@@ -72,3 +72,6 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# To much sizs ignore
+C:\Develope\unreal\HauntedMension\Content\SICKA_mansion\Maps
