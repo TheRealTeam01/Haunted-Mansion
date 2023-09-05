@@ -74,4 +74,4 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # To much sizs ignore
-C:\Develope\unreal\HauntedMension\Content\SICKA_mansion\Maps
+Content/SICKA_mansion/Maps/*
