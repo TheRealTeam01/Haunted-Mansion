@@ -1,5 +1,3 @@
-
-
 #include "HauntedMension/Character/Phase.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -18,6 +16,8 @@ APhase::APhase()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
+	CharacterMovement = GetCharacterMovement();
+	CharacterMovement->MaxWalkSpeed = 150.f;
 }
 
 void APhase::BeginPlay()
@@ -68,6 +68,16 @@ void APhase::Jump(const FInputActionValue& Value)
 	ACharacter::Jump();
 }
 
+void APhase::RunPressed()
+{
+	CharacterMovement->MaxWalkSpeed = 600.f;
+}
+
+void APhase::RunReleased()
+{
+	CharacterMovement->MaxWalkSpeed = 150.f;
+}
+
 // Called every frame
 void APhase::Tick(float DeltaTime)
 {
@@ -85,6 +95,8 @@ void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APhase::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APhase::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APhase::Jump);
+		EnhancedInputComponent->BindAction(RunPressedAction, ETriggerEvent::Triggered, this, &APhase::RunPressed);
+		EnhancedInputComponent->BindAction(RunReleasedAction, ETriggerEvent::Triggered, this, &APhase::RunReleased);
 	}
 }
 

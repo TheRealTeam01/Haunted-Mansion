@@ -27,7 +27,10 @@ protected:
 	void Look(const FInputActionValue& Value);
 	
 	void Jump(const FInputActionValue& Value);
+	
+	void RunPressed();
 
+	void RunReleased();
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -42,9 +45,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* RunPressedAction;
+	
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* RunReleasedAction;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* SpringArm;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class UCameraComponent* Camera;
+
+	UCharacterMovementComponent* CharacterMovement;
 };
