@@ -32,9 +32,9 @@ protected:
 	float Speed;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool IsFalling;
+	bool IsFalling;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		bool IsAccelerating;
+	bool IsAccelerating;
 
 };

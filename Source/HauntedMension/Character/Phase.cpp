@@ -5,16 +5,27 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h" 
 #include "InputActionValue.h"
+#include "HauntedMension/PickUp/FlashLight.h"
+#include "HauntedMension/Interact/Interact.h"
+
 
 APhase::APhase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
+	GetMesh()->SetGenerateOverlapEvents(true);
+
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetMesh());
+	SpringArm->TargetArmLength = 150.f;
+	SpringArm->bUsePawnControlRotation = true;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(SpringArm);
+	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+	Camera->bUsePawnControlRotation = false;
 
 	CharacterMovement = GetCharacterMovement();
 	CharacterMovement->MaxWalkSpeed = 150.f;
@@ -44,10 +55,10 @@ void APhase::Move(const FInputActionValue& Value)
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
 
 	const FVector FowardDirecton = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(FowardDirecton, MovementVector.Y);
+	AddMovementInput(FowardDirecton, MovementVector.X);
 
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(RightDirection, MovementVector.X);
+	AddMovementInput(RightDirection, MovementVector.Y);
 
 }
 
@@ -78,14 +89,56 @@ void APhase::RunReleased()
 	CharacterMovement->MaxWalkSpeed = 150.f;
 }
 
-// Called every frame
+void APhase::HideMeshifCameraClose()
+{
+	if ((Camera->GetComponentLocation() - GetActorLocation()).Size() < CameraDistanceThresHold)
+	{
+		GetMesh()->SetVisibility(false);
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+	}
+}
+
+void APhase::InteractPressed()
+{
+	AFlashLight* FlashLight = Cast<AFlashLight>(InteractItem);
+	if (FlashLight)
+	{
+		FlashLight->Equip(GetMesh(), this, this);
+		EquippedFlashLight = FlashLight;
+	}
+}
+
+void APhase::FlashOnOffPressed()
+{
+	if (EquippedFlashLight)
+	{
+		if (!EquippedFlashLight->GetbLightOn())
+		{
+			EquippedFlashLight->LightOnOff(true);
+		}
+		else
+		{
+			EquippedFlashLight->LightOnOff(false);
+		}
+	}
+}
+
+void APhase::SetOverlappingInteractitem(AInteract* Interact)
+{
+	InteractItem = Interact;
+
+}
+
 void APhase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	HideMeshifCameraClose();
 }
 
-// Called to bind functionality to input
 void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -97,6 +150,8 @@ void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APhase::Jump);
 		EnhancedInputComponent->BindAction(RunPressedAction, ETriggerEvent::Triggered, this, &APhase::RunPressed);
 		EnhancedInputComponent->BindAction(RunReleasedAction, ETriggerEvent::Triggered, this, &APhase::RunReleased);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APhase::InteractPressed);
+		EnhancedInputComponent->BindAction(FlashOnOffAction, ETriggerEvent::Triggered, this, &APhase::FlashOnOffPressed);
 	}
 }
 

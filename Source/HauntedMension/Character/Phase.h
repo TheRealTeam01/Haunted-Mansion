@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "HauntedMension/Interfaces/InteractInterface.h"
 #include "Phase.generated.h"
 
 UCLASS()
-class HAUNTEDMENSION_API APhase : public ACharacter
+class HAUNTEDMENSION_API APhase : public ACharacter, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -18,6 +19,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetOverlappingInteractitem(class AInteract* Interact);
 
 protected:
 	virtual void BeginPlay() override;
@@ -31,6 +34,18 @@ protected:
 	void RunPressed();
 
 	void RunReleased();
+
+	void HideMeshifCameraClose();
+
+	void InteractPressed();
+
+	void FlashOnOffPressed();
+
+	UPROPERTY(VisibleAnywhere)
+	class AInteract* InteractItem;
+
+	class AFlashLight* EquippedFlashLight;
+
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -51,6 +66,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* RunReleasedAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* InteractAction;
+	
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* FlashOnOffAction;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* SpringArm;
 
@@ -58,4 +79,9 @@ private:
 		class UCameraComponent* Camera;
 
 	UCharacterMovementComponent* CharacterMovement;
+
+	UPROPERTY(EditAnywhere)
+	float CameraDistanceThresHold = 150.f;
+
+
 };
