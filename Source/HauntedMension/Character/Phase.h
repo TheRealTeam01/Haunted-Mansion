@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "HauntedMension/Interfaces/InteractInterface.h"
+#include "HauntedMension/HMTypes/TurnInPlace.h"
 #include "Phase.generated.h"
 
 UCLASS()
@@ -46,6 +47,15 @@ protected:
 
 	class AFlashLight* EquippedFlashLight;
 
+	void AimOffset(float DeltaTime);
+
+	float CalculateSpeed();
+
+	void TurningInPlace(float DeltaTime);
+
+	UPROPERTY(VisibleAnywhere)
+	ETurnInPlace TurnInPlace;
+
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -83,5 +93,19 @@ private:
 	UPROPERTY(EditAnywhere)
 	float CameraDistanceThresHold = 150.f;
 
+	float AO_Yaw;
+	float AO_Pitch;
+	float Interp_AO_Yaw;
+
+	bool bRotateRootBone;
+
+	FRotator StartAimRotation;
+
+public:
+
+	FORCEINLINE float GetAO_Yaw() { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() { return AO_Pitch; }
+	FORCEINLINE ETurnInPlace GetTurningInPlace() { return TurnInPlace; }
+	FORCEINLINE bool GetbRotateRootBone() { return bRotateRootBone; }
 
 };

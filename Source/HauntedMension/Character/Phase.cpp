@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "HauntedMension/PickUp/FlashLight.h"
 #include "HauntedMension/Interact/Interact.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 APhase::APhase()
@@ -29,6 +30,8 @@ APhase::APhase()
 
 	CharacterMovement = GetCharacterMovement();
 	CharacterMovement->MaxWalkSpeed = 150.f;
+
+	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 }
 
 void APhase::BeginPlay()
@@ -91,7 +94,9 @@ void APhase::RunReleased()
 
 void APhase::HideMeshifCameraClose()
 {
-	if ((Camera->GetComponentLocation() - GetActorLocation()).Size() < CameraDistanceThresHold)
+	float DistanceToCamera = (Camera->GetComponentLocation() - GetActorLocation()).Size();
+	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
+	if (DistanceToCamera < CameraDistanceThresHold)
 	{
 		GetMesh()->SetVisibility(false);
 	}
@@ -126,6 +131,70 @@ void APhase::FlashOnOffPressed()
 	}
 }
 
+void APhase::AimOffset(float DeltaTime)
+{
+	
+	float Speed = CalculateSpeed();
+	bool IsFalling = CharacterMovement->IsFalling();
+	
+	if (Speed == 0.f && !IsFalling)
+	{
+		bRotateRootBone = true;
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartAimRotation, CurrentAimRotation);
+		AO_Yaw = -1.f * DeltaAimRotation.Yaw;
+
+		if (TurnInPlace == ETurnInPlace::ETIP_NotTurning)
+		{
+			Interp_AO_Yaw = AO_Yaw;
+		}
+		bUseControllerRotationYaw = true;
+		TurningInPlace(DeltaTime);
+	}
+
+	if (Speed > 0.f || IsFalling)
+	{
+		bRotateRootBone = false;
+		AO_Yaw = 0.f;
+		StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		bUseControllerRotationYaw = false;
+		TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+	}
+
+	AO_Pitch = GetBaseAimRotation().GetNormalized().Pitch;
+}
+
+float APhase::CalculateSpeed()
+{
+	FVector Velocity = this->GetVelocity();
+	Velocity.Z = 0;
+	return Velocity.Size();
+}
+
+void APhase::TurningInPlace(float DeltaTime)
+{
+	if (AO_Yaw > 90.f)
+	{
+		TurnInPlace = ETurnInPlace::ETIP_TurnRight;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		TurnInPlace = ETurnInPlace::ETIP_TurnLeft;
+	}
+
+	if (TurnInPlace != ETurnInPlace::ETIP_NotTurning) //움직이거나 점프일때 
+	{
+		Interp_AO_Yaw = FMath::FInterpTo(Interp_AO_Yaw, 0.f, DeltaTime, 6.f);
+		AO_Yaw = Interp_AO_Yaw; //AO_Yaw 0으로 재설정.
+		
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+			StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
+	}
+}
+
 void APhase::SetOverlappingInteractitem(AInteract* Interact)
 {
 	InteractItem = Interact;
@@ -137,6 +206,9 @@ void APhase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	HideMeshifCameraClose();
+
+	AimOffset(DeltaTime);
+	
 }
 
 void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

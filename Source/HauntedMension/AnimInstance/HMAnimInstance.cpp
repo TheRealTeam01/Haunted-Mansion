@@ -30,5 +30,20 @@ void UHMAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		IsFalling = CharacterMovement->IsFalling();
 
 		IsAccelerating = CharacterMovement->GetCurrentAcceleration().Size() > 0.f ? true : false;
+
+		bRotateRootBone = Character->GetbRotateRootBone();
+
+		TurningInPlace = Character->GetTurningInPlace();
+
+		AO_Yaw = Character->GetAO_Yaw();
+		AO_Pitch = Character->GetAO_Pitch();
+
+
+
 	}
+
+
+
+	
+
 }
