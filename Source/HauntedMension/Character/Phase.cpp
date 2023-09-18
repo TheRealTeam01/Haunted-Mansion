@@ -8,6 +8,7 @@
 #include "HauntedMension/PickUp/FlashLight.h"
 #include "HauntedMension/Interact/Interact.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/PlayerController.h"
 
 
 APhase::APhase()
@@ -38,7 +39,7 @@ void APhase::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -49,6 +50,12 @@ void APhase::BeginPlay()
 
 	GetMesh()->HideBoneByName(FName("teddy_bear_root"), EPhysBodyOp::PBO_None);
 	GetMesh()->HideBoneByName(FName("heart_box"), EPhysBodyOp::PBO_None);
+
+	if (Camera)
+	{
+		DefaultFOV = Camera->FieldOfView;
+		CurrentFOV = DefaultFOV;
+	}
 }
 
 void APhase::Move(const FInputActionValue& Value)
@@ -108,11 +115,50 @@ void APhase::HideMeshifCameraClose()
 
 void APhase::InteractPressed()
 {
-	AFlashLight* FlashLight = Cast<AFlashLight>(InteractItem);
 	if (FlashLight)
 	{
-		FlashLight->Equip(GetMesh(), this, this);
+		PlayPickUpMontage();
 		EquippedFlashLight = FlashLight;
+		PlayerController = Cast<APlayerController>(Controller);
+		if (PlayerController && CharacterMovement)
+		{
+			//FInputModeUIOnly UIOnlyMode;
+			//PlayerController->SetInputMode(UIOnlyMode);
+			CharacterMovement->MaxWalkSpeed = 0.f;
+		}
+	}
+}
+
+void APhase::AimPressed()
+{
+	if (EquippedFlashLight == nullptr) return;
+
+	bAiming = true;
+}
+
+void APhase::AimReleased()
+{
+	if (EquippedFlashLight == nullptr) return;
+
+	 bAiming = false;
+}
+
+void APhase::InterpFOV(float DeltaTime)
+{
+	if (EquippedFlashLight == nullptr) return;
+
+	if (bAiming)
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, ZoomedFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	else
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+
+	if (Camera)
+	{
+		Camera->SetFieldOfView(CurrentFOV);
 	}
 }
 
@@ -131,6 +177,23 @@ void APhase::FlashOnOffPressed()
 	}
 }
 
+void APhase::PlayPickUpMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && PickupMontage)
+	{
+		AnimInstance->Montage_Play(PickupMontage);
+	}
+}
+
+void APhase::AttachToFlashLight()
+{
+	if (EquippedFlashLight)
+	{
+		EquippedFlashLight->Equip(GetMesh(), this, this);
+	}
+}
+
 void APhase::AimOffset(float DeltaTime)
 {
 	
@@ -140,7 +203,7 @@ void APhase::AimOffset(float DeltaTime)
 	if (Speed == 0.f && !IsFalling)
 	{
 		bRotateRootBone = true;
-		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); // 가만히 있는 상태에서 시점을 바꿀때 Yaw
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartAimRotation, CurrentAimRotation);
 		AO_Yaw = -1.f * DeltaAimRotation.Yaw;
 
@@ -199,6 +262,8 @@ void APhase::SetOverlappingInteractitem(AInteract* Interact)
 {
 	InteractItem = Interact;
 
+	FlashLight = Cast<AFlashLight>(InteractItem);
+
 }
 
 void APhase::Tick(float DeltaTime)
@@ -208,6 +273,8 @@ void APhase::Tick(float DeltaTime)
 	HideMeshifCameraClose();
 
 	AimOffset(DeltaTime);
+
+	InterpFOV(DeltaTime);
 	
 }
 
@@ -224,6 +291,8 @@ void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(RunReleasedAction, ETriggerEvent::Triggered, this, &APhase::RunReleased);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APhase::InteractPressed);
 		EnhancedInputComponent->BindAction(FlashOnOffAction, ETriggerEvent::Triggered, this, &APhase::FlashOnOffPressed);
+		EnhancedInputComponent->BindAction(AimPressedAction, ETriggerEvent::Triggered, this, &APhase::AimPressed);
+		EnhancedInputComponent->BindAction(AimReleasedAction, ETriggerEvent::Triggered, this, &APhase::AimReleased);
 	}
 }
 
