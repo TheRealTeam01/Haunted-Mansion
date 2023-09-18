@@ -63,6 +63,7 @@ public:
 	void Patrol_Chase();
 	void Chase_Attack();
 
+	// 상태머신은 AIController에서 처리한다.
 	// 공격상태가 종료되면 델리게이트를 통해 알린다.
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
 

@@ -11,6 +11,12 @@ ASevarog::ASevarog()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// 캐릭터 메시 초기화
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonSevarog/Characters/Heroes/Sevarog/Meshes/Sevarog.Sevarog'"));
+	if (SM.Succeeded()) 
+	{
+		GetMesh()->SetSkeletalMesh(SM.Object);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -73,25 +79,28 @@ void ASevarog::AttackCheck()
 	// 피격판정인데 뭘로 공격하는지를 모르겠다
 }
 
+
 void ASevarog::Idle()
 {
 	
-
 }
 
+// 순찰은 특정 지점과 지점까지를 그냥 단순 이동한다
 void ASevarog::Patrol()
 {
 }
 
+// 추격 상태에서 행할 내용
 void ASevarog::Chase()
 {
 }
 
+// 이건 안쓸거같은데요 일단 넣어놨습니다
 void ASevarog::Die()
 {
 }
 
-// 
+// Idle에서 Chase로 상태전이 -> Heard상태이거나, 근처에 있음을 감지
 void ASevarog::Idle_Chase()
 {
 }
