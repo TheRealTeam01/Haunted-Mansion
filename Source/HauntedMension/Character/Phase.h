@@ -40,11 +40,20 @@ protected:
 
 	void InteractPressed();
 
+	void AimPressed();
+
+	void AimReleased();
+
+	void InterpFOV(float DeltaTime);
+
 	void FlashOnOffPressed();
 
+	void PlayPickUpMontage();
+	
 	UPROPERTY(VisibleAnywhere)
 	class AInteract* InteractItem;
 
+	UPROPERTY(VisibleAnywhere)
 	class AFlashLight* EquippedFlashLight;
 
 	void AimOffset(float DeltaTime);
@@ -55,6 +64,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	ETurnInPlace TurnInPlace;
+
+	UPROPERTY(BlueprintReadOnly)
+	AFlashLight* FlashLight;
+
 
 private:
 
@@ -82,6 +95,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* FlashOnOffAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* AimPressedAction;
+	
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* AimReleasedAction;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* SpringArm;
 
@@ -89,6 +108,9 @@ private:
 		class UCameraComponent* Camera;
 
 	UCharacterMovementComponent* CharacterMovement;
+
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* PickupMontage;
 
 	UPROPERTY(EditAnywhere)
 	float CameraDistanceThresHold = 150.f;
@@ -100,6 +122,23 @@ private:
 	bool bRotateRootBone;
 
 	FRotator StartAimRotation;
+
+	UFUNCTION(BlueprintCallable)
+		void AttachToFlashLight();
+
+	APlayerController* PlayerController;
+
+	bool bAiming;
+
+	float DefaultFOV;
+
+	float CurrentFOV;
+	
+	UPROPERTY(EditAnywhere)
+	float ZoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere)
+	float ZoomInterpSpeed = 30.f;
 
 public:
 
