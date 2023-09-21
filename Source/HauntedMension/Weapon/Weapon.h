@@ -1,0 +1,43 @@
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "Weapon.generated.h"
+
+UCLASS()
+class HAUNTEDMENSION_API AWeapon : public AActor
+{
+	GENERATED_BODY()
+	
+public:	
+	AWeapon();
+
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void BeginPlay() override;
+
+	virtual void Fire(FVector& HitTarget);
+
+protected:
+	
+	UPROPERTY(EditAnywhere)
+		USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(EditAnywhere)
+		class UParticleSystem* FlashParticle;
+	
+	UPROPERTY(EditAnywhere)
+		UParticleSystem* HitFlashParticle;
+
+	UPROPERTY(EditAnywhere)
+		class UAnimationAsset* FireAnimation;
+
+private:	
+	
+	class APhase* Phase;
+
+public:
+
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
+};

@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "HauntedMension/Interfaces/InteractInterface.h"
 #include "HauntedMension/HMTypes/TurnInPlace.h"
+#include "HauntedMension/HMTypes/HMTypes.h"
 #include "Phase.generated.h"
 
 UCLASS()
@@ -22,6 +23,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void SetOverlappingInteractitem(class AInteract* Interact);
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AWeapon> Weapon;
 
 protected:
 	virtual void BeginPlay() override;
@@ -49,12 +53,24 @@ protected:
 	void FlashOnOffPressed();
 
 	void PlayPickUpMontage();
+
+	void Fire();
 	
+	void TraceCrossHair(FHitResult& TraceHitResult);
+
+	FVector HitTarget;
+
 	UPROPERTY(VisibleAnywhere)
 	class AInteract* InteractItem;
 
 	UPROPERTY(VisibleAnywhere)
 	class AFlashLight* EquippedFlashLight;
+
+	UPROPERTY(VisibleAnywhere)
+		AWeapon* DefaultWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	EFlashLightState FlashLightState;
 
 	void AimOffset(float DeltaTime);
 
@@ -67,6 +83,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	AFlashLight* FlashLight;
+	
+	UPROPERTY(BlueprintReadOnly)
+		bool bAiming;
 
 
 private:
@@ -100,6 +119,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* AimReleasedAction;
+	
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* FireAction;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* SpringArm;
@@ -128,8 +150,6 @@ private:
 
 	APlayerController* PlayerController;
 
-	bool bAiming;
-
 	float DefaultFOV;
 
 	float CurrentFOV;
@@ -146,5 +166,6 @@ public:
 	FORCEINLINE float GetAO_Pitch() { return AO_Pitch; }
 	FORCEINLINE ETurnInPlace GetTurningInPlace() { return TurnInPlace; }
 	FORCEINLINE bool GetbRotateRootBone() { return bRotateRootBone; }
-
+	FORCEINLINE AWeapon* GetDefaultWeapon() { return DefaultWeapon; }
+	FORCEINLINE FVector GetHitTarget() { return HitTarget; }
 };
