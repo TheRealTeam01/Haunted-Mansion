@@ -9,6 +9,9 @@
 #include "HauntedMension/Interact/Interact.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/PlayerController.h"
+#include "HauntedMension/Weapon/Weapon.h"
+#include "HauntedMension/HMTypes/HMTypes.h"
+#include "Kismet/GameplayStatics.h"
 
 
 APhase::APhase()
@@ -48,6 +51,8 @@ void APhase::BeginPlay()
 		}
 	}
 
+	FlashLightState = EFlashLightState::EFS_UnEquippedFlashLight;
+
 	GetMesh()->HideBoneByName(FName("teddy_bear_root"), EPhysBodyOp::PBO_None);
 	GetMesh()->HideBoneByName(FName("heart_box"), EPhysBodyOp::PBO_None);
 
@@ -56,6 +61,20 @@ void APhase::BeginPlay()
 		DefaultFOV = Camera->FieldOfView;
 		CurrentFOV = DefaultFOV;
 	}
+
+	if (Weapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Weapon"));
+
+		DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(Weapon);
+		if (DefaultWeapon)
+		{
+			FAttachmentTransformRules AttachmentRule(EAttachmentRule::SnapToTarget, true);
+			DefaultWeapon->AttachToComponent(GetMesh(), AttachmentRule, FName("RightHandSocket"));
+			DefaultWeapon->SetOwner(this);
+		}
+	}
+
 }
 
 void APhase::Move(const FInputActionValue& Value)
@@ -102,7 +121,7 @@ void APhase::RunReleased()
 void APhase::HideMeshifCameraClose()
 {
 	float DistanceToCamera = (Camera->GetComponentLocation() - GetActorLocation()).Size();
-	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
+	//UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
 	if (DistanceToCamera < CameraDistanceThresHold)
 	{
 		GetMesh()->SetVisibility(false);
@@ -131,21 +150,21 @@ void APhase::InteractPressed()
 
 void APhase::AimPressed()
 {
-	if (EquippedFlashLight == nullptr) return;
+	if (DefaultWeapon == nullptr) return;
 
 	bAiming = true;
 }
 
 void APhase::AimReleased()
 {
-	if (EquippedFlashLight == nullptr) return;
+	if (DefaultWeapon == nullptr) return;
 
 	 bAiming = false;
 }
 
 void APhase::InterpFOV(float DeltaTime)
 {
-	if (EquippedFlashLight == nullptr) return;
+	if (DefaultWeapon == nullptr) return;
 
 	if (bAiming)
 	{
@@ -186,11 +205,70 @@ void APhase::PlayPickUpMontage()
 	}
 }
 
+void APhase::Fire()
+{
+	DefaultWeapon->Fire(HitTarget);
+}
+
+void APhase::TraceCrossHair(FHitResult& TraceHitResult)
+{
+	FVector2D ViewportSize;
+	
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	FVector2D CrossHairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrossHairWorldPosition; // 월드 좌표
+	FVector CrossHairWorldDirection; // 방향 
+
+
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld( //주어진 2D 화면 공간 좌표를 3D 세계 공간 지점과 방향으로 변환.
+		UGameplayStatics::GetPlayerController(this, 0) ,
+		CrossHairLocation, 
+		CrossHairWorldPosition,
+		CrossHairWorldDirection
+	);
+	
+	if (bScreenToWorld)
+	{
+		FVector TraceStart = CrossHairWorldPosition;
+
+		float DistanceToCharacter = (GetActorLocation() - TraceStart).Size();
+		TraceStart += CrossHairWorldDirection * (DistanceToCharacter * 100.f); // 캐릭터보다 앞에서 Trace하도록.
+
+		FVector TraceEnd = TraceStart + (CrossHairWorldDirection * 10000.f);
+
+		UWorld* World = GetWorld();
+
+		if (World)
+		{
+			World->LineTraceSingleByChannel(
+				TraceHitResult,
+				TraceStart,
+				TraceEnd,
+				ECollisionChannel::ECC_Visibility
+			);
+
+			if (!TraceHitResult.bBlockingHit) // 조준하는 곳이 너무 멀리있으면 방향이 이상해지는걸 수정.
+			{
+				TraceHitResult.ImpactPoint = TraceEnd;
+			}
+
+		}
+
+	}
+
+
+}
+
 void APhase::AttachToFlashLight()
 {
 	if (EquippedFlashLight)
 	{
 		EquippedFlashLight->Equip(GetMesh(), this, this);
+		FlashLightState = EFlashLightState::EFS_EquippedFlashLight;
 	}
 }
 
@@ -276,6 +354,11 @@ void APhase::Tick(float DeltaTime)
 
 	InterpFOV(DeltaTime);
 	
+	FHitResult TraceHitResult;
+
+	TraceCrossHair(TraceHitResult);
+	HitTarget = TraceHitResult.ImpactPoint;
+
 }
 
 void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -293,6 +376,7 @@ void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(FlashOnOffAction, ETriggerEvent::Triggered, this, &APhase::FlashOnOffPressed);
 		EnhancedInputComponent->BindAction(AimPressedAction, ETriggerEvent::Triggered, this, &APhase::AimPressed);
 		EnhancedInputComponent->BindAction(AimReleasedAction, ETriggerEvent::Triggered, this, &APhase::AimReleased);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APhase::Fire);
 	}
 }
 

@@ -49,7 +49,16 @@ protected:
 		
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bRotateRootBone;
+		
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+		FRotator RightHandRotation;
 
+	UPROPERTY()
+	class AWeapon* DefaultWeapon;
+
+	UPROPERTY()
 	FRotator DeltaRotation;
+
+
 
 };
