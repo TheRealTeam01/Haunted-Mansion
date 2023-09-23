@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "HauntedMension/Interfaces/InteractInterface.h"
+#include "HauntedMension/Interfaces/HitInterface.h"
 #include "HauntedMension/HMTypes/TurnInPlace.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "Phase.generated.h"
 
 UCLASS()
-class HAUNTEDMENSION_API APhase : public ACharacter, public IInteractInterface
+class HAUNTEDMENSION_API APhase : public ACharacter, public IHitInterface
 {
 	GENERATED_BODY()
 
@@ -58,6 +58,10 @@ protected:
 	
 	void TraceCrossHair(FHitResult& TraceHitResult);
 
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override; // 블루프린트에서도 호출할거면 Implementaion을 붙임.
+
+	void SetActionState();
+
 	FVector HitTarget;
 
 	UPROPERTY(VisibleAnywhere)
@@ -72,6 +76,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFlashLightState FlashLightState;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		EActionState ActionState = EActionState::EAS_Unoccupied;
 	void AimOffset(float DeltaTime);
 
 	float CalculateSpeed();

@@ -2,6 +2,7 @@
 #include "HauntedMension/Character/Phase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "HauntedMension/Interfaces/HitInterface.h"
 
 AWeapon::AWeapon()
 {
@@ -59,6 +60,13 @@ void AWeapon::Fire(FVector& HitTarget)
 					this,
 					UDamageType::StaticClass()
 				);
+
+				IHitInterface* HitInterface = Cast<IHitInterface>(HitResult.GetActor());
+				if (HitInterface)
+				{
+					HitInterface->Execute_GetHit(HitResult.GetActor(),HitResult.ImpactPoint); //Excute_ - Implementaion으로 선언한 인터페이스 함수 호출(호출할 대상, 호출 함수)
+					CreateFields(HitResult.ImpactPoint);
+				}
 
 				UGameplayStatics::SpawnEmitterAtLocation(World,
 					HitFlashParticle,

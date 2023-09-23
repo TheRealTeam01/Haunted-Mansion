@@ -3,10 +3,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "HauntedMension/Interfaces/HitInterface.h"
 #include "Weapon.generated.h"
 
 UCLASS()
-class HAUNTEDMENSION_API AWeapon : public AActor
+class HAUNTEDMENSION_API AWeapon : public AActor , public IHitInterface
 {
 	GENERATED_BODY()
 	
@@ -32,6 +33,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		class UAnimationAsset* FireAnimation;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+		void CreateFields(const FVector& FieldLocation);
 
 private:	
 	

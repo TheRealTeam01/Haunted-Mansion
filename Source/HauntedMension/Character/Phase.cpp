@@ -12,6 +12,7 @@
 #include "HauntedMension/Weapon/Weapon.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 APhase::APhase()
@@ -36,6 +37,8 @@ APhase::APhase()
 	CharacterMovement->MaxWalkSpeed = 150.f;
 
 	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+
+	bUseControllerRotationYaw = false;
 }
 
 void APhase::BeginPlay()
@@ -153,6 +156,7 @@ void APhase::AimPressed()
 	if (DefaultWeapon == nullptr) return;
 
 	bAiming = true;
+	ActionState = EActionState::EAS_Aiming;
 }
 
 void APhase::AimReleased()
@@ -160,6 +164,8 @@ void APhase::AimReleased()
 	if (DefaultWeapon == nullptr) return;
 
 	 bAiming = false;
+	 ActionState = EActionState::EAS_Unoccupied;
+
 }
 
 void APhase::InterpFOV(float DeltaTime)
@@ -207,7 +213,10 @@ void APhase::PlayPickUpMontage()
 
 void APhase::Fire()
 {
-	DefaultWeapon->Fire(HitTarget);
+	if (ActionState == EActionState::EAS_Aiming)
+	{
+		DefaultWeapon->Fire(HitTarget);
+	}
 }
 
 void APhase::TraceCrossHair(FHitResult& TraceHitResult)
@@ -263,6 +272,24 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 
 }
 
+void APhase::GetHit_Implementation(const FVector& ImpactPoint)
+{
+
+}
+
+void APhase::SetActionState()
+{
+	switch (ActionState)
+	{
+	case EActionState::EAS_Unoccupied:
+		bUseControllerRotationYaw = false;
+		break;
+	case EActionState::EAS_Aiming:
+		bUseControllerRotationYaw = true;
+		break;
+	}
+}
+
 void APhase::AttachToFlashLight()
 {
 	if (EquippedFlashLight)
@@ -298,7 +325,6 @@ void APhase::AimOffset(float DeltaTime)
 		bRotateRootBone = false;
 		AO_Yaw = 0.f;
 		StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		bUseControllerRotationYaw = false;
 		TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 	}
 
@@ -347,6 +373,8 @@ void APhase::SetOverlappingInteractitem(AInteract* Interact)
 void APhase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	SetActionState();
 
 	HideMeshifCameraClose();
 
