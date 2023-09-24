@@ -4,19 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "HauntedMension/HMTypes/HMTypes.h"
 #include "Sevarog.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
-
-UENUM(BlueprintType)
-enum class ESevarogState : uint8
-{
-	E_Idle = 0		UMETA(DisplayName = "Idle"),
-	E_Patrol	UMETA(DisplayName = "Patrol"),
-	E_Chase		UMETA(DisplayName = "Chase"),
-	E_Attack	UMETA(DisplayName = "Attack"),
-	E_Die		UMETA(DisplayName = "Die")
-};
 
 UCLASS()
 class HAUNTEDMENSION_API ASevarog : public ACharacter
@@ -73,6 +64,9 @@ private:
 	bool IsAttacking = false;
 
 	UPROPERTY()
+	float AttackDist = 10.0f;
+
+	UPROPERTY()
 	class USevarogAnimInstance* AnimInstance;
 
 	UPROPERTY()
@@ -84,4 +78,10 @@ public:
 
 	UPROPERTY()
 	float LeftRightValue;
+
+	UPROPERTY(VisibleAnywhere)
+	ESevarogState State;
+
+	UPROPERTY(VisibleAnywhere)
+	ACharacter* Player;
 };
