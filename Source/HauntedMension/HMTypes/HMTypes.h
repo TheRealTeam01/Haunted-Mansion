@@ -8,11 +8,10 @@ enum class EFlashLightState : uint8
 };
 
 UENUM(BlueprintType)
-enum class ESevarogState : uint8
+enum class EActionState : uint8
 {
-	E_Idle = 0		UMETA(DisplayName = "Idle"),
-	E_Patrol	UMETA(DisplayName = "Patrol"),
-	E_Chase		UMETA(DisplayName = "Chase"),
-	E_Attack	UMETA(DisplayName = "Attack"),
-	E_Die		UMETA(DisplayName = "Die")
+	EAS_Unoccupied UMETA(DisplayName = "Unoccupied"),
+	EAS_Aiming UMETA(DisplayName = "Aiming"),
+	
+	EAS_MAX UMETA(DisplayName = "Default MAX")
 };
