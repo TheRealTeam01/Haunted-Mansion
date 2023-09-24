@@ -13,6 +13,7 @@
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "HauntedMension/HUD/HMHUD.h"
 
 
 APhase::APhase()
@@ -157,6 +158,16 @@ void APhase::AimPressed()
 
 	bAiming = true;
 	ActionState = EActionState::EAS_Aiming;
+
+	PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
+	if (PlayerController)
+	{
+		AHMHUD* HMHUD = PlayerController->GetHUD<AHMHUD>();
+		if (HMHUD)
+		{
+			HMHUD->ShowCrossHair();
+		}
+	}
 }
 
 void APhase::AimReleased()
@@ -166,6 +177,15 @@ void APhase::AimReleased()
 	 bAiming = false;
 	 ActionState = EActionState::EAS_Unoccupied;
 
+	 PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
+	 if (PlayerController)
+	 {
+		 AHMHUD* HMHUD = PlayerController->GetHUD<AHMHUD>();
+		 if (HMHUD)
+		 {
+			 HMHUD->HideCrossHair();
+		 }
+	 }
 }
 
 void APhase::InterpFOV(float DeltaTime)
@@ -213,10 +233,12 @@ void APhase::PlayPickUpMontage()
 
 void APhase::Fire()
 {
-	if (ActionState == EActionState::EAS_Aiming)
-	{
-		DefaultWeapon->Fire(HitTarget);
-	}
+	//if (ActionState == EActionState::EAS_Aiming)
+	//{
+	//	DefaultWeapon->Fire(HitTarget);
+	//}
+
+	DefaultWeapon->Fire(HitTarget);
 }
 
 void APhase::TraceCrossHair(FHitResult& TraceHitResult)
@@ -245,9 +267,9 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 		FVector TraceStart = CrossHairWorldPosition;
 
 		float DistanceToCharacter = (GetActorLocation() - TraceStart).Size();
-		TraceStart += CrossHairWorldDirection * (DistanceToCharacter * 100.f); // 캐릭터보다 앞에서 Trace하도록.
+		TraceStart += CrossHairWorldDirection * (DistanceToCharacter + 100.f); // 캐릭터보다 앞에서 Trace하도록.
 
-		FVector TraceEnd = TraceStart + (CrossHairWorldDirection * 10000.f);
+		FVector TraceEnd = TraceStart + (CrossHairWorldDirection * 80000.f);
 
 		UWorld* World = GetWorld();
 
@@ -279,6 +301,7 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 
 void APhase::SetActionState()
 {
+	
 	switch (ActionState)
 	{
 	case EActionState::EAS_Unoccupied:
@@ -288,6 +311,8 @@ void APhase::SetActionState()
 		bUseControllerRotationYaw = true;
 		break;
 	}
+
+
 }
 
 void APhase::AttachToFlashLight()
@@ -383,6 +408,7 @@ void APhase::Tick(float DeltaTime)
 	InterpFOV(DeltaTime);
 	
 	FHitResult TraceHitResult;
+
 
 	TraceCrossHair(TraceHitResult);
 	HitTarget = TraceHitResult.ImpactPoint;
