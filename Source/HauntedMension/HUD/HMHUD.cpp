@@ -3,30 +3,16 @@
 #include "HMHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "HMOverlay.h"
 
 void AHMHUD::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 
 	PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
-	if (PlayerController && CrossHairClasses)
+	if (PlayerController && HMOverlayClass)
 	{
-		CrossHairWidget = CreateWidget<UUserWidget>(PlayerController, CrossHairClasses);
-	}
-}
-
-void AHMHUD::ShowCrossHair()
-{
-	if (CrossHairWidget)
-	{
-		CrossHairWidget->AddToViewport();
-	}
-}
-
-void AHMHUD::HideCrossHair()
-{
-	if (CrossHairWidget)
-	{
-		CrossHairWidget->RemoveFromParent();
+		HMOverlay = CreateWidget<UHMOverlay>(PlayerController, HMOverlayClass);
+		HMOverlay->AddToViewport();
 	}
 }
