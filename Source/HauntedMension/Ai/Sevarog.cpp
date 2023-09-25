@@ -14,7 +14,7 @@ ASevarog::ASevarog()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Ä³¸¯ÅÍ ¸Þ½Ã ÃÊ±âÈ­
+	// Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ ï¿½Ê±ï¿½È­
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonSevarog/Characters/Heroes/Sevarog/Meshes/Sevarog.Sevarog'"));
 	if (SM.Succeeded()) 
 	{
@@ -27,8 +27,7 @@ void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	Player->GetActorLocation();
-	UE_LOG(LogTemp, Warning, TEXT("%s"), Player);
+	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
 
 // Called every frame
@@ -44,7 +43,7 @@ void ASevarog::Tick(float DeltaTime)
 		Patrol();
 		break;
 	case ESevarogState::E_Chase:
-		Chase();
+		Chase(Player);
 		break;
 	case ESevarogState::E_Attack:
 		Attack();
@@ -82,11 +81,11 @@ void ASevarog::Yaw(float Value)
 
 void ASevarog::Attack()
 {
-	// ¸ó½ºÅÍ°¡ ÇàÇÏ´Â °ø°Ý¿¡ ´ëÇÑ ³»¿ëÀÌ µé¾î°£´Ù.
+	// ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Ý¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½î°£ï¿½ï¿½.
 	if (IsAttacking)
 		return;
 
-	// ¿©±â¼­ ¾Ö´Ï¸ÞÀÌ¼Ç ÀÎ½ºÅÏ½º¿Í ¿¬°áÇÑ´Ù.
+	// ï¿½ï¿½ï¿½â¼­ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	AnimInstance->PlayAttackMontage();
 	AnimInstance->JumpToSection(AttackIndex);
 	AttackIndex = (AttackIndex + 1) % 3;
@@ -96,56 +95,54 @@ void ASevarog::Attack()
 
 void ASevarog::AttackCheck()
 {
-	//ÇÇ°Ý ÆÇÁ¤°ú °ü·ÃµÈ ³»¿ëÀÌ µé¾î°£´Ù.
+	//ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½î°£ï¿½ï¿½.
 	FHitResult HitResult;
-	// Ãæµ¹ Ã¼Å©¸¦ À§ÇÑ Ãæµ¹ ÆÄ¶ó¹ÌÅÍ ÁöÁ¤
+	// ï¿½æµ¹ Ã¼Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½æµ¹ ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	// ÇÇ°ÝÆÇÁ¤ÀÎµ¥ ¹»·Î °ø°ÝÇÏ´ÂÁö¸¦ ¸ð¸£°Ú´Ù
+	// ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ð¸£°Ú´ï¿½
 }
 
 
 void ASevarog::Idle()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Player now State is Idle"));
-	double SearchRange = 100.f;
-	double PatrolRange = 50.f;
+	//UE_LOG(LogTemp, Warning, TEXT("Sevarog now State is Idle"));
+	float SearchRange = 1000.f;
+	float PatrolRange = 500.f;
 
-	// ¿ì¼± °Å¸®¸¦ Ã¼Å©ÇÑ´Ù
+	// ï¿½ì¼± ï¿½Å¸ï¿½ï¿½ï¿½ Ã¼Å©ï¿½Ñ´ï¿½
 	FVector myLocation = GetActorLocation();
-	// ÇÃ·¹¾îÀÌ¸¦ Ã£¾Æ¿Í¼­ 
-	FVector TargetVector = Player->GetTargetLocation();
+	// ï¿½Ã·ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½ Ã£ï¿½Æ¿Í¼ï¿½ 
+	FVector TargetVector = Player->GetActorLocation();
+	FVector Distance = TargetVector - myLocation;
+	float VectorSize = Distance.Size();
 
-	// ¿©±â¼­ ¿ì¼± ÇÃ·¹ÀÌ¾î°¡ ÀÖ´ÂÁö Ã¼Å©¸¦
-	// ¿©±â¼­ null ¶á´Ù
 	if (Player == nullptr) {
 		UE_LOG(LogTemp, Warning, TEXT("Player is nullptr"));
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Distance : %s"), TargetVector);
-	// ÇÃ·¹ÀÌ¾î°¡ ¼­Ä¡ ¹üÀ§³»¿¡ ¾ø´Ù¸é Patrol·Î »óÅÂ ÀüÀÌ
+
+	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), VectorSize);
 	if (FVector::Dist(myLocation, TargetVector) < SearchRange) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"))
-		State = ESevarogState::E_Patrol;
+		Idle_Patrol();
 	}
 
-	// ÇÃ·¹ÀÌ¾î°¡ ¼­Ä¡ ¹üÀ§ ³»¿¡ ÀÖ´Ù¸é Chase »óÅÂ·Î ÀüÀÌ
 	if (FVector::Dist(myLocation, TargetVector) < PatrolRange) 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
-		State = ESevarogState::E_Chase;
+		Idle_Chase();
 	}
 }
 
-// ¼øÂûÀº Æ¯Á¤ ÁöÁ¡°ú ÁöÁ¡±îÁö¸¦ ±×³É ´Ü¼ø ÀÌµ¿ÇÑ´Ù
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Æ¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×³ï¿½ ï¿½Ü¼ï¿½ ï¿½Ìµï¿½ï¿½Ñ´ï¿½
 void ASevarog::Patrol()
 {
-	// ·£´ý ÁÂÇ¥¸¦ ÁöÁ¤ÇØ¼­ Ã³¸®ÇØ¾ßÇÑ´Ù. ±Ùµ¥ NavMesh°¡ ¾ø´Âµ¥? ¾îÄÉÇÏÁö?
+	State = ESevarogState::E_Patrol;
 }
 
-// Ãß°Ý »óÅÂ¿¡¼­ ÇàÇÒ ³»¿ë
-void ASevarog::Chase()
+// ï¿½ß°ï¿½ ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+void ASevarog::Chase(AActor* Target)
 {
 	FVector myLocation = GetActorLocation();
 	FVector TargetVector = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
@@ -157,33 +154,36 @@ void ASevarog::Chase()
 	
 }
 
-// ÀÌ°Ç ¾È¾µ°Å°°Àºµ¥¿ä ÀÏ´Ü ³Ö¾î³ù½À´Ï´Ù
 void ASevarog::Die()
 {
-	State = ESevarogState::E_Idle;
+	State = ESevarogState::E_Die;
+	UE_LOG(LogTemp, Warning, TEXT("State Die"));
 }
 
-// Idle¿¡¼­ Chase·Î »óÅÂÀüÀÌ -> Heard»óÅÂÀÌ°Å³ª, ±ÙÃ³¿¡ ÀÖÀ½À» °¨Áö
 void ASevarog::Idle_Chase()
 {
 	State = ESevarogState::E_Chase;
+	UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
 }
 
-// ÀÌ°Ç ÆÐÅÏÀ» ¾ÈÁ¤Çß³×¿ä
+// ï¿½Ì°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ß³×¿ï¿½
 void ASevarog::Idle_Patrol()
 {
 	State = ESevarogState::E_Patrol;
+	UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
 }
 
 void ASevarog::Patrol_Chase()
 {
 	State = ESevarogState::E_Chase;
+	UE_LOG(LogTemp, Warning, TEXT("State Patrol to Chase"));
 }
 
-// Å¸°Ù°úÀÇ °Å¸®¸¦ ±âÁØÀ¸·Î °Å¸®³»¸é ¹«Á¶°Ç °ø°Ý
+// Å¸ï¿½Ù°ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 void ASevarog::Chase_Attack()
 {
 	State = ESevarogState::E_Attack;
+	UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
 }
 
 

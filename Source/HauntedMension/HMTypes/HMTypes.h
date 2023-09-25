@@ -15,3 +15,14 @@ enum class EActionState : uint8
 	
 	EAS_MAX UMETA(DisplayName = "Default MAX")
 };
+
+UENUM(BlueprintType)
+enum class ESevarogState : uint8
+{
+	E_Undefine	UMETA(DisplayName = "Sevarog Undefine"),
+	E_Idle		UMETA(DisplayName = "Sevarog Idle"),
+	E_Patrol	UMETA(DisplayName = "Sevarog Patrol"),
+	E_Chase		UMETA(DisplayName = "Sevarog Chasing"),
+	E_Attack	UMETA(DisplayName = "Sevarog Attack"),
+	E_Die		UMETA(DisplayName = "Sevarog Die")
+};

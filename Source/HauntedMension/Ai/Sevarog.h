@@ -29,37 +29,37 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// ¸ó½ºÅÍ ÀÌµ¿ °ø°Ýµî »óÅÂ ÇÔ¼ö
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½Ýµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	void UpDown(float Value);
 	void LeftRight(float Value);
 	void Yaw(float Value);
 
 	FOnAttackEnd OnAttackEnd;
 
-	// À¯´ÏÆ¼ Æ÷ÅæÃ³·³ ÀÎ½ºÅÏ½º ½ºÅ¸Æ®´Â »ý·«
-	// ¸ó½ºÅÍ °ø°Ý¿¡ °üÇÑ ÇÔ¼ö
+	// ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½Å¸Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ý¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	void Attack();
-	// ¸ó½ºÅÍ ÇÇ°Ý ÆÇÁ¤¿¡ °üÇÑ ÇÔ¼ö
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	void AttackCheck();
 	
-	// ¸ó½ºÅÍ »óÅÂ Ã¼Å©¿¡ µû¸¥ Çàµ¿ ¸ÅÇÎ
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¼Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½àµ¿ ï¿½ï¿½ï¿½ï¿½
 	void Idle();
 	void Patrol();
-	void Chase();
+	void Chase(AActor* Target);
 	void Die();
 
-	// »óÅÂ ÀüÀÌ ÇÔ¼ö
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 	void Idle_Chase();
 	void Idle_Patrol();
 	void Patrol_Chase();
 	void Chase_Attack();
 
-	// »óÅÂ¸Ó½ÅÀº AIController¿¡¼­ Ã³¸®ÇÑ´Ù.
-	// °ø°Ý»óÅÂ°¡ Á¾·áµÇ¸é µ¨¸®°ÔÀÌÆ®¸¦ ÅëÇØ ¾Ë¸°´Ù.
+	// ï¿½ï¿½ï¿½Â¸Ó½ï¿½ï¿½ï¿½ AIControllerï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ï¿½Ñ´ï¿½.
+	// ï¿½ï¿½ï¿½Ý»ï¿½ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë¸ï¿½ï¿½ï¿½.
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
 
 private:
-	// °ø°Ý »óÅÂ¸¦ ¾Ë±â À§ÇÑ ÇÃ·¡±×
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½Ë±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½ï¿½
 	UPROPERTY()
 	bool IsAttacking = false;
 
@@ -83,5 +83,5 @@ public:
 	ESevarogState State;
 
 	UPROPERTY(VisibleAnywhere)
-	ACharacter* Player;
+	AActor* Player;
 };
