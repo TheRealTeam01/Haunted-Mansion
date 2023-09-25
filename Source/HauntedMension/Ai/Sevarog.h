@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AIController.h"
 #include "GameFramework/Character.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "Sevarog.generated.h"
 
@@ -67,6 +69,9 @@ private:
 	float AttackDist = 10.0f;
 
 	UPROPERTY()
+	float SearchRange = 1000.f;
+
+	UPROPERTY()
 	class USevarogAnimInstance* AnimInstance;
 
 	UPROPERTY()
@@ -84,4 +89,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* Player;
+
+	UPROPERTY(VisibleAnywhere)
+	AAIController* EnemyController;
 };

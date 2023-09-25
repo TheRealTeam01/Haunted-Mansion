@@ -2,15 +2,14 @@
 
 
 #include "Sevarog.h"
-#include "SevarogAIController.h"
 #include "SevarogAnimInstance.h"
 #include "Kismet/GamePlayStatics.h"
 #include "Math/Vector.h"
 
-
 // Sets default values
 ASevarog::ASevarog()
 {
+	// 하위에 직접넣는 컴포넌트, Mesh같은거는 여기서
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -27,6 +26,8 @@ void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	
+	EnemyController = Cast<AAIController>(GetController());
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
 
@@ -107,8 +108,6 @@ void ASevarog::AttackCheck()
 void ASevarog::Idle()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Sevarog now State is Idle"));
-	float SearchRange = 1000.f;
-	float PatrolRange = 500.f;
 
 	// �켱 �Ÿ��� üũ�Ѵ�
 	FVector myLocation = GetActorLocation();
@@ -117,18 +116,20 @@ void ASevarog::Idle()
 	FVector Distance = TargetVector - myLocation;
 	float VectorSize = Distance.Size();
 
-	if (Player == nullptr) {
+	if (Player == nullptr)
+	{
 		UE_LOG(LogTemp, Warning, TEXT("Player is nullptr"));
 		return;
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), VectorSize);
-	if (FVector::Dist(myLocation, TargetVector) < SearchRange) 
+	if (VectorSize > SearchRange) 
 	{
+		UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
 		Idle_Patrol();
 	}
 
-	if (FVector::Dist(myLocation, TargetVector) < PatrolRange) 
+	if (VectorSize < SearchRange) 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
 		Idle_Chase();
@@ -144,14 +145,26 @@ void ASevarog::Patrol()
 // �߰� ���¿��� ���� ����
 void ASevarog::Chase(AActor* Target)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("EnemyController is nullptr"));
+	//if (EnemyController == nullptr) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Chase State"));
 	FVector myLocation = GetActorLocation();
 	FVector TargetVector = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-	if (FVector::Dist(myLocation, TargetVector) < AttackDist)
+	double VectorSize = FVector::Dist(TargetVector, myLocation);
+
+	if (VectorSize > SearchRange)
+		ESevarogState::E_Idle;
+
+	if (VectorSize < AttackDist)
 	{
 		Chase_Attack();
 	}
 
-	
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(Target);
+	MoveRequest.SetAcceptanceRadius(10.0f);
+	EnemyController->MoveTo(MoveRequest);
 }
 
 void ASevarog::Die()
@@ -161,9 +174,8 @@ void ASevarog::Die()
 }
 
 void ASevarog::Idle_Chase()
-{
+{	
 	State = ESevarogState::E_Chase;
-	UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
 }
 
 // �̰� ������ �����߳׿�
