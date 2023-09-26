@@ -93,7 +93,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		bool bAiming;
 
-
+	class UHMOverlay* HMOverlay;
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)

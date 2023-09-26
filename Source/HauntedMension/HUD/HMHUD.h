@@ -18,16 +18,12 @@ public:
 	virtual void PreInitializeComponents() override;
 
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<class UUserWidget> CrossHairClasses;
+		TSubclassOf<class UHMOverlay> HMOverlayClass;
 
-	UUserWidget* CrossHairWidget;
-
-	void ShowCrossHair();
-
-	void HideCrossHair();
+	UHMOverlay* HMOverlay;
 
 	APlayerController* PlayerController;
 
-
+	FORCEINLINE UHMOverlay* GetHMOverlay() { return HMOverlay; }
 
 };
