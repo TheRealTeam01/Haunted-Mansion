@@ -41,6 +41,12 @@ private:
 	
 	class APhase* Phase;
 
+	UPROPERTY(EditAnywhere)
+	int32 CarriedAmmo;
+
+	UPROPERTY(EditAnywhere)
+	int32 Ammo;
+
 public:
 
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }

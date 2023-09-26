@@ -13,7 +13,9 @@
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "HauntedMension/HUD/HMOverlay.h"
 #include "HauntedMension/HUD/HMHUD.h"
+#include "Blueprint/UserWidget.h"
 
 
 APhase::APhase()
@@ -162,10 +164,14 @@ void APhase::AimPressed()
 	PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
 	if (PlayerController)
 	{
-		AHMHUD* HMHUD = PlayerController->GetHUD<AHMHUD>();
+		TObjectPtr<AHMHUD> HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
 		if (HMHUD)
 		{
-			HMHUD->ShowCrossHair();
+			HMOverlay = HMHUD->GetHMOverlay();
+			if (HMOverlay)
+			{
+				HMOverlay->ShowCrossHair();
+			}
 		}
 	}
 }
@@ -180,10 +186,14 @@ void APhase::AimReleased()
 	 PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
 	 if (PlayerController)
 	 {
-		 AHMHUD* HMHUD = PlayerController->GetHUD<AHMHUD>();
+		 TObjectPtr<AHMHUD> HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
 		 if (HMHUD)
 		 {
-			 HMHUD->HideCrossHair();
+			 HMOverlay = HMHUD->GetHMOverlay();
+			 if (HMOverlay)
+			 {
+				 HMOverlay->HideCrossHair();
+			 }
 		 }
 	 }
 }
@@ -233,12 +243,10 @@ void APhase::PlayPickUpMontage()
 
 void APhase::Fire()
 {
-	//if (ActionState == EActionState::EAS_Aiming)
-	//{
-	//	DefaultWeapon->Fire(HitTarget);
-	//}
-
-	DefaultWeapon->Fire(HitTarget);
+	if (ActionState == EActionState::EAS_Aiming)
+	{
+		DefaultWeapon->Fire(HitTarget);
+	}
 }
 
 void APhase::TraceCrossHair(FHitResult& TraceHitResult)
@@ -408,7 +416,6 @@ void APhase::Tick(float DeltaTime)
 	InterpFOV(DeltaTime);
 	
 	FHitResult TraceHitResult;
-
 
 	TraceCrossHair(TraceHitResult);
 	HitTarget = TraceHitResult.ImpactPoint;
