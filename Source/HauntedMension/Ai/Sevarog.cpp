@@ -31,6 +31,18 @@ void ASevarog::BeginPlay()
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
 
+void ASevarog::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	AnimInstance = Cast<USevarogAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &ASevarog::OnAttackMontageEnded);
+		AnimInstance->OnAttackHit.AddUObject(this, &ASevarog::AttackCheck);
+	}
+	
+}
+
 // Called every frame
 void ASevarog::Tick(float DeltaTime)
 {
@@ -51,7 +63,7 @@ void ASevarog::Tick(float DeltaTime)
 		break;
 
 	default:
-		Idle();
+		StateRefresh();
 		break;
 	}
 }
@@ -82,16 +94,10 @@ void ASevarog::Yaw(float Value)
 
 void ASevarog::Attack()
 {
-	// ���Ͱ� ���ϴ� ���ݿ� ���� ������ ����.
-	if (IsAttacking)
-		return;
-
-	// ���⼭ �ִϸ��̼� �ν��Ͻ��� �����Ѵ�.
 	AnimInstance->PlayAttackMontage();
-	AnimInstance->JumpToSection(AttackIndex);
-	AttackIndex = (AttackIndex + 1) % 3;
-
+	//State = ESevarogState::E_Idle;
 	IsAttacking = true;
+	State = ESevarogState::E_Undefine;
 }
 
 void ASevarog::AttackCheck()
@@ -125,13 +131,13 @@ void ASevarog::Idle()
 	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), VectorSize);
 	if (VectorSize > SearchRange) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
+		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
 		Idle_Patrol();
 	}
 
 	if (VectorSize < SearchRange) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
+		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
 		Idle_Chase();
 	}
 }
@@ -139,6 +145,7 @@ void ASevarog::Idle()
 // ������ Ư�� ������ ���������� �׳� �ܼ� �̵��Ѵ�
 void ASevarog::Patrol()
 {
+	TArray<AActor*> targetPosition;
 	State = ESevarogState::E_Patrol;
 }
 
@@ -173,6 +180,12 @@ void ASevarog::Die()
 	UE_LOG(LogTemp, Warning, TEXT("State Die"));
 }
 
+void ASevarog::StateRefresh()
+{
+	UE_LOG(LogTemp, Warning, TEXT("State Refresh"));
+	State = ESevarogState::E_Idle;
+}
+
 void ASevarog::Idle_Chase()
 {	
 	State = ESevarogState::E_Chase;
@@ -202,6 +215,7 @@ void ASevarog::Chase_Attack()
 void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 {
 	IsAttacking = false;
+	State = ESevarogState::E_Idle;
 	OnAttackEnd.Broadcast();
 }
 

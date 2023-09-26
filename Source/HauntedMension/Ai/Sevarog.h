@@ -23,6 +23,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
@@ -49,6 +50,7 @@ public:
 	void Patrol();
 	void Chase(AActor* Target);
 	void Die();
+	void StateRefresh();
 
 	// ���� ���� �Լ�
 	void Idle_Chase();
@@ -58,6 +60,7 @@ public:
 
 	// ���¸ӽ��� AIController���� ó���Ѵ�.
 	// ���ݻ��°� ����Ǹ� ��������Ʈ�� ���� �˸���.
+	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
 
 private:
@@ -66,7 +69,7 @@ private:
 	bool IsAttacking = false;
 
 	UPROPERTY()
-	float AttackDist = 10.0f;
+	float AttackDist = 100.0f;
 
 	UPROPERTY()
 	float SearchRange = 1000.f;
