@@ -250,9 +250,11 @@ void APhase::PlayPickUpMontage()
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && PickupMontage && CharacterMovement)
 	{
+		CharacterMovement->DisableMovement();
 		ActionState = EActionState::EAS_PickUp;
-		CharacterMovement->MaxWalkSpeed = 0.f;
+		HMController->DisableInput(PlayerController);
 		AnimInstance->Montage_Play(PickupMontage);
+
 	}
 }
 
@@ -261,8 +263,9 @@ void APhase::PlayReloadMontage()
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if(AnimInstance)
 	{
-		if (ReloadMontage)
+		if (ReloadMontage && CharacterMovement)
 		{
+			CharacterMovement->DisableMovement();
 			AnimInstance->Montage_Play(ReloadMontage);
 		}
 	}
@@ -297,7 +300,8 @@ void APhase::ReloadPressed()
 void APhase::FinishReload()
 {
 	ActionState = EActionState::EAS_Unoccupied;
-	
+	if (CharacterMovement) CharacterMovement->SetMovementMode(EMovementMode::MOVE_Walking);
+
 	UpdateHUDAmmo();
 	UpdateHUDCarriedAmmo();
 }
@@ -503,9 +507,10 @@ bool APhase::CanReload()
 void APhase::EndPickUp()
 {
 	if (CharacterMovement)
-	{
-		CharacterMovement->MaxWalkSpeed = 150.f;
+	{	
+		CharacterMovement->SetMovementMode(EMovementMode::MOVE_Walking);
 		ActionState = EActionState::EAS_Unoccupied;
+
 	}
 }
 
