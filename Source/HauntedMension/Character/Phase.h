@@ -27,6 +27,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AWeapon> Weapon;
 
+	void PlayPickUpMontage();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -52,15 +54,30 @@ protected:
 
 	void FlashOnOffPressed();
 
-	void PlayPickUpMontage();
+	void PlayReloadMontage();
 
-	void Fire();
+	void ReloadPressed();
+
+	void FinishReload();
+
+	void FirePressed();
 	
 	void TraceCrossHair(FHitResult& TraceHitResult);
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override; // 블루프린트에서도 호출할거면 Implementaion을 붙임.
 
 	void SetActionState();
+
+	void UpdateHUDAmmo();
+
+	void UpdateHUDCarriedAmmo();
+
+	bool CanFire();
+
+	bool CanReload();
+
+	UFUNCTION(BlueprintCallable)
+	void EndPickUp();
 
 	FVector HitTarget;
 
@@ -72,6 +89,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 		AWeapon* DefaultWeapon;
+
+	UPROPERTY(VisibleAnywhere)
+		class AAmmoPickUp* AmmoPickup;
+
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFlashLightState FlashLightState;
@@ -129,6 +151,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* FireAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* ReloadAction;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* SpringArm;
 
@@ -139,6 +164,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* PickupMontage;
+
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* ReloadMontage;
+
+	UPROPERTY(EditAnywhere)
+		class USoundBase* NoAmmoSound;
 
 	UPROPERTY(EditAnywhere)
 	float CameraDistanceThresHold = 150.f;
@@ -155,6 +186,8 @@ private:
 		void AttachToFlashLight();
 
 	APlayerController* PlayerController;
+
+	class AHMController* HMController;
 
 	float DefaultFOV;
 
@@ -174,4 +207,6 @@ public:
 	FORCEINLINE bool GetbRotateRootBone() { return bRotateRootBone; }
 	FORCEINLINE AWeapon* GetDefaultWeapon() { return DefaultWeapon; }
 	FORCEINLINE FVector GetHitTarget() { return HitTarget; }
+	FORCEINLINE EActionState GetActionState() { return ActionState; }
+	FORCEINLINE AAmmoPickUp* GetAmmoPickUp() { return AmmoPickup; }
 };

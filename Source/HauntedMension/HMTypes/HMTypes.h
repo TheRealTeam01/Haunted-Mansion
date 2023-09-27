@@ -12,6 +12,8 @@ enum class EActionState : uint8
 {
 	EAS_Unoccupied UMETA(DisplayName = "Unoccupied"),
 	EAS_Aiming UMETA(DisplayName = "Aiming"),
+	EAS_Reloading UMETA(DisplayName = "Reloading"),
+	EAS_PickUp UMETA(DisplayName = "Pick Up"),
 	
 	EAS_MAX UMETA(DisplayName = "Default MAX")
 };

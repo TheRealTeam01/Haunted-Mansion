@@ -16,7 +16,9 @@
 #include "HauntedMension/HUD/HMOverlay.h"
 #include "HauntedMension/HUD/HMHUD.h"
 #include "Blueprint/UserWidget.h"
-
+#include "HauntedMension/Controller/HMController.h"
+#include "Kismet/GamePlayStatics.h"
+#include "HauntedMension/PickUp/AmmoPickUp.h"
 
 APhase::APhase()
 {
@@ -81,10 +83,16 @@ void APhase::BeginPlay()
 		}
 	}
 
+	UpdateHUDAmmo();
+
+	UpdateHUDCarriedAmmo();
+
 }
 
 void APhase::Move(const FInputActionValue& Value)
 {
+	if (ActionState == EActionState::EAS_Reloading) return;
+
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
@@ -111,11 +119,14 @@ void APhase::Look(const FInputActionValue& Value)
 
 void APhase::Jump(const FInputActionValue& Value)
 {
+	if (ActionState != EActionState::EAS_Unoccupied) return;
+
 	ACharacter::Jump();
 }
 
 void APhase::RunPressed()
 {
+
 	CharacterMovement->MaxWalkSpeed = 600.f;
 }
 
@@ -127,7 +138,7 @@ void APhase::RunReleased()
 void APhase::HideMeshifCameraClose()
 {
 	float DistanceToCamera = (Camera->GetComponentLocation() - GetActorLocation()).Size();
-	//UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
+	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
 	if (DistanceToCamera < CameraDistanceThresHold)
 	{
 		GetMesh()->SetVisibility(false);
@@ -140,23 +151,25 @@ void APhase::HideMeshifCameraClose()
 
 void APhase::InteractPressed()
 {
+	if (ActionState != EActionState::EAS_Unoccupied) return;
+
 	if (FlashLight)
 	{
 		PlayPickUpMontage();
 		EquippedFlashLight = FlashLight;
-		PlayerController = Cast<APlayerController>(Controller);
-		if (PlayerController && CharacterMovement)
-		{
-			//FInputModeUIOnly UIOnlyMode;
-			//PlayerController->SetInputMode(UIOnlyMode);
-			CharacterMovement->MaxWalkSpeed = 0.f;
-		}
+		FlashLightState = EFlashLightState::EFS_EquippedFlashLight;
+		FlashLight->Equip(GetMesh(), this, this);
+	}
+
+	if (AmmoPickup && DefaultWeapon) 
+	{
+		DefaultWeapon->PickUpAmmo(DefaultWeapon->AmmountToPickUp);
 	}
 }
 
 void APhase::AimPressed()
 {
-	if (DefaultWeapon == nullptr) return;
+	if (DefaultWeapon == nullptr && ActionState != EActionState::EAS_Unoccupied) return;
 
 	bAiming = true;
 	ActionState = EActionState::EAS_Aiming;
@@ -235,18 +248,94 @@ void APhase::FlashOnOffPressed()
 void APhase::PlayPickUpMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && PickupMontage)
+	if (AnimInstance && PickupMontage && CharacterMovement)
 	{
+		ActionState = EActionState::EAS_PickUp;
+		CharacterMovement->MaxWalkSpeed = 0.f;
 		AnimInstance->Montage_Play(PickupMontage);
 	}
 }
 
-void APhase::Fire()
+void APhase::PlayReloadMontage()
 {
-	if (ActionState == EActionState::EAS_Aiming)
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance)
 	{
+		if (ReloadMontage)
+		{
+			AnimInstance->Montage_Play(ReloadMontage);
+		}
+	}
+	
+	FOnMontageEnded MontageEnd;
+	MontageEnd.BindWeakLambda(this, [this](UAnimMontage* Animmontage, bool bInterrupted)
+		{
+			if (bInterrupted) // 장전하다 중간에 피격할 경우.
+			{
+				ActionState = EActionState::EAS_Unoccupied;
+			}
+			else
+			{
+				FinishReload();
+			}
+		});
+	AnimInstance->Montage_SetEndDelegate(MontageEnd, ReloadMontage);
+}
+
+void APhase::ReloadPressed()
+{
+	if (DefaultWeapon == nullptr && ActionState != EActionState::EAS_Unoccupied) return;
+
+	if (CanReload())
+	{
+		ActionState = EActionState::EAS_Reloading;
+		PlayReloadMontage();
+		DefaultWeapon->Reload();
+	}
+}
+
+void APhase::FinishReload()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+	
+	UpdateHUDAmmo();
+	UpdateHUDCarriedAmmo();
+}
+
+void APhase::FirePressed()
+{
+	if (DefaultWeapon == nullptr || ActionState != EActionState::EAS_Aiming) return;
+
+	if (CanFire())
+	{	
 		DefaultWeapon->Fire(HitTarget);
 	}
+	
+	bool bEnounghAmmo = DefaultWeapon->GetAmmo() > 0 ? true : false;
+	
+	if (!bEnounghAmmo) // 총알을 다 썼을 때
+	{
+		PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
+		if (PlayerController)
+		{
+			TObjectPtr<AHMHUD> HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
+			if (HMHUD)
+			{
+				HMOverlay = HMHUD->GetHMOverlay();
+				if (HMOverlay)
+				{
+					if (NoAmmoSound)
+					{
+						UGameplayStatics::PlaySoundAtLocation(DefaultWeapon, NoAmmoSound, DefaultWeapon->GetActorLocation());
+					}
+					HMOverlay->PlayBlink();
+
+				}
+			}
+		}
+	}
+	
+	
 }
 
 void APhase::TraceCrossHair(FHitResult& TraceHitResult)
@@ -323,6 +412,26 @@ void APhase::SetActionState()
 
 }
 
+void APhase::UpdateHUDAmmo()
+{
+	HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+
+	if (HMController)
+	{
+		HMController->SetHUDAmmo(DefaultWeapon->GetAmmo());
+	}
+}
+
+void APhase::UpdateHUDCarriedAmmo()
+{
+	HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+
+	if (HMController)
+	{
+		HMController->SetHUDCarriedAmmo(DefaultWeapon->GetCarriedAmmo());
+	}
+}
+
 void APhase::AttachToFlashLight()
 {
 	if (EquippedFlashLight)
@@ -371,6 +480,35 @@ float APhase::CalculateSpeed()
 	return Velocity.Size();
 }
 
+bool APhase::CanFire()
+{
+	if (DefaultWeapon && DefaultWeapon->GetAmmo())
+	{
+		return DefaultWeapon->GetAmmo() > 0 && ActionState == EActionState::EAS_Aiming ? true : false;
+	}
+
+	return false;
+}
+
+bool APhase::CanReload()
+{
+	if (DefaultWeapon && DefaultWeapon->GetAmmo() >= 0 && DefaultWeapon->GetCarriedAmmo())
+	{
+		return ActionState == EActionState::EAS_Unoccupied && DefaultWeapon->GetCarriedAmmo() > 0 && DefaultWeapon->GetAmmo() < DefaultWeapon->GetMaxAmmo();
+	}
+
+	return false;
+}
+
+void APhase::EndPickUp()
+{
+	if (CharacterMovement)
+	{
+		CharacterMovement->MaxWalkSpeed = 150.f;
+		ActionState = EActionState::EAS_Unoccupied;
+	}
+}
+
 void APhase::TurningInPlace(float DeltaTime)
 {
 	if (AO_Yaw > 90.f)
@@ -401,6 +539,7 @@ void APhase::SetOverlappingInteractitem(AInteract* Interact)
 
 	FlashLight = Cast<AFlashLight>(InteractItem);
 
+	AmmoPickup = Cast<AAmmoPickUp>(InteractItem);
 }
 
 void APhase::Tick(float DeltaTime)
@@ -420,6 +559,8 @@ void APhase::Tick(float DeltaTime)
 	TraceCrossHair(TraceHitResult);
 	HitTarget = TraceHitResult.ImpactPoint;
 
+	if (DefaultWeapon->GetAmmo() == 0) ReloadPressed();
+
 }
 
 void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -437,7 +578,9 @@ void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(FlashOnOffAction, ETriggerEvent::Triggered, this, &APhase::FlashOnOffPressed);
 		EnhancedInputComponent->BindAction(AimPressedAction, ETriggerEvent::Triggered, this, &APhase::AimPressed);
 		EnhancedInputComponent->BindAction(AimReleasedAction, ETriggerEvent::Triggered, this, &APhase::AimReleased);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APhase::Fire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APhase::FirePressed);
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &APhase::ReloadPressed);
+
 	}
 }
 
