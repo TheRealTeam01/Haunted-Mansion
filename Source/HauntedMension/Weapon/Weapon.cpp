@@ -126,6 +126,7 @@ void AWeapon::SpendAmmo()
 
 void AWeapon::PickUpAmmo(int32 AmmoAmount)
 {
+
 	CarriedAmmo = FMath::Clamp(CarriedAmmo + AmmoAmount, 0, MaxCarriedAmmo);
 
 	Character = Character == nullptr ? Cast<APhase>(GetOwner()) : Character;

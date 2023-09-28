@@ -387,7 +387,10 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 			{
 				TraceHitResult.ImpactPoint = TraceEnd;
 			}
-
+			else
+			{
+				TraceEnd = TraceHitResult.ImpactPoint;
+			}
 		}
 
 	}
@@ -397,6 +400,26 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 
 void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 {
+	FVector Forward = GetActorForwardVector();
+	FVector ToTarget = ImpactPoint - GetActorLocation();
+	double CosTheta = FVector::DotProduct(Forward, ToTarget);
+	
+	
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			if (CosTheta >= 0)
+			{
+				AnimInstance->Montage_Play(HitMontage);
+				AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
+			}
+			else
+			{
+				AnimInstance->Montage_Play(HitMontage);
+				AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
+			}
+		}
+	
 
 }
 

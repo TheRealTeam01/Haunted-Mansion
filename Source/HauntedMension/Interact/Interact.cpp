@@ -15,6 +15,7 @@ AInteract::AInteract()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Mesh->SetRenderCustomDepth(false);
 
 	InteractSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Interact Sphere"));
 	InteractSphere->SetupAttachment(Mesh);
@@ -58,6 +59,11 @@ void AInteract::OnEndSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		Character->SetOverlappingInteractitem(nullptr);
 		ShowInteractWidget(false);
 	}
+}
+
+void AInteract::EnableCustomDepth(bool Enable)
+{
+	Mesh->SetRenderCustomDepth(Enable);
 }
 
 void AInteract::ShowInteractWidget(bool bShowWidget)

@@ -18,6 +18,10 @@ void AFlashLight::BeginPlay()
 	Super::BeginPlay();	
 
 	Light->SetIntensity(InitialBrightness);
+	
+	//Mesh->SetCustomDepthStencilValue(252);
+	//Mesh->MarkRenderStateDirty();
+	//EnableCustomDepth(true);
 }
 
 void AFlashLight::LightOnOff(bool LightOnOff)
@@ -56,6 +60,7 @@ void AFlashLight::Equip(USceneComponent* Inparent, AActor* NewOwner, APawn* NewI
 
 	InteractSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	//EnableCustomDepth(false);
 }
 
 void AFlashLight::Tick(float DeltaTime)
