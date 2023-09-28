@@ -17,8 +17,6 @@ public:
 
 	void ShowInteractWidget(bool bShowWidget);
 
-	virtual void Interact();
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -36,7 +34,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UWidgetComponent* InteractWidget;
-
 private:
 
 

@@ -219,3 +219,8 @@ void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 	OnAttackEnd.Broadcast();
 }
 
+void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
+{
+
+}
+

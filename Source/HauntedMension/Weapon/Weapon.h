@@ -18,7 +18,11 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire(FVector& HitTarget);
+	void Fire(FVector& HitTarget);
+
+	void Reload();
+
+	void PickUpAmmo(int32 AmmoAmount);
 
 protected:
 	
@@ -37,17 +41,48 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 		void CreateFields(const FVector& FieldLocation);
 
+	void UpdateAmmos();
+
+	void SpendAmmo();
+
 private:	
 	
-	class APhase* Phase;
+	UPROPERTY()
+	class APhase* Character;
+
+	UPROPERTY()
+	class AHMHUD* HMHUD;
+
+	UPROPERTY()
+	class AHMController* HMController;
 
 	UPROPERTY(EditAnywhere)
-	int32 CarriedAmmo;
+	int32 CarriedAmmo = 5;
 
 	UPROPERTY(EditAnywhere)
-	int32 Ammo;
+	int32 Ammo = 5;
 
+	UPROPERTY(EditAnywhere)
+	int32 MaxAmmo = 5;
+
+	UPROPERTY(EditAnywhere)
+		int32 MaxCarriedAmmo = 30;
+
+	UPROPERTY(EditAnywhere)
+		float Damage = 30.f;
+
+	UPROPERTY(EditAnywhere)
+		float HeadShotDamage = 60.f;
 public:
 
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
+	
+	FORCEINLINE int32 GetAmmo() { return Ammo;}
+	
+	FORCEINLINE int32 GetCarriedAmmo() { return CarriedAmmo; }
+	
+	FORCEINLINE int32 GetMaxAmmo() { return MaxAmmo; }
+
+	UPROPERTY(EditAnywhere)
+		int32 AmmountToPickUp = 5;
 };

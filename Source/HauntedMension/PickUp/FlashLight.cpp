@@ -1,6 +1,7 @@
 #include "FlashLight.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/SphereComponent.h"
+#include "HauntedMension/Character/Phase.h"
 
 // Sets default values
 AFlashLight::AFlashLight()

@@ -7,12 +7,13 @@
 #include "GameFramework/Character.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
+#include "HauntedMension/Interfaces/HitInterface.h"
 #include "Sevarog.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
 
 UCLASS()
-class HAUNTEDMENSION_API ASevarog : public ACharacter
+class HAUNTEDMENSION_API ASevarog : public ACharacter, public IHitInterface
 {
 	GENERATED_BODY()
 
@@ -62,6 +63,8 @@ public:
 	// ���ݻ��°� ����Ǹ� ��������Ʈ�� ���� �˸���.
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
+
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 private:
 	// ���� ���¸� �˱� ���� �÷���

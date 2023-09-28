@@ -17,18 +17,35 @@ class HAUNTEDMENSION_API UHMOverlay : public UUserWidget
 public:
 	
 	UPROPERTY(meta = (BindWidget))
-	class UImage* CrossHair;
+	class UImage* CrossHairCenter;
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* Ammo1;
+		UImage* CrossHairTop;
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* Ammo2;
+		UImage* CrossHairBottom;
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* Ammo3;
+		UImage* CrossHairRight;
 
+	UPROPERTY(meta = (BindWidget))
+		UImage* CrossHairLeft;
+
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* AmmoText;
+
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* CarriedAmmoText;
+	
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* NoAmmoText;
+
+	UPROPERTY(meta = (BindWidgetAnim), transient)
+		class UWidgetAnimation* Blink;
+	
 	void ShowCrossHair();
 
 	void HideCrossHair();
+
+	void PlayBlink();
 };

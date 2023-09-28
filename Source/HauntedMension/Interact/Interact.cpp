@@ -68,11 +68,6 @@ void AInteract::ShowInteractWidget(bool bShowWidget)
 	}
 }
 
-void AInteract::Interact()
-{
-
-}
-
 void AInteract::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
