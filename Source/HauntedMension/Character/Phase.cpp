@@ -401,7 +401,7 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	FVector Forward = GetActorForwardVector();
-	FVector ToTarget = ImpactPoint - GetActorLocation();
+	FVector ToTarget = (ImpactPoint - GetActorLocation()).GetSafeNormal();
 	double CosTheta = FVector::DotProduct(Forward, ToTarget);
 	
 	
