@@ -17,7 +17,10 @@ public:
 
 	void ShowInteractWidget(bool bShowWidget);
 
+	void EnableCustomDepth(bool Enable);
+
 protected:
+
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
@@ -34,6 +37,7 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UWidgetComponent* InteractWidget;
+
 private:
 
 

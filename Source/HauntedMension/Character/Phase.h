@@ -169,10 +169,20 @@ private:
 		UAnimMontage* ReloadMontage;
 
 	UPROPERTY(EditAnywhere)
+		UAnimMontage* HitMontage;
+
+	UPROPERTY(EditAnywhere)
 		class USoundBase* NoAmmoSound;
 
 	UPROPERTY(EditAnywhere)
 	float CameraDistanceThresHold = 150.f;
+
+	UPROPERTY(EditAnywhere)
+		float HP = 100.f;
+	
+	UPROPERTY(EditAnywhere)
+		float MaxHP = 100.f;
+
 
 	float AO_Yaw;
 	float AO_Pitch;
