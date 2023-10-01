@@ -3,6 +3,10 @@
 
 #include "Sevarog.h"
 #include "SevarogAnimInstance.h"
+#include "NavigationSystem.h"
+#include "AIController.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GamePlayStatics.h"
 #include "Math/Vector.h"
 
@@ -28,6 +32,7 @@ void ASevarog::BeginPlay()
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	
 	EnemyController = Cast<AAIController>(GetController());
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
 
@@ -47,13 +52,17 @@ void ASevarog::PostInitializeComponents()
 void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	float Count = FApp::GetDeltaTime();
+	SearchInterval -= Count;
+
 	switch (State) 
 	{
 	case ESevarogState::E_Idle:
 		Idle();
 		break;
 	case ESevarogState::E_Patrol:
-		Patrol();
+		if (SearchInterval <= 0.0f)
+			Patrol();
 		break;
 	case ESevarogState::E_Chase:
 		Chase(Player);
@@ -61,7 +70,6 @@ void ASevarog::Tick(float DeltaTime)
 	case ESevarogState::E_Attack:
 		Attack();
 		break;
-
 	default:
 		StateRefresh();
 		break;
@@ -94,6 +102,7 @@ void ASevarog::Yaw(float Value)
 
 void ASevarog::Attack()
 {
+	GetCharacterMovement()->MaxWalkSpeed = 0;
 	AnimInstance->PlayAttackMontage();
 	//State = ESevarogState::E_Idle;
 	IsAttacking = true;
@@ -102,18 +111,15 @@ void ASevarog::Attack()
 
 void ASevarog::AttackCheck()
 {
-	//�ǰ� ������ ���õ� ������ ����.
 	FHitResult HitResult;
-	// �浹 üũ�� ���� �浹 �Ķ���� ����
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	// �ǰ������ε� ���� �����ϴ����� �𸣰ڴ�
 }
 
 
 void ASevarog::Idle()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Sevarog now State is Idle"));
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 
 	// �켱 �Ÿ��� üũ�Ѵ�
 	FVector myLocation = GetActorLocation();
@@ -128,7 +134,6 @@ void ASevarog::Idle()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), VectorSize);
 	if (VectorSize > SearchRange) 
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
@@ -145,17 +150,29 @@ void ASevarog::Idle()
 // ������ Ư�� ������ ���������� �׳� �ܼ� �̵��Ѵ�
 void ASevarog::Patrol()
 {
-	TArray<AActor*> targetPosition;
-	State = ESevarogState::E_Patrol;
+	FVector PlayerVector = Player->GetActorLocation();
+	FVector MyVector = GetActorLocation();
+	FVector DistVector = PlayerVector - MyVector;
+	float DistSize = DistVector.Size();
+	if (DistSize < SearchRange)
+		ESevarogState::E_Undefine;
+
+	FVector GoalLocation;
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (NavSystem == nullptr)
+		return;
+
+	FNavLocation RandomLocation;
+	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) {
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
+	}
+	SearchInterval = 5.0f;
+	State = ESevarogState::E_Undefine;
 }
 
 // �߰� ���¿��� ���� ����
 void ASevarog::Chase(AActor* Target)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("EnemyController is nullptr"));
-	//if (EnemyController == nullptr) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("Chase State"));
 	FVector myLocation = GetActorLocation();
 	FVector TargetVector = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 	double VectorSize = FVector::Dist(TargetVector, myLocation);
@@ -191,24 +208,24 @@ void ASevarog::Idle_Chase()
 	State = ESevarogState::E_Chase;
 }
 
-// �̰� ������ �����߳׿�
+// 여기서 가장 가까운 지점을 정찰하도록 위치를 지정해준다
 void ASevarog::Idle_Patrol()
 {
 	State = ESevarogState::E_Patrol;
-	UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
+	//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
 }
 
 void ASevarog::Patrol_Chase()
 {
 	State = ESevarogState::E_Chase;
-	UE_LOG(LogTemp, Warning, TEXT("State Patrol to Chase"));
+	//UE_LOG(LogTemp, Warning, TEXT("State Patrol to Chase"));
 }
 
 // Ÿ�ٰ��� �Ÿ��� �������� �Ÿ����� ������ ����
 void ASevarog::Chase_Attack()
 {
 	State = ESevarogState::E_Attack;
-	UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
+	//UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
 }
 
 

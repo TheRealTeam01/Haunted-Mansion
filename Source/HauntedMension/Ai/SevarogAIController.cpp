@@ -9,7 +9,7 @@
 
 ASevarogAIController::ASevarogAIController() 
 {
-	// Blackboard¸¦ °¡Á®¿Â´Ù
+	// Blackboardï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½
 	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BT(TEXT(""));
 	if (BT.Succeeded()) {
 		BehaviorTree = BT.Object;
@@ -23,14 +23,11 @@ ASevarogAIController::ASevarogAIController()
 
 void ASevarogAIController::OnPossess(APawn* InPawn)
 {
-	Super::OnPossess(InPawn);
 }
 
 void ASevarogAIController::OnUnPossess()
 {
-	// ÀÏÁ¤ ½Ã°£ÀÌ µÇ¸é ÀÓÀÇÀÇ ÁÂÇ¥·Î ÀÌµ¿ÇÏ´Â ¼öÁØÀÇ ÇÔ¼öÀÌ´Ù
-	Super::OnUnPossess();
-	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+
 }
 
 void ASevarogAIController::RandomMove()

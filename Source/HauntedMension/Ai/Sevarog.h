@@ -72,10 +72,13 @@ private:
 	bool IsAttacking = false;
 
 	UPROPERTY()
-	float AttackDist = 100.0f;
+	float AttackDist = 150.0f;
 
 	UPROPERTY()
-	float SearchRange = 1000.f;
+	float SearchRange = 500.0f;
+
+	UPROPERTY()
+	float SearchInterval;
 
 	UPROPERTY()
 	class USevarogAnimInstance* AnimInstance;
@@ -95,6 +98,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* Player;
+
+	UPROPERTY(VisibleAnywhere)
+	AActor* PatrolTarget;
 
 	UPROPERTY(VisibleAnywhere)
 	AAIController* EnemyController;

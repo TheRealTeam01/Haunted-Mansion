@@ -27,7 +27,6 @@ void USevarogAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	auto Pawn = TryGetPawnOwner();
 	if(IsValid(Pawn))
 	{
-		// �̵� ���ǵ� �޾ƿͼ� 
 		Speed = Pawn->GetVelocity().Size();
 		auto Character = Cast<ASevarog>(Pawn);
 		if (Character) {
