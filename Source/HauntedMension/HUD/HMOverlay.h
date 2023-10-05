@@ -30,6 +30,9 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 		UImage* CrossHairLeft;
+	
+	UPROPERTY(meta = (BindWidget))
+		UImage* BloodSplatter;
 
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* AmmoText;
@@ -43,9 +46,14 @@ public:
 	UPROPERTY(meta = (BindWidgetAnim), transient)
 		class UWidgetAnimation* Blink;
 	
+	UPROPERTY(meta = (BindWidgetAnim), transient)
+		UWidgetAnimation* HP80;
+	
 	void ShowCrossHair();
 
 	void HideCrossHair();
 
 	void PlayBlink();
+
+	void ShowBloodSplatter(float Health);
 };

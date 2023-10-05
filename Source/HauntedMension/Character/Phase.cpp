@@ -19,6 +19,7 @@
 #include "HauntedMension/Controller/HMController.h"
 #include "Kismet/GamePlayStatics.h"
 #include "HauntedMension/PickUp/AmmoPickUp.h"
+#include "HauntedMension/Attribute/AttributeComponent.h"
 
 APhase::APhase()
 {
@@ -40,6 +41,8 @@ APhase::APhase()
 
 	CharacterMovement = GetCharacterMovement();
 	CharacterMovement->MaxWalkSpeed = 150.f;
+
+	StatComponent = CreateDefaultSubobject<UAttributeComponent>("Attributes");
 
 	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 
@@ -535,6 +538,13 @@ void APhase::EndPickUp()
 		ActionState = EActionState::EAS_Unoccupied;
 
 	}
+}
+
+float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	StatComponent->CalculateDamage(DamageAmount);
+	/*HMController->SetHUDHealth(StatComponent->GetHealth());*/
+	return DamageAmount;
 }
 
 void APhase::TurningInPlace(float DeltaTime)

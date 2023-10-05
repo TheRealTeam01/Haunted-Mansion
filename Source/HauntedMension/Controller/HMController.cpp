@@ -31,3 +31,16 @@ void AHMController::SetHUDCarriedAmmo(int32 CarriedAmmo)
 		HMHUD->HMOverlay->CarriedAmmoText->SetText(FText::FromString(FString::Printf(TEXT("%d"), CarriedAmmo)));
 	}
 }
+
+void AHMController::SetHUDHealth(float Health)
+{
+	AHMHUD* HMHUD = Cast<AHMHUD>(GetHUD());
+
+	bool bValidHUD = HMHUD &&
+		HMHUD->HMOverlay;
+
+	if (bValidHUD)
+	{
+		HMHUD->HMOverlay->ShowBloodSplatter(Health);
+	}
+}

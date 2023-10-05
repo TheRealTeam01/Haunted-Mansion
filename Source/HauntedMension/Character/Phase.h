@@ -79,6 +79,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void EndPickUp();
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	FVector HitTarget;
 
 	UPROPERTY(VisibleAnywhere)
@@ -161,6 +163,9 @@ private:
 		class UCameraComponent* Camera;
 
 	UCharacterMovementComponent* CharacterMovement;
+
+	UPROPERTY(VisibleAnywhere)
+	class UAttributeComponent* StatComponent;
 
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* PickupMontage;
