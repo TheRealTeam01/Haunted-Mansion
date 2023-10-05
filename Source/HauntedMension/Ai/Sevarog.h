@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AIController.h"
 #include "GameFramework/Character.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "Sevarog.generated.h"
@@ -22,6 +24,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
@@ -48,6 +51,7 @@ public:
 	void Patrol();
 	void Chase(AActor* Target);
 	void Die();
+	void StateRefresh();
 
 	// ���� ���� �Լ�
 	void Idle_Chase();
@@ -57,6 +61,7 @@ public:
 
 	// ���¸ӽ��� AIController���� ó���Ѵ�.
 	// ���ݻ��°� ����Ǹ� ��������Ʈ�� ���� �˸���.
+	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
@@ -67,7 +72,13 @@ private:
 	bool IsAttacking = false;
 
 	UPROPERTY()
-	float AttackDist = 10.0f;
+	float AttackDist = 150.0f;
+
+	UPROPERTY()
+	float SearchRange = 500.0f;
+
+	UPROPERTY()
+	float SearchInterval;
 
 	UPROPERTY()
 	class USevarogAnimInstance* AnimInstance;
@@ -87,4 +98,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* Player;
+
+	UPROPERTY(VisibleAnywhere)
+	AActor* PatrolTarget;
+
+	UPROPERTY(VisibleAnywhere)
+	AAIController* EnemyController;
 };

@@ -6,10 +6,10 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Sevarog.h"
 
-// BP ¿¡¼ÂÀ» °¡Á®¿Â´Ù
+// BP ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½
 USevarogAnimInstance::USevarogAnimInstance()
 {
-	// ¾Ö´Ï¸ÞÀÌ¼Ç ¸ùÅ¸ÁÖ¸¦ °¡Á®¿Â´Ù.
+	// ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½Å¸ï¿½Ö¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½.
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM(TEXT("/Script/Engine.AnimMontage'/Game/HauntedMansion/Animation/Sevarog_SkeletonMontage.Sevarog_SkeletonMontage'"));
 	if (AM.Succeeded()) {
 		AttackMontage = AM.Object;
@@ -27,7 +27,6 @@ void USevarogAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	auto Pawn = TryGetPawnOwner();
 	if(IsValid(Pawn))
 	{
-		// ÀÌµ¿ ½ºÇÇµå ¹Þ¾Æ¿Í¼­ 
 		Speed = Pawn->GetVelocity().Size();
 		auto Character = Cast<ASevarog>(Pawn);
 		if (Character) {
@@ -39,14 +38,14 @@ void USevarogAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void USevarogAnimInstance::PlayAttackMontage()
 {
-	Montage_Play(AttackMontage);
+	Montage_Play(AttackMontage, 1.0f);
 }
 
-// ¿¬¼Ó°ø°ÝÀ» À§ÇØ¼­ °ø°Ý ¸ùÅ¸ÁÖ¸¦ °¡Á®¿Â´Ù
+// ï¿½ï¿½ï¿½Ó°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½Ö¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½
 void USevarogAnimInstance::JumpToSection(int32 SectionIndex)
 {
 	FName Name = GetAttackMontageName(SectionIndex);
-	Montage_JumpToSection(Name, AttackMontage);
+	//Montage_JumpToSection(Name, AttackMontage);
 }
 
 FName USevarogAnimInstance::GetAttackMontageName(int32 SectionIndex)

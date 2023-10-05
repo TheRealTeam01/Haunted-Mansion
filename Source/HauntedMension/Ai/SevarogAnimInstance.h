@@ -21,7 +21,7 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	void PlayAttackMontage();	// ¾Ö´Ï¸ÞÀÌ¼Ç Àç»ý ½Ã°£ Áß°£¿¡ ÀÌº¥Æ®¸¦ ³ÖÀ» ¿¹Á¤
+	void PlayAttackMontage();	// ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	void JumpToSection(int32 SectionIndex);
 
 	FName GetAttackMontageName(int32 SectionIndex);

@@ -2,15 +2,18 @@
 
 
 #include "Sevarog.h"
-#include "SevarogAIController.h"
 #include "SevarogAnimInstance.h"
+#include "NavigationSystem.h"
+#include "AIController.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GamePlayStatics.h"
 #include "Math/Vector.h"
-
 
 // Sets default values
 ASevarog::ASevarog()
 {
+	// 하위에 직접넣는 컴포넌트, Mesh같은거는 여기서
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -27,20 +30,39 @@ void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	
+	EnemyController = Cast<AAIController>(GetController());
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
+}
+
+void ASevarog::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	AnimInstance = Cast<USevarogAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &ASevarog::OnAttackMontageEnded);
+		AnimInstance->OnAttackHit.AddUObject(this, &ASevarog::AttackCheck);
+	}
+	
 }
 
 // Called every frame
 void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	float Count = FApp::GetDeltaTime();
+	SearchInterval -= Count;
+
 	switch (State) 
 	{
 	case ESevarogState::E_Idle:
 		Idle();
 		break;
 	case ESevarogState::E_Patrol:
-		Patrol();
+		if (SearchInterval <= 0.0f)
+			Patrol();
 		break;
 	case ESevarogState::E_Chase:
 		Chase(Player);
@@ -48,9 +70,8 @@ void ASevarog::Tick(float DeltaTime)
 	case ESevarogState::E_Attack:
 		Attack();
 		break;
-
 	default:
-		Idle();
+		StateRefresh();
 		break;
 	}
 }
@@ -81,34 +102,24 @@ void ASevarog::Yaw(float Value)
 
 void ASevarog::Attack()
 {
-	// ���Ͱ� ���ϴ� ���ݿ� ���� ������ ����.
-	if (IsAttacking)
-		return;
-
-	// ���⼭ �ִϸ��̼� �ν��Ͻ��� �����Ѵ�.
+	GetCharacterMovement()->MaxWalkSpeed = 0;
 	AnimInstance->PlayAttackMontage();
-	AnimInstance->JumpToSection(AttackIndex);
-	AttackIndex = (AttackIndex + 1) % 3;
-
+	//State = ESevarogState::E_Idle;
 	IsAttacking = true;
+	State = ESevarogState::E_Undefine;
 }
 
 void ASevarog::AttackCheck()
 {
-	//�ǰ� ������ ���õ� ������ ����.
 	FHitResult HitResult;
-	// �浹 üũ�� ���� �浹 �Ķ���� ����
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	// �ǰ������ε� ���� �����ϴ����� �𸣰ڴ�
 }
 
 
 void ASevarog::Idle()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Sevarog now State is Idle"));
-	float SearchRange = 1000.f;
-	float PatrolRange = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 
 	// �켱 �Ÿ��� üũ�Ѵ�
 	FVector myLocation = GetActorLocation();
@@ -117,20 +128,21 @@ void ASevarog::Idle()
 	FVector Distance = TargetVector - myLocation;
 	float VectorSize = Distance.Size();
 
-	if (Player == nullptr) {
+	if (Player == nullptr)
+	{
 		UE_LOG(LogTemp, Warning, TEXT("Player is nullptr"));
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), VectorSize);
-	if (FVector::Dist(myLocation, TargetVector) < SearchRange) 
+	if (VectorSize > SearchRange) 
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
 		Idle_Patrol();
 	}
 
-	if (FVector::Dist(myLocation, TargetVector) < PatrolRange) 
+	if (VectorSize < SearchRange) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
+		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
 		Idle_Chase();
 	}
 }
@@ -138,7 +150,24 @@ void ASevarog::Idle()
 // ������ Ư�� ������ ���������� �׳� �ܼ� �̵��Ѵ�
 void ASevarog::Patrol()
 {
-	State = ESevarogState::E_Patrol;
+	FVector PlayerVector = Player->GetActorLocation();
+	FVector MyVector = GetActorLocation();
+	FVector DistVector = PlayerVector - MyVector;
+	float DistSize = DistVector.Size();
+	if (DistSize < SearchRange)
+		ESevarogState::E_Undefine;
+
+	FVector GoalLocation;
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (NavSystem == nullptr)
+		return;
+
+	FNavLocation RandomLocation;
+	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) {
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
+	}
+	SearchInterval = 5.0f;
+	State = ESevarogState::E_Undefine;
 }
 
 // �߰� ���¿��� ���� ����
@@ -146,12 +175,20 @@ void ASevarog::Chase(AActor* Target)
 {
 	FVector myLocation = GetActorLocation();
 	FVector TargetVector = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-	if (FVector::Dist(myLocation, TargetVector) < AttackDist)
+	double VectorSize = FVector::Dist(TargetVector, myLocation);
+
+	if (VectorSize > SearchRange)
+		ESevarogState::E_Idle;
+
+	if (VectorSize < AttackDist)
 	{
 		Chase_Attack();
 	}
 
-	
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(Target);
+	MoveRequest.SetAcceptanceRadius(10.0f);
+	EnemyController->MoveTo(MoveRequest);
 }
 
 void ASevarog::Die()
@@ -160,36 +197,42 @@ void ASevarog::Die()
 	UE_LOG(LogTemp, Warning, TEXT("State Die"));
 }
 
-void ASevarog::Idle_Chase()
+void ASevarog::StateRefresh()
 {
-	State = ESevarogState::E_Chase;
-	UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
+	UE_LOG(LogTemp, Warning, TEXT("State Refresh"));
+	State = ESevarogState::E_Idle;
 }
 
-// �̰� ������ �����߳׿�
+void ASevarog::Idle_Chase()
+{	
+	State = ESevarogState::E_Chase;
+}
+
+// 여기서 가장 가까운 지점을 정찰하도록 위치를 지정해준다
 void ASevarog::Idle_Patrol()
 {
 	State = ESevarogState::E_Patrol;
-	UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
+	//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
 }
 
 void ASevarog::Patrol_Chase()
 {
 	State = ESevarogState::E_Chase;
-	UE_LOG(LogTemp, Warning, TEXT("State Patrol to Chase"));
+	//UE_LOG(LogTemp, Warning, TEXT("State Patrol to Chase"));
 }
 
 // Ÿ�ٰ��� �Ÿ��� �������� �Ÿ����� ������ ����
 void ASevarog::Chase_Attack()
 {
 	State = ESevarogState::E_Attack;
-	UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
+	//UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
 }
 
 
 void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 {
 	IsAttacking = false;
+	State = ESevarogState::E_Idle;
 	OnAttackEnd.Broadcast();
 }
 
