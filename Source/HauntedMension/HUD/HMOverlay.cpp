@@ -35,9 +35,9 @@ void UHMOverlay::PlayBlink()
 
 void UHMOverlay::ShowBloodSplatter(float Health)
 {
-	if (Health <= 80.f && HP80)
+	if (Health <= 80.f && BloodSplatterAnim)
 	{
 		BloodSplatter->SetVisibility(ESlateVisibility::Visible);
-		PlayAnimation(HP80);
+		PlayAnimation(BloodSplatterAnim, 0.f, 1);
 	}
 }

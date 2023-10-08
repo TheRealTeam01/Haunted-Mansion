@@ -423,7 +423,19 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 			}
 		}
 	
+	/*HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+	if (HMController)
+	{
+		HMController->SetHUDHealth(StatComponent->GetHealth());
+	}*/
 
+	//if (HitSound)
+	//{
+	//	UGameplayStatics::PlaySoundAtLocation(
+	//		GetWorld(),
+	//		HitSound,
+	//		ImpactPoint);
+	//}
 }
 
 void APhase::SetActionState()
@@ -543,7 +555,18 @@ void APhase::EndPickUp()
 float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	StatComponent->CalculateDamage(DamageAmount);
-	/*HMController->SetHUDHealth(StatComponent->GetHealth());*/
+	HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+	if (HMController)
+	{
+		HMController->SetHUDHealth(StatComponent->GetHealth());
+	}
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			HitSound,
+			GetActorLocation());
+	}
 	return DamageAmount;
 }
 

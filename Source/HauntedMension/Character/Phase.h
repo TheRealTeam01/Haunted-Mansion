@@ -95,8 +95,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 		class AAmmoPickUp* AmmoPickup;
 
-
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFlashLightState FlashLightState;
 
@@ -178,6 +176,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		class USoundBase* NoAmmoSound;
+
+	UPROPERTY(EditAnywhere)
+		USoundBase* HitSound;
 
 	UPROPERTY(EditAnywhere)
 	float CameraDistanceThresHold = 150.f;

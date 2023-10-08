@@ -47,7 +47,7 @@ public:
 		class UWidgetAnimation* Blink;
 	
 	UPROPERTY(meta = (BindWidgetAnim), transient)
-		UWidgetAnimation* HP80;
+		UWidgetAnimation* BloodSplatterAnim;
 	
 	void ShowCrossHair();
 
