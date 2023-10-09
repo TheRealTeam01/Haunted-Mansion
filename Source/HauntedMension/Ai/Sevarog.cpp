@@ -97,13 +97,17 @@ void ASevarog::LeftRight(float Value)
 
 void ASevarog::Yaw(float Value)
 {
-
+	AddControllerYawInput(Value);
 }
 
 void ASevarog::Attack()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 0;
+	if (IsAttacking)
+		return;
+
 	AnimInstance->PlayAttackMontage();
+	GetCharacterMovement()->MaxWalkSpeed = 1.0f;
+
 	//State = ESevarogState::E_Idle;
 	IsAttacking = true;
 	State = ESevarogState::E_Undefine;
@@ -153,6 +157,9 @@ void ASevarog::Patrol()
 	FVector PlayerVector = Player->GetActorLocation();
 	FVector MyVector = GetActorLocation();
 	FVector DistVector = PlayerVector - MyVector;
+
+	FQuat Dir = DistVector.ToOrientationQuat();
+
 	float DistSize = DistVector.Size();
 	if (DistSize < SearchRange)
 		ESevarogState::E_Undefine;
