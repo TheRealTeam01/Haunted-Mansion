@@ -4,6 +4,7 @@
 #include "Sevarog.h"
 #include "SevarogAnimInstance.h"
 #include "NavigationSystem.h"
+#include "Components/CapsuleComponent.h"
 #include "AIController.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -113,11 +114,46 @@ void ASevarog::Attack()
 	State = ESevarogState::E_Undefine;
 }
 
+// 공격이 플레이어에게 닿았는지 직접 판단하는 부분
 void ASevarog::AttackCheck()
 {
+	// 거리는 State체크에서 이미 체크했으니 콜라이더 충돌 여부만 판단한다
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
+	float AttackRadius = 50.0f;
+
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		OUT HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AttackDist,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel2,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
+
+	FColor DrawColor;
+	FVector Vec = GetActorForwardVector() * AttackDist;
+	FVector Center = GetActorLocation() + Vec * 0.5f;
+	FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
+	float HalfHeight = AttackDist * 0.5f + AttackRadius;
+
+	// 공격 이벤트가 실행되는 지점을 알기 위한 DrawShape
+	if (bResult)
+		DrawColor = FColor::Green;
+	else
+		DrawColor = FColor::Red;
+
+	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius,
+		Rotation, DrawColor, false, 2.0f);
+
+	// 맞은게 확실하다면
+	if (bResult && HitResult.GetActor()) 
+	{
+		UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.GetActor()->GetName());
+		//FDamageEvent DamageEvent;
+	}
 }
 
 

@@ -33,17 +33,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// ���� �̵� ���ݵ� ���� �Լ�
 	void UpDown(float Value);
 	void LeftRight(float Value);
 	void Yaw(float Value);
 
 	FOnAttackEnd OnAttackEnd;
 
-	// ����Ƽ ����ó�� �ν��Ͻ� ��ŸƮ�� ����
-	// ���� ���ݿ� ���� �Լ�
 	void Attack();
-	// ���� �ǰ� ������ ���� �Լ�
 	void AttackCheck();
 	
 	// ���� ���� üũ�� ���� �ൿ ����
