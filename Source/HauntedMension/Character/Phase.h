@@ -88,12 +88,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	class AFlashLight* EquippedFlashLight;
+	
+	UPROPERTY(VisibleAnywhere)
+	AWeapon* DefaultWeapon;
 
 	UPROPERTY(VisibleAnywhere)
-		AWeapon* DefaultWeapon;
-
-	UPROPERTY(VisibleAnywhere)
-		class AAmmoPickUp* AmmoPickup;
+	class AAmmoPickUp* AmmoPickup;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFlashLightState FlashLightState;

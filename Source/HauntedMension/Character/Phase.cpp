@@ -141,7 +141,7 @@ void APhase::RunReleased()
 void APhase::HideMeshifCameraClose()
 {
 	float DistanceToCamera = (Camera->GetComponentLocation() - GetActorLocation()).Size();
-	UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
+	//UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
 	if (DistanceToCamera < CameraDistanceThresHold)
 	{
 		GetMesh()->SetVisibility(false);
@@ -406,23 +406,22 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 	FVector Forward = GetActorForwardVector();
 	FVector ToTarget = (ImpactPoint - GetActorLocation()).GetSafeNormal();
 	double CosTheta = FVector::DotProduct(Forward, ToTarget);
-	
-	
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		if (CosTheta >= 0)
 		{
-			if (CosTheta >= 0)
-			{
-				AnimInstance->Montage_Play(HitMontage);
-				AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
-			}
-			else
-			{
-				AnimInstance->Montage_Play(HitMontage);
-				AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
-			}
+			AnimInstance->Montage_Play(HitMontage);
+			AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
 		}
-	
+		else
+		{
+			AnimInstance->Montage_Play(HitMontage);
+			AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
+		}
+	}
+
 	/*HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
 	if (HMController)
 	{

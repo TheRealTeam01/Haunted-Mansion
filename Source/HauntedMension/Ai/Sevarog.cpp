@@ -10,6 +10,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GamePlayStatics.h"
 #include "Math/Vector.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+
 
 // Sets default values
 ASevarog::ASevarog()
@@ -24,6 +27,8 @@ ASevarog::ASevarog()
 	{
 		GetMesh()->SetSkeletalMesh(SM.Object);
 	}
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -132,6 +137,42 @@ void ASevarog::AttackCheck()
 		FCollisionShape::MakeSphere(AttackRadius),
 		Params
 	);
+
+	//무기 클래스라 가정
+	//TArray<AActor*> IgnoreToActors;
+	//IgnoreToActors.AddUnique(GetOwner());
+
+	//FHitResult BoxResult;
+
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision); //평소에, 공격 끝났을 때
+
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // 공격할 떄
+
+	//UKismetSystemLibrary::BoxTraceSingle(
+	//	GetWorld(),
+	//	Start,
+	//	End,
+	//	BoxSize,
+	//	GetActorRotation(),
+	//	ECC_EngineTraceChannel1,
+	//	false,
+	//	IgnoreToActors,
+	//	EDrawDebugTrace::ForDuration,
+	//	BoxResult,
+	//	true
+	//);
+
+	//
+	//if (BoxResult.GetActor())
+	//{
+	//	if(BoxResult.BoneName.ToString() == FString("head"))
+	//	UGameplayStatics::ApplyDamage(BoxResult.GetActor(), 50.f, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
+	//	IHitInterface* Interface = Cast<IHitInterface>(BoxResult.GetActor());
+	//	if (Interface)
+	//	{
+	//		Interface->Execute_GetHit(BoxResult.GetActor(), BoxResult.BoneName);
+	//	}
+	//}
 
 	FColor DrawColor;
 	FVector Vec = GetActorForwardVector() * AttackDist;
