@@ -5,7 +5,7 @@
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "HauntedMension/Controller/HMController.h"
 #include "HauntedMension/Character/Phase.h"
-#include "HauntedMension/PickUp/AmmoPickUp.h"
+#include "HauntedMension/Interact/PickUp/AmmoPickUp.h"
 
 AWeapon::AWeapon()
 {
@@ -130,10 +130,8 @@ void AWeapon::PickUpAmmo(int32 AmmoAmount)
 	CarriedAmmo = FMath::Clamp(CarriedAmmo + AmmoAmount, 0, MaxCarriedAmmo);
 
 	Character = Character == nullptr ? Cast<APhase>(GetOwner()) : Character;
-	if (Character && Character->GetAmmoPickUp())
+	if (Character)
 	{
-		Character->PlayPickUpMontage();
-		Character->GetAmmoPickUp()->Destroy();
 		HMController = HMController == nullptr ? Cast<AHMController>(Character->Controller) : HMController;
 		if (HMController)
 		{

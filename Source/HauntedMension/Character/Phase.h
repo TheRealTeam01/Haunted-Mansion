@@ -10,6 +10,8 @@
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "Phase.generated.h"
 
+class IInteractInterface;
+
 UCLASS()
 class HAUNTEDMENSION_API APhase : public ACharacter, public IHitInterface
 {
@@ -76,15 +78,21 @@ protected:
 
 	bool CanReload();
 
+	void InitializeComponent();
+
 	UFUNCTION(BlueprintCallable)
 	void EndPickUp();
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	UPROPERTY(VisibleAnywhere)
 	FVector HitTarget;
 
+	UPROPERTY(EditAnywhere)
+		float Speed;
+
 	UPROPERTY(VisibleAnywhere)
-	class AInteract* InteractItem;
+	TScriptInterface<IInteractInterface> InteractItem;
 
 	UPROPERTY(VisibleAnywhere)
 	class AFlashLight* EquippedFlashLight;
@@ -100,6 +108,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		EActionState ActionState = EActionState::EAS_Unoccupied;
+
+	UPROPERTY(VisibleAnywhere)
+		EKeyState KeyState = EKeyState::EKS_UnEquippedKey;
+
 	void AimOffset(float DeltaTime);
 
 	float CalculateSpeed();
@@ -109,11 +121,17 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	ETurnInPlace TurnInPlace;
 
+	//UPROPERTY(BlueprintReadOnly)
+	//AFlashLight* FlashLight;
+
+	//UPROPERTY(VisibleAnywhere)
+	//	class ADoorKey* Key;
+
+	//UPROPERTY(VisibleAnywhere)
+	//	class ADoor* Door;
+
 	UPROPERTY(BlueprintReadOnly)
-	AFlashLight* FlashLight;
-	
-	UPROPERTY(BlueprintReadOnly)
-		bool bAiming;
+	bool bAiming;
 
 	class UHMOverlay* HMOverlay;
 private:
@@ -205,6 +223,8 @@ private:
 
 	class AHMController* HMController;
 
+	class AHMHUD* HMHUD;
+
 	float DefaultFOV;
 
 	float CurrentFOV;
@@ -225,4 +245,8 @@ public:
 	FORCEINLINE FVector GetHitTarget() { return HitTarget; }
 	FORCEINLINE EActionState GetActionState() { return ActionState; }
 	FORCEINLINE AAmmoPickUp* GetAmmoPickUp() { return AmmoPickup; }
+	FORCEINLINE EKeyState GetKeyState() { return KeyState; }
+	void SetFlashLightState(EFlashLightState State) { FlashLightState = State; }
+	void SetEquippedFlashLightState(AFlashLight* FlashLight) { EquippedFlashLight = FlashLight; }
+	void SetKeyState(EKeyState State) { KeyState = State; }
 };

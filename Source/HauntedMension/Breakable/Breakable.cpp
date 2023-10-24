@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Interfaces/HitInterface.h"
+#include "HauntedMension/Interact/Interact.h"
 
 ABreakable::ABreakable()
 {
@@ -31,13 +32,27 @@ void ABreakable::BeginPlay()
 
 void ABreakable::GetHit_Implementation(const FVector& ImpactPoint)
 {
+	SpawnItem();
+
 	if (FractionSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(
+		UGameplayStatics::SpawnSoundAtLocation(
 			this,
 			FractionSound,
 			ImpactPoint
 		);
+	}
+	
+	SetLifeSpan(LifeSpan);
+
+	Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ABreakable::SpawnItem()
+{
+	if (SpawnItems)
+	{
+		GetWorld()->SpawnActor<AInteract>(SpawnItems, GetActorLocation(), GetActorRotation());
 	}
 }
 
