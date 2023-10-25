@@ -1,0 +1,97 @@
+#include "Book.h"
+#include "HauntedMension/Character/Phase.h"
+#include "HauntedMension/Interact/StoneStatue.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+
+ABook::ABook()
+{
+	PrimaryActorTick.bCanEverTick = true;
+
+	Root = CreateDefaultSubobject<USceneComponent>("Root");
+	SetRootComponent(Root);
+
+	Mesh->SetupAttachment(Root);
+}
+
+void ABook::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (CurveFloat)
+	{
+		TimelineUpdate.BindDynamic(this, &ABook::BookRotate);
+		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate);
+	}
+}
+
+	
+void ABook::StoneStatueInteract()
+{
+	TArray<AActor*> StoneStatues;
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStoneStatue::StaticClass(),StoneStatues); //StoneStatue클래스인 엑터들을 가져와 StoneStatues배열에 담아서 반환.
+	for (auto statue : StoneStatues)
+	{
+		TObjectPtr<AStoneStatue> StoneStatue = Cast<AStoneStatue>(statue);
+		if (StoneStatue)
+		{
+			TScriptInterface<IInteractInterface> Interface = TScriptInterface<IInteractInterface>(StoneStatue);
+			if (Interface)
+			{
+				StoneStatue->Interact();
+				UE_LOG(LogTemp, Warning, TEXT("StoneStatueInBook"));
+			}
+		}
+	}
+	
+}
+
+void ABook::PlayPullOutAnimation()
+{
+	TObjectPtr<APhase> Character = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (Character)
+	{
+		TObjectPtr<UAnimInstance> AnimInstance = Character->GetMesh()->GetAnimInstance();
+		if (AnimInstance && CharacterAnim)
+		{
+			AnimInstance->Montage_Play(CharacterAnim);
+			UE_LOG(LogTemp, Warning, TEXT("CharacterAnim"));
+		}
+	}
+}
+
+void ABook::Interact()
+{
+	if (!IsRotate) 
+	{
+		Timeline.PlayFromStart();
+
+		PlayPullOutAnimation();
+		
+		GetWorld()->GetTimerManager().SetTimer(BookTimer, [this] {StoneStatueInteract();}, WaitTime, false);
+
+		IsRotate = true;
+	}
+
+	
+
+}
+
+void ABook::BookRotate(float DeltaTime)
+{
+	FRotator Rotation(BookRotation * DeltaTime ,0.f, 0.f );
+	FVector Location(GetActorLocation().X , GetActorLocation().Y + BookLocation * DeltaTime, GetActorLocation().Z);
+
+	SetActorRelativeRotation(Rotation);
+	SetActorRelativeLocation(Location);
+}
+
+void ABook::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	Timeline.TickTimeline(DeltaTime);
+}
+
+

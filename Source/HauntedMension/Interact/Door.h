@@ -40,11 +40,11 @@ private:
 		TObjectPtr<UStaticMeshComponent> DoorFrame;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UCurveFloat> DoorCurveFloat;
+	TObjectPtr<UCurveFloat> CurveFloat;
 
-	FTimeline DoorTimeline;
+	FTimeline Timeline;
 
-	FOnTimelineFloat DoorTimelineUpdate;
+	FOnTimelineFloat TimelineUpdate;
 
 	UPROPERTY(EditAnywhere)
 	float DoorRotateValue = 120.f;
@@ -54,5 +54,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		bool IsOpened = false;
+
+	UPROPERTY(VisibleAnywhere)
+		bool SetOpen = false;
 
 };

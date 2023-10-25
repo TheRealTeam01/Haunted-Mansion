@@ -5,6 +5,8 @@
 #include "HauntedMension/Interfaces/InteractInterface.h"
 #include "Interact.generated.h"
 
+class USceneComponent;
+
 UCLASS()
 class HAUNTEDMENSION_API AInteract : public AActor, public IInteractInterface
 {
@@ -22,6 +24,9 @@ public:
 protected:
 
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere)
+		USceneComponent* Root;
 
 	UPROPERTY(EditAnywhere)
 		UStaticMeshComponent* Mesh;
