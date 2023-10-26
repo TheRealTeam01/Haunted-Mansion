@@ -7,6 +7,11 @@ void AStoneStatue::Interact()
 	{
 		Timeline.PlayFromStart();
 		
+		if (MoveSound)
+		{
+			UGameplayStatics::SpawnSoundAtLocation(this, MoveSound, GetActorLocation(), GetActorRotation());
+		}
+
 		IsMove = true;
 		
 		UE_LOG(LogTemp, Warning, TEXT("StoneStatue"));
@@ -16,11 +21,6 @@ void AStoneStatue::Interact()
 void AStoneStatue::StatueMove(float DeltaTime)
 {
 	FVector Location(GetActorLocation().X, GetActorLocation().Y + MoveValue * DeltaTime, GetActorLocation().Z);
-
-	if (MoveSound)
-	{
-		UGameplayStatics::SpawnSoundAtLocation(this, MoveSound, GetActorLocation(), GetActorRotation());
-	}
 
 	SetActorRelativeLocation(Location);
 

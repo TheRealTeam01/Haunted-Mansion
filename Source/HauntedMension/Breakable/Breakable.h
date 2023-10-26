@@ -32,7 +32,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UCapsuleComponent> Capsule;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 	
 	UPROPERTY(EditAnywhere)

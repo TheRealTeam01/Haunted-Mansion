@@ -9,6 +9,7 @@
 
 class UAnimMontage;
 class UCurveFloat;
+class USoundBase;
 
 /**
  * 
@@ -37,6 +38,12 @@ protected:
 
 	void PlayPullOutAnimation();
 
+	/*UFUNCTION()
+	void SetPhysics();
+
+	UFUNCTION()
+		virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);*/
+
 private:
 
 	FTimeline Timeline;
@@ -44,6 +51,8 @@ private:
 	FOnTimelineFloat TimelineUpdate;
 
 	FTimerHandle BookTimer;
+
+	/*FOnTimelineEvent TimelineFinish;*/
 
 	UPROPERTY(EditAnywhere)
 		float BookRotation = 120.f;
@@ -56,6 +65,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		TObjectPtr<UAnimMontage> CharacterAnim;
+
+	/*UPROPERTY(EditAnywhere)
+		TObjectPtr<USoundBase> FallSound;*/
 
 	UPROPERTY(VisibleAnywhere)
 		bool IsRotate = false;

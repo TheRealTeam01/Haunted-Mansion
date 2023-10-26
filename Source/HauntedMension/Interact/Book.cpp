@@ -22,7 +22,11 @@ void ABook::BeginPlay()
 	{
 		TimelineUpdate.BindDynamic(this, &ABook::BookRotate);
 		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate);
+		/*TimelineFinish.BindUFunction(this, FName("SetPhysics"));
+		Timeline.SetTimelineFinishedFunc(TimelineFinish);*/
 	}
+
+	/*Mesh->OnComponentHit.AddDynamic(this, &ABook::OnHit);*/
 }
 
 	
@@ -61,6 +65,19 @@ void ABook::PlayPullOutAnimation()
 	}
 }
 
+//void ABook::SetPhysics()
+//{
+//	Mesh->SetSimulatePhysics(true);
+//}
+//
+//void ABook::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+//{
+//	if (FallSound)
+//	{	
+//		UGameplayStatics::SpawnSoundAtLocation(this, FallSound, GetActorLocation(), GetActorRotation());
+//	}
+//}
+
 void ABook::Interact()
 {
 	if (!IsRotate) 
@@ -80,10 +97,10 @@ void ABook::Interact()
 
 void ABook::BookRotate(float DeltaTime)
 {
-	FRotator Rotation(BookRotation * DeltaTime ,0.f, 0.f );
-	FVector Location(GetActorLocation().X , GetActorLocation().Y + BookLocation * DeltaTime, GetActorLocation().Z);
+	/*FRotator Rotation(BookRotation * DeltaTime ,0.f, 0.f );*/
+	FVector Location(GetActorLocation().X + BookLocation * DeltaTime, GetActorLocation().Y, GetActorLocation().Z);
 
-	SetActorRelativeRotation(Rotation);
+	//SetActorRelativeRotation(Rotation);
 	SetActorRelativeLocation(Location);
 }
 

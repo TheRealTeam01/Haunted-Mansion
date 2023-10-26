@@ -45,7 +45,7 @@ void ABreakable::GetHit_Implementation(const FVector& ImpactPoint)
 	
 	SetLifeSpan(LifeSpan);
 
-	Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	/*Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
 }
 
 void ABreakable::SpawnItem()
