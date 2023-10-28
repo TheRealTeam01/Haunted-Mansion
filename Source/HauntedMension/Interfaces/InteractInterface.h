@@ -16,5 +16,5 @@ class HAUNTEDMENSION_API IInteractInterface
 
 public:
 	
-
+	virtual void Interact() =0;
 };

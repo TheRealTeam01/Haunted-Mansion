@@ -5,14 +5,14 @@
 #include "HauntedMension/Character/Phase.h"
 #include "Components/WidgetComponent.h"
 #include "HauntedMension/Character/Phase.h"
+#include "Kismet/GameplayStatics.h"
 
 AInteract::AInteract()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	SetRootComponent(Mesh);
-
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(GetRootComponent());
 	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Mesh->SetRenderCustomDepth(false);
@@ -59,6 +59,11 @@ void AInteract::OnEndSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		Character->SetOverlappingInteractitem(nullptr);
 		ShowInteractWidget(false);
 	}
+}
+
+void AInteract::Interact()
+{
+
 }
 
 void AInteract::EnableCustomDepth(bool Enable)

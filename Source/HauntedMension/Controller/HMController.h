@@ -20,5 +20,7 @@ public:
 
 	void SetHUDCarriedAmmo(int32 CarriedAmmo);
 
-	void SetHUDHealth(float Health);
+	void SetHUDHealth(float HealthPercent);
+
+	void SetHUDStamina(float StaminaPercent);
 };

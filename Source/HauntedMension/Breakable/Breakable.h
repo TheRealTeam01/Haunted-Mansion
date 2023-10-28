@@ -7,12 +7,17 @@
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "Breakable.generated.h"
 
+class UCapsuleComponent;
+class UGeometryCollectionComponent;
+class USoundBase;
+class AInteract;
 UCLASS()
 class HAUNTEDMENSION_API ABreakable : public AActor, public IHitInterface
 {
 	GENERATED_BODY()
 	
 public:	
+
 	ABreakable();
 
 	virtual void Tick(float DeltaTime) override;
@@ -20,17 +25,24 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UCapsuleComponent* Capsule;
-	
-	UPROPERTY(EditAnywhere)
-	class UGeometryCollectionComponent* GeometryCollection;
-
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
-	UPROPERTY(EditAnywhere)
-		class USoundBase* FractionSound;
+	virtual void SpawnItem();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UCapsuleComponent> Capsule;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USoundBase> FractionSound;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AInteract> SpawnItems;
+
+	UPROPERTY(EditAnywhere)
+	float LifeSpan = 1.f;
 private:
 
 };

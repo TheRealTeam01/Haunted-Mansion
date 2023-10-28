@@ -5,7 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h" 
 #include "InputActionValue.h"
-#include "HauntedMension/PickUp/FlashLight.h"
+#include "HauntedMension/Interact/PickUp/FlashLight.h"
 #include "HauntedMension/Interact/Interact.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/PlayerController.h"
@@ -18,8 +18,12 @@
 #include "Blueprint/UserWidget.h"
 #include "HauntedMension/Controller/HMController.h"
 #include "Kismet/GamePlayStatics.h"
-#include "HauntedMension/PickUp/AmmoPickUp.h"
+#include "HauntedMension/Interact/PickUp/AmmoPickUp.h"
 #include "HauntedMension/Attribute/AttributeComponent.h"
+#include "HauntedMension/Interact/Door.h"
+#include "HauntedMension/Interact/PickUp/DoorKey.h"
+#include "HauntedMension/Interfaces/InteractInterface.h"
+#include "Components/TextBlock.h"
 
 APhase::APhase()
 {
@@ -29,6 +33,7 @@ APhase::APhase()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetGenerateOverlapEvents(true);
+	
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetMesh());
@@ -86,10 +91,23 @@ void APhase::BeginPlay()
 		}
 	}
 
+	InitializeComponent();
+
+}
+
+void APhase::InitializeComponent()
+{
+	
+	HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+	if (HMController)
+	{
+		HMController->SetHUDHealth(StatComponent->GetHealthPercent());
+		HMController->SetHUDStamina(StatComponent->GetStaminaPercent());
+	}
+
 	UpdateHUDAmmo();
 
 	UpdateHUDCarriedAmmo();
-
 }
 
 void APhase::Move(const FInputActionValue& Value)
@@ -141,7 +159,7 @@ void APhase::RunReleased()
 void APhase::HideMeshifCameraClose()
 {
 	float DistanceToCamera = (Camera->GetComponentLocation() - GetActorLocation()).Size();
-	//UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);
+	/*UE_LOG(LogTemp, Warning, TEXT("Distance : %f"), DistanceToCamera);*/
 	if (DistanceToCamera < CameraDistanceThresHold)
 	{
 		GetMesh()->SetVisibility(false);
@@ -152,22 +170,42 @@ void APhase::HideMeshifCameraClose()
 	}
 }
 
+void APhase::SetOverlappingInteractitem(AInteract* Interact)
+{
+	InteractItem = TScriptInterface<IInteractInterface>(Interact);
+
+}
+
 void APhase::InteractPressed()
 {
 	if (ActionState != EActionState::EAS_Unoccupied) return;
 
-	if (FlashLight)
+	if(InteractItem)
+	{
+		InteractItem->Interact();
+	}
+
+	/*if (FlashLight)
 	{
 		PlayPickUpMontage();
 		EquippedFlashLight = FlashLight;
 		FlashLightState = EFlashLightState::EFS_EquippedFlashLight;
-		FlashLight->Equip(GetMesh(), this, this);
 	}
 
 	if (AmmoPickup && DefaultWeapon) 
 	{
+		PlayPickUpMontage();
 		DefaultWeapon->PickUpAmmo(DefaultWeapon->AmmountToPickUp);
+		AmmoPickup->Destroy();
 	}
+
+	if (Key)
+	{
+		PlayPickUpMontage();
+		Key->Destroy();
+		KeyState = EKeyState::EKS_EquippedKey;
+	}*/
+
 }
 
 void APhase::AimPressed()
@@ -180,7 +218,7 @@ void APhase::AimPressed()
 	PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
 	if (PlayerController)
 	{
-		TObjectPtr<AHMHUD> HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
+		HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
 		if (HMHUD)
 		{
 			HMOverlay = HMHUD->GetHMOverlay();
@@ -202,7 +240,7 @@ void APhase::AimReleased()
 	 PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
 	 if (PlayerController)
 	 {
-		 TObjectPtr<AHMHUD> HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
+		 HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
 		 if (HMHUD)
 		 {
 			 HMOverlay = HMHUD->GetHMOverlay();
@@ -325,7 +363,7 @@ void APhase::FirePressed()
 		PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
 		if (PlayerController)
 		{
-			TObjectPtr<AHMHUD> HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
+			HMHUD = Cast<AHMHUD>(PlayerController->GetHUD<AHMHUD>());
 			if (HMHUD)
 			{
 				HMOverlay = HMHUD->GetHMOverlay();
@@ -335,6 +373,7 @@ void APhase::FirePressed()
 					{
 						UGameplayStatics::PlaySoundAtLocation(DefaultWeapon, NoAmmoSound, DefaultWeapon->GetActorLocation());
 					}
+					HMOverlay->BlinkText->SetText(FText::FromString("Not Enough Ammo"));
 					HMOverlay->PlayBlink();
 
 				}
@@ -406,22 +445,23 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 	FVector Forward = GetActorForwardVector();
 	FVector ToTarget = (ImpactPoint - GetActorLocation()).GetSafeNormal();
 	double CosTheta = FVector::DotProduct(Forward, ToTarget);
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
-	{
-		if (CosTheta >= 0)
+	
+	
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
 		{
-			AnimInstance->Montage_Play(HitMontage);
-			AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
+			if (CosTheta >= 0)
+			{
+				AnimInstance->Montage_Play(HitMontage);
+				AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
+			}
+			else
+			{
+				AnimInstance->Montage_Play(HitMontage);
+				AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
+			}
 		}
-		else
-		{
-			AnimInstance->Montage_Play(HitMontage);
-			AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
-		}
-	}
-
+	
 	/*HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
 	if (HMController)
 	{
@@ -485,7 +525,7 @@ void APhase::AttachToFlashLight()
 void APhase::AimOffset(float DeltaTime)
 {
 	
-	float Speed = CalculateSpeed();
+	Speed = CalculateSpeed();
 	bool IsFalling = CharacterMovement->IsFalling();
 	
 	if (Speed == 0.f && !IsFalling)
@@ -557,7 +597,7 @@ float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
 	if (HMController)
 	{
-		HMController->SetHUDHealth(StatComponent->GetHealth());
+		HMController->SetHUDHealth(StatComponent->GetHealthPercent());
 	}
 	if (HitSound)
 	{
@@ -593,15 +633,6 @@ void APhase::TurningInPlace(float DeltaTime)
 	}
 }
 
-void APhase::SetOverlappingInteractitem(AInteract* Interact)
-{
-	InteractItem = Interact;
-
-	FlashLight = Cast<AFlashLight>(InteractItem);
-
-	AmmoPickup = Cast<AAmmoPickUp>(InteractItem);
-}
-
 void APhase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -613,7 +644,7 @@ void APhase::Tick(float DeltaTime)
 	AimOffset(DeltaTime);
 
 	InterpFOV(DeltaTime);
-	
+
 	FHitResult TraceHitResult;
 
 	TraceCrossHair(TraceHitResult);
@@ -621,6 +652,24 @@ void APhase::Tick(float DeltaTime)
 
 	if (DefaultWeapon->GetAmmo() == 0) ReloadPressed();
 
+	if (CalculateSpeed() > 150.f)
+	{
+		HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+		if(HMController && StatComponent)
+		{
+			StatComponent->SpendStamina(DeltaTime);
+			HMController->SetHUDStamina(StatComponent->GetStaminaPercent());
+		}
+	}
+	else 
+	{
+		HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+		if (HMController && StatComponent)
+		{
+			StatComponent->RegenStamina(DeltaTime);
+			HMController->SetHUDStamina(StatComponent->GetStaminaPercent());
+		}
+	}
 }
 
 void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

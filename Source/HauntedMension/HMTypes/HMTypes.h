@@ -19,6 +19,13 @@ enum class EActionState : uint8
 };
 
 UENUM(BlueprintType)
+enum class EKeyState : uint8
+{
+	EKS_UnEquippedKey UMETA(DisplayName = "Unequipped Key"),
+	EKS_EquippedKey UMETA(DisplayName = "Equipped Key")
+};
+
+UENUM(BlueprintType)
 enum class ESevarogState : uint8
 {
 	E_Undefine	UMETA(DisplayName = "Sevarog Undefine"),

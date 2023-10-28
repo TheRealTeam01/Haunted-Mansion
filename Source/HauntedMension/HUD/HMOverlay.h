@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "HMOverlay.generated.h"
 
+class UProgressBar;
+
 /**
  * 
  */
@@ -41,7 +43,7 @@ public:
 		class UTextBlock* CarriedAmmoText;
 	
 	UPROPERTY(meta = (BindWidget))
-		class UTextBlock* NoAmmoText;
+		class UTextBlock* BlinkText;
 
 	UPROPERTY(meta = (BindWidgetAnim), transient)
 		class UWidgetAnimation* Blink;
@@ -49,11 +51,20 @@ public:
 	UPROPERTY(meta = (BindWidgetAnim), transient)
 		UWidgetAnimation* BloodSplatterAnim;
 	
+	UPROPERTY(meta = (BindWidget))
+		UProgressBar* HPBar;
+
+	UPROPERTY(meta = (BindWidget))
+		UProgressBar* StaminaBar;
+
 	void ShowCrossHair();
 
 	void HideCrossHair();
 
 	void PlayBlink();
 
+	void SetBlinkText(FText Text);
+
 	void ShowBloodSplatter(float Health);
+
 };

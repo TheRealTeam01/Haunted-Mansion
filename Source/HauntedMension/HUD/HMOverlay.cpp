@@ -26,16 +26,22 @@ void UHMOverlay::HideCrossHair()
 
 void UHMOverlay::PlayBlink()
 {
-	if (Blink && NoAmmoText)
+	if (Blink && BlinkText)
 	{
-		NoAmmoText->SetVisibility(ESlateVisibility::Visible);
+		
+		BlinkText->SetVisibility(ESlateVisibility::Visible);
 		PlayAnimation(Blink);
 	}
 }
 
+void UHMOverlay::SetBlinkText(FText Text)
+{
+	BlinkText->SetText(Text);
+}
+
 void UHMOverlay::ShowBloodSplatter(float Health)
 {
-	if (Health <= 80.f && BloodSplatterAnim)
+	if (Health < 100.f && BloodSplatterAnim)
 	{
 		BloodSplatter->SetVisibility(ESlateVisibility::Visible);
 		PlayAnimation(BloodSplatterAnim, 0.f, 1);
