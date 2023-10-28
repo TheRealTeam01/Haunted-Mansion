@@ -48,5 +48,7 @@ protected:
 private:
 
 
+public:
 
+	FORCEINLINE UStaticMeshComponent* GetInteractMesh() { return Mesh; }
 };

@@ -111,12 +111,18 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 		EKeyState KeyState = EKeyState::EKS_UnEquippedKey;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		EDeathState DeathState = EDeathState::EDS_Alive;
 
 	void AimOffset(float DeltaTime);
 
 	float CalculateSpeed();
 
 	void TurningInPlace(float DeltaTime);
+
+	UFUNCTION(BlueprintCallable)
+	void FallEquipped();
 
 	UPROPERTY(VisibleAnywhere)
 	ETurnInPlace TurnInPlace;
@@ -191,6 +197,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		UAnimMontage* HitMontage;
+	
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* DeathMontage;
 
 	UPROPERTY(EditAnywhere)
 		class USoundBase* NoAmmoSound;

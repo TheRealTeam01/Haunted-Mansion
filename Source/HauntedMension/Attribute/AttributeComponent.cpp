@@ -39,6 +39,11 @@ void UAttributeComponent::SpendStamina(float DeltaTime)
 	Stamina = FMath::Clamp(Stamina - RegenStaminaCost * DeltaTime, 0.f, MaxStamina);
 }
 
+bool UAttributeComponent::IsDead()
+{
+	return Health == 0.f ? true : false;
+}
+
 void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);

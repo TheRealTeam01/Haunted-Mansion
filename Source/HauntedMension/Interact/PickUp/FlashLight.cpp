@@ -11,7 +11,6 @@ AFlashLight::AFlashLight()
 
 	Light = CreateDefaultSubobject<USpotLightComponent>(TEXT("Light"));
 	Light->SetupAttachment(Mesh, FName("FlashSocket"));
-	
 }
 
 void AFlashLight::BeginPlay()

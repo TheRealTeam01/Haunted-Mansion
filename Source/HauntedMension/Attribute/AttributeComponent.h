@@ -51,4 +51,5 @@ public:
 
 	void SpendStamina(float DeltaTime);
 
+	bool IsDead();
 };

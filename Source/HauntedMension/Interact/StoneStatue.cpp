@@ -6,7 +6,8 @@ void AStoneStatue::Interact()
 	if (!IsMove)
 	{
 		Timeline.PlayFromStart();
-		
+		StatueCameraShake();
+
 		if (MoveSound)
 		{
 			UGameplayStatics::SpawnSoundAtLocation(this, MoveSound, GetActorLocation(), GetActorRotation());
@@ -31,6 +32,14 @@ void AStoneStatue::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Timeline.TickTimeline(DeltaTime);
+}
+
+void AStoneStatue::StatueCameraShake()
+{
+	if (CameraShake)
+	{
+		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(CameraShake);
+	}
 }
 
 void AStoneStatue::BeginPlay()

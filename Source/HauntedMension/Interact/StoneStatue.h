@@ -25,6 +25,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	void StatueCameraShake();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -46,4 +48,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		bool IsMove = false;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> CameraShake;
 };

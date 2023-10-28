@@ -22,8 +22,8 @@ void ABook::BeginPlay()
 	{
 		TimelineUpdate.BindDynamic(this, &ABook::BookRotate);
 		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate);
-		/*TimelineFinish.BindUFunction(this, FName("SetPhysics"));
-		Timeline.SetTimelineFinishedFunc(TimelineFinish);*/
+		TimelineFinish.BindUFunction(this, FName("SetPhysics"));
+		Timeline.SetTimelineFinishedFunc(TimelineFinish);
 	}
 
 	/*Mesh->OnComponentHit.AddDynamic(this, &ABook::OnHit);*/
@@ -65,11 +65,11 @@ void ABook::PlayPullOutAnimation()
 	}
 }
 
-//void ABook::SetPhysics()
-//{
-//	Mesh->SetSimulatePhysics(true);
-//}
-//
+void ABook::SetPhysics()
+{
+	Mesh->SetSimulatePhysics(true);
+}
+
 //void ABook::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 //{
 //	if (FallSound)

@@ -446,21 +446,35 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 	FVector ToTarget = (ImpactPoint - GetActorLocation()).GetSafeNormal();
 	double CosTheta = FVector::DotProduct(Forward, ToTarget);
 	
-	
+	if (StatComponent)
+	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
+		
+		if (StatComponent->IsDead() && DeathMontage)
 		{
-			if (CosTheta >= 0)
+			AnimInstance->Montage_Play(DeathMontage);
+			DeathState = EDeathState::EDS_Death;
+			GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+		}
+		else
+		{
+			if (AnimInstance && HitMontage)
 			{
-				AnimInstance->Montage_Play(HitMontage);
-				AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
-			}
-			else
-			{
-				AnimInstance->Montage_Play(HitMontage);
-				AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
+				if (CosTheta >= 0)
+				{
+					AnimInstance->Montage_Play(HitMontage);
+					AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
+				}
+				else
+				{
+					AnimInstance->Montage_Play(HitMontage);
+					AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
+				}
 			}
 		}
+	}
+
 	
 	/*HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
 	if (HMController)
@@ -552,6 +566,22 @@ void APhase::AimOffset(float DeltaTime)
 	}
 
 	AO_Pitch = GetBaseAimRotation().GetNormalized().Pitch;
+}
+
+void APhase::FallEquipped()
+{
+	if (EquippedFlashLight && DefaultWeapon)
+	{
+		FDetachmentTransformRules DetachRule(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, false);
+		EquippedFlashLight->DetachFromActor(DetachRule);
+		EquippedFlashLight->GetInteractMesh()->SetSimulatePhysics(true);
+		FlashLightState = EFlashLightState::EFS_UnEquippedFlashLight;
+		EquippedFlashLight = nullptr;
+
+		DefaultWeapon->DetachFromActor(DetachRule);
+		DefaultWeapon->GetWeaponMesh()->SetSimulatePhysics(true);
+		DefaultWeapon = nullptr;
+	}
 }
 
 float APhase::CalculateSpeed()
@@ -650,7 +680,7 @@ void APhase::Tick(float DeltaTime)
 	TraceCrossHair(TraceHitResult);
 	HitTarget = TraceHitResult.ImpactPoint;
 
-	if (DefaultWeapon->GetAmmo() == 0) ReloadPressed();
+	if (DefaultWeapon && DefaultWeapon->GetAmmo() == 0) ReloadPressed();
 
 	if (CalculateSpeed() > 150.f)
 	{

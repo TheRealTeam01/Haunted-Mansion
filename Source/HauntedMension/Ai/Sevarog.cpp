@@ -128,7 +128,7 @@ void ASevarog::AttackCheck()
 		GetActorLocation(),
 		GetActorLocation() + GetActorForwardVector() * AttackDist,
 		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel2,
+		ECollisionChannel::ECC_Visibility,
 		FCollisionShape::MakeSphere(AttackRadius),
 		Params
 	);
@@ -152,6 +152,12 @@ void ASevarog::AttackCheck()
 	if (bResult && HitResult.GetActor()) 
 	{
 		UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.GetActor()->GetName());
+		UGameplayStatics::ApplyDamage(HitResult.GetActor(), 30.f, GetInstigatorController(), this, UDamageType::StaticClass());
+		TScriptInterface Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
+		if (Interface)
+		{
+			Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
+		}
 		//FDamageEvent DamageEvent;
 	}
 }

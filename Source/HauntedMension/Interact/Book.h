@@ -38,11 +38,11 @@ protected:
 
 	void PlayPullOutAnimation();
 
-	/*UFUNCTION()
+	UFUNCTION()
 	void SetPhysics();
 
-	UFUNCTION()
-		virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);*/
+	//UFUNCTION()
+	//	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
 
@@ -52,7 +52,7 @@ private:
 
 	FTimerHandle BookTimer;
 
-	/*FOnTimelineEvent TimelineFinish;*/
+	FOnTimelineEvent TimelineFinish;
 
 	UPROPERTY(EditAnywhere)
 		float BookRotation = 120.f;

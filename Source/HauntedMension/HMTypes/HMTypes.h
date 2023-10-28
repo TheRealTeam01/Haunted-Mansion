@@ -26,6 +26,12 @@ enum class EKeyState : uint8
 };
 
 UENUM(BlueprintType)
+enum class EDeathState : uint8
+{
+	EDS_Alive UMETA(DisplayName = "Alive"),
+	EDS_Death UMETA(DisplayName = "Death")
+};
+UENUM(BlueprintType)
 enum class ESevarogState : uint8
 {
 	E_Undefine	UMETA(DisplayName = "Sevarog Undefine"),
