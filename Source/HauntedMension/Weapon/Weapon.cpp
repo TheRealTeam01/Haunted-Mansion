@@ -55,9 +55,9 @@ void AWeapon::Fire(FVector& HitTarget)
 
 			if (HitResult.GetActor())
 			{
-				bool bHeadShot = HitResult.BoneName.ToString() == FString("head") ? true : false; // Çìµå¼¦ÀÎÁö ÆÇº° 
+				bool bHeadShot = HitResult.BoneName.ToString() == FString("head") ? true : false; // ï¿½ï¿½å¼¦ï¿½ï¿½ï¿½ï¿½ ï¿½Çºï¿½ 
 
-				if (bHeadShot) // Çìµå¼¦ÀÌ¶ó¸é
+				if (bHeadShot) // ï¿½ï¿½å¼¦ï¿½Ì¶ï¿½ï¿½
 				{
 					UGameplayStatics::ApplyDamage(
 						HitResult.GetActor(),
@@ -67,7 +67,7 @@ void AWeapon::Fire(FVector& HitTarget)
 						UDamageType::StaticClass()
 					);
 				}
-				else // ¹Ùµð¼¦ÀÌ¶ó¸é
+				else // ï¿½Ùµï¿½ï¿½Ì¶ï¿½ï¿½
 				{
 					UGameplayStatics::ApplyDamage(
 						HitResult.GetActor(),
@@ -80,7 +80,7 @@ void AWeapon::Fire(FVector& HitTarget)
 				IHitInterface* HitInterface = Cast<IHitInterface>(HitResult.GetActor());
 				if (HitInterface)
 				{
-					HitInterface->Execute_GetHit(HitResult.GetActor(),HitResult.ImpactPoint); //Excute_ - ImplementaionÀ¸·Î ¼±¾ðÇÑ ÀÎÅÍÆäÀÌ½º ÇÔ¼ö È£Ãâ(È£ÃâÇÒ ´ë»ó, È£Ãâ ÇÔ¼ö)
+					HitInterface->Execute_GetHit(HitResult.GetActor(),HitResult.ImpactPoint); //Excute_ - Implementaionï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½(È£ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½, È£ï¿½ï¿½ ï¿½Ô¼ï¿½)
 					CreateFields(HitResult.ImpactPoint);
 				}
 
@@ -94,14 +94,14 @@ void AWeapon::Fire(FVector& HitTarget)
 		}
 	}
 
-	SpendAmmo(); // ÃÑ¾Ë ¼Òºñ
+	SpendAmmo(); // ï¿½Ñ¾ï¿½ ï¿½Òºï¿½
 }
 
 void AWeapon::UpdateAmmos()
 {
-	int32 RoomInMag = MaxAmmo - Ammo; // ÀçÀåÀü ÇÒ ¼ö ÀÖ´Â ¼ö.
+	int32 RoomInMag = MaxAmmo - Ammo; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½.
 
-	int32 Least = FMath::Min(RoomInMag, CarriedAmmo); //ÀçÀåÀü ÇÒ ¼ö ÀÖ´Â ¼öº¸´Ù CarriedAmmo°¡ ÀÛ´Ù¸é ¸ðµÎ ¾¸.
+	int32 Least = FMath::Min(RoomInMag, CarriedAmmo); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ CarriedAmmoï¿½ï¿½ ï¿½Û´Ù¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½.
 
 	int32 AmountToReload = FMath::Clamp(RoomInMag, 0, Least);
 
