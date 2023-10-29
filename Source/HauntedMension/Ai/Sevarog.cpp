@@ -14,6 +14,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Attribute/AttributeComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASevarog::ASevarog()
@@ -111,8 +112,7 @@ void ASevarog::Yaw(float Value)
 
 void ASevarog::Attack()
 {
-	if (IsAttacking)
-		return;
+	if (IsAttacking) return;
 
 	AnimInstance->PlayAttackMontage();
 	/*GetCharacterMovement()->MaxWalkSpeed = 1.0f;*/
@@ -207,8 +207,6 @@ void ASevarog::Patrol()
 	FNavLocation RandomLocation;
 	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) 
 	{
-		if (DistSize < SearchRange)
-			UAIBlueprintHelperLibrary::Moving
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
 	}
 	SearchInterval = 5.0f;
