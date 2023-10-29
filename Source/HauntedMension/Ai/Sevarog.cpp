@@ -12,8 +12,7 @@
 #include "Math/Vector.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "HauntedMension/Ai/SevarogActorComponent.h"
-#include "HauntedMension/Attribute/AttributeComponent.h"
+
 
 // Sets default values
 ASevarog::ASevarog()
@@ -28,7 +27,8 @@ ASevarog::ASevarog()
 	{
 		GetMesh()->SetSkeletalMesh(SM.Object);
 	}
-	Stat = CreateDefaultSubobject<UAttributeComponent>("Attributes");
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -38,8 +38,7 @@ void ASevarog::BeginPlay()
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	
 	EnemyController = Cast<AAIController>(GetController());
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	
+	/*GetCharacterMovement()->MaxWalkSpeed = 300.f;*/
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
 
@@ -113,7 +112,7 @@ void ASevarog::Attack()
 		return;
 
 	AnimInstance->PlayAttackMontage();
-	GetCharacterMovement()->MaxWalkSpeed = 1.0f;
+	/*GetCharacterMovement()->MaxWalkSpeed = 1.0f;*/
 
 	//State = ESevarogState::E_Idle;
 	IsAttacking = true;
@@ -139,20 +138,42 @@ void ASevarog::AttackCheck()
 		Params
 	);
 
-	FColor DrawColor;
-	FVector Vec = GetActorForwardVector() * AttackDist;
-	FVector Center = GetActorLocation() + Vec * 0.5f;
-	FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
-	float HalfHeight = AttackDist * 0.5f + AttackRadius;
+	//무기 클래스라 가정
+	//TArray<AActor*> IgnoreToActors;
+	//IgnoreToActors.AddUnique(GetOwner());
 
-	// 공격 이벤트가 실행되는 지점을 알기 위한 DrawShape
-	if (bResult)
-		DrawColor = FColor::Green;
-	else
-		DrawColor = FColor::Red;
+	//FHitResult BoxResult;
 
-	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius,
-		Rotation, DrawColor, false, 2.0f);
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision); //평소에, 공격 끝났을 때
+
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // 공격할 떄
+
+	//
+	//if (BoxResult.GetActor())
+	//{
+	//	if(BoxResult.BoneName.ToString() == FString("head"))
+	//	UGameplayStatics::ApplyDamage(BoxResult.GetActor(), 50.f, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
+	//	IHitInterface* Interface = Cast<IHitInterface>(BoxResult.GetActor());
+	//	if (Interface)
+	//	{
+	//		Interface->Execute_GetHit(BoxResult.GetActor(), BoxResult.BoneName);
+	//	}
+	//}
+
+	//FColor DrawColor;
+	//FVector Vec = GetActorForwardVector() * AttackDist;
+	//FVector Center = GetActorLocation() + Vec * 0.5f;
+	//FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
+	//float HalfHeight = AttackDist * 0.5f + AttackRadius;
+
+	//// 공격 이벤트가 실행되는 지점을 알기 위한 DrawShape
+	//if (bResult)
+	//	DrawColor = FColor::Green;
+	//else
+	//	DrawColor = FColor::Red;
+
+	//DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius,
+	//	Rotation, DrawColor, false, 2.0f);
 
 	// 맞은게 확실하다면
 	if (bResult && HitResult.GetActor()) 
@@ -192,7 +213,7 @@ void ASevarog::Idle()
 		Idle_Patrol();
 	}
 
-	else if (VectorSize < SearchRange) 
+	if (VectorSize < SearchRange) 
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
 		Idle_Chase();
@@ -293,32 +314,6 @@ void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 
 void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	FVector Forward = GetActorForwardVector();
-	FVector ToTarget = (ImpactPoint - GetActorLocation()).GetSafeNormal();
-	UE_LOG(LogTemp, Warning, TEXT("Sevarog GetHit Implmentation"));
-
-	if (Stat) 
-	{
-		UAnimInstance* AnimIns = GetMesh()->GetAnimInstance();
-		if (Stat->IsDead() && DeathMontage)
-		{
-			AnimIns->Montage_Play(DeathMontage);
-			State = ESevarogState::E_Die;
-			GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
-			GetCharacterMovement()->bOrientRotationToMovement = false;
-		}
-		else 
-		{
-			if (AnimIns && HitMontage)
-			{
-				AnimIns->Montage_Play(HitMontage);
-			}
-		}
-	}
-}
-
-float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	return 0.0f;
+	
 }
 

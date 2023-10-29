@@ -37,7 +37,7 @@ void AWeapon::Fire(FVector& HitTarget)
 			FVector TraceStart = MuzzleFlashTransform.GetLocation();
 			FVector TraceEnd = TraceStart + (HitTarget - TraceStart) * 1.25f;
 
-			DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 5.f, 0U, 2.f);
+			/*DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 5.f, 0U, 2.f);*/
 
 			FHitResult HitResult;
 			World->LineTraceSingleByChannel(

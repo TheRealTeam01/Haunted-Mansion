@@ -23,4 +23,7 @@ public:
 	void SetHUDHealth(float HealthPercent);
 
 	void SetHUDStamina(float StaminaPercent);
+
+	void SetHUDDie();
+
 };

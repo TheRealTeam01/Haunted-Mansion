@@ -2,6 +2,7 @@
 #include "HMController.h"
 #include "HauntedMension/HUD/HMOverlay.h"
 #include "HauntedMension/HUD/HMHUD.h"
+#include "HauntedMension/HUD/HMDeath.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 
@@ -55,7 +56,7 @@ void AHMController::SetHUDHealth(float HealthPercent)
 void AHMController::SetHUDStamina(float StaminaPercent)
 {
 	AHMHUD* HMHUD = Cast<AHMHUD>(GetHUD());
-
+	
 	bool bValidHUD = HMHUD &&
 		HMHUD->HMOverlay &&
 		HMHUD->HMOverlay->StaminaBar;
@@ -63,5 +64,26 @@ void AHMController::SetHUDStamina(float StaminaPercent)
 	if (bValidHUD)
 	{
 		HMHUD->HMOverlay->StaminaBar->SetPercent(StaminaPercent);
+	}
+}
+
+void AHMController::SetHUDDie()
+{
+	AHMHUD* HMHUD = Cast<AHMHUD>(GetHUD());
+
+	bool bValidHUD = HMHUD &&
+		HMHUD->HMDeath &&
+		HMHUD->HMDeath->DeathText &&
+		HMHUD->HMDeath->BloodSplatter &&
+		HMHUD->HMDeath->DeathAnim;
+
+	if (bValidHUD)
+	{
+		HMHUD->HMOverlay->RemoveFromParent();
+		FInputModeUIOnly InputMode;
+		SetInputMode(InputMode);
+		SetShowMouseCursor(true);
+		HMHUD->HMDeath->SetVisibility(ESlateVisibility::Visible);
+		HMHUD->HMDeath->PlayDeathAnim();
 	}
 }
