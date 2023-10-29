@@ -314,7 +314,7 @@ void APhase::PlayReloadMontage()
 	FOnMontageEnded MontageEnd;
 	MontageEnd.BindWeakLambda(this, [this](UAnimMontage* Animmontage, bool bInterrupted)
 		{
-			if (bInterrupted) // ÀåÀüÇÏ´Ù Áß°£¿¡ ÇÇ°ÝÇÒ °æ¿ì.
+			if (bInterrupted) // ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½.
 			{
 				ActionState = EActionState::EAS_Unoccupied;
 			}
@@ -358,7 +358,7 @@ void APhase::FirePressed()
 	
 	bool bEnounghAmmo = DefaultWeapon->GetAmmo() > 0 ? true : false;
 	
-	if (!bEnounghAmmo) // ÃÑ¾ËÀ» ´Ù ½èÀ» ¶§
+	if (!bEnounghAmmo) // ï¿½Ñ¾ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 	{
 		PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
 		if (PlayerController)
@@ -394,11 +394,11 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 	}
 
 	FVector2D CrossHairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-	FVector CrossHairWorldPosition; // ¿ùµå ÁÂÇ¥
-	FVector CrossHairWorldDirection; // ¹æÇâ 
+	FVector CrossHairWorldPosition; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥
+	FVector CrossHairWorldDirection; // ï¿½ï¿½ï¿½ï¿½ 
 
 
-	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld( //ÁÖ¾îÁø 2D È­¸é °ø°£ ÁÂÇ¥¸¦ 3D ¼¼°è °ø°£ ÁöÁ¡°ú ¹æÇâÀ¸·Î º¯È¯.
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld( //ï¿½Ö¾ï¿½ï¿½ï¿½ 2D È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ 3D ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯.
 		UGameplayStatics::GetPlayerController(this, 0) ,
 		CrossHairLocation, 
 		CrossHairWorldPosition,
@@ -410,7 +410,7 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 		FVector TraceStart = CrossHairWorldPosition;
 
 		float DistanceToCharacter = (GetActorLocation() - TraceStart).Size();
-		TraceStart += CrossHairWorldDirection * (DistanceToCharacter + 100.f); // Ä³¸¯ÅÍº¸´Ù ¾Õ¿¡¼­ TraceÇÏµµ·Ï.
+		TraceStart += CrossHairWorldDirection * (DistanceToCharacter + 100.f); // Ä³ï¿½ï¿½ï¿½Íºï¿½ï¿½ï¿½ ï¿½Õ¿ï¿½ï¿½ï¿½ Traceï¿½Ïµï¿½ï¿½ï¿½.
 
 		FVector TraceEnd = TraceStart + (CrossHairWorldDirection * 80000.f);
 
@@ -425,7 +425,7 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 				ECollisionChannel::ECC_Visibility
 			);
 
-			if (!TraceHitResult.bBlockingHit) // Á¶ÁØÇÏ´Â °÷ÀÌ ³Ê¹« ¸Ö¸®ÀÖÀ¸¸é ¹æÇâÀÌ ÀÌ»óÇØÁö´Â°É ¼öÁ¤.
+			if (!TraceHitResult.bBlockingHit) // ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¹ï¿½ ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½.
 			{
 				TraceHitResult.ImpactPoint = TraceEnd;
 			}
@@ -545,7 +545,7 @@ void APhase::AimOffset(float DeltaTime)
 	if (Speed == 0.f && !IsFalling)
 	{
 		bRotateRootBone = true;
-		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); // °¡¸¸È÷ ÀÖ´Â »óÅÂ¿¡¼­ ½ÃÁ¡À» ¹Ù²Ü¶§ Yaw
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²Ü¶ï¿½ Yaw
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartAimRotation, CurrentAimRotation);
 		AO_Yaw = -1.f * DeltaAimRotation.Yaw;
 
@@ -650,10 +650,10 @@ void APhase::TurningInPlace(float DeltaTime)
 		TurnInPlace = ETurnInPlace::ETIP_TurnLeft;
 	}
 
-	if (TurnInPlace != ETurnInPlace::ETIP_NotTurning) //¿òÁ÷ÀÌ°Å³ª Á¡ÇÁÀÏ¶§ 
+	if (TurnInPlace != ETurnInPlace::ETIP_NotTurning) //ï¿½ï¿½ï¿½ï¿½ï¿½Ì°Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¶ï¿½ 
 	{
 		Interp_AO_Yaw = FMath::FInterpTo(Interp_AO_Yaw, 0.f, DeltaTime, 6.f);
-		AO_Yaw = Interp_AO_Yaw; //AO_Yaw 0À¸·Î Àç¼³Á¤.
+		AO_Yaw = Interp_AO_Yaw; //AO_Yaw 0ï¿½ï¿½ï¿½ï¿½ ï¿½ç¼³ï¿½ï¿½.
 		
 		if (FMath::Abs(AO_Yaw) < 15.f)
 		{

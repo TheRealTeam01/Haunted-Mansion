@@ -66,7 +66,7 @@ protected:
 	
 	void TraceCrossHair(FHitResult& TraceHitResult);
 
-	virtual void GetHit_Implementation(const FVector& ImpactPoint) override; // ºí·çÇÁ¸°Æ®¿¡¼­µµ È£ÃâÇÒ°Å¸é ImplementaionÀ» ºÙÀÓ.
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½Ò°Å¸ï¿½ Implementaionï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 
 	void SetActionState();
 

@@ -3,3 +3,14 @@
 
 #include "HauntedMension/Ai/SevarogWeapon.h"
 
+void ASevarogWeapon::BeginPlay()
+{
+}
+
+void ASevarogWeapon::Tick(float DeltaTime)
+{
+}
+
+void ASevarogWeapon::Swing()
+{
+}

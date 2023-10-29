@@ -54,13 +54,13 @@ public:
 	void Idle_Patrol();
 	void Patrol_Chase();
 	void Chase_Attack();
-
 	// ���¸ӽ��� AIController���� ó���Ѵ�.
 	// ���ݻ��°� ����Ǹ� ��������Ʈ�� ���� �˸���.
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 private:
 	// ���� ���¸� �˱� ���� �÷���
@@ -82,6 +82,9 @@ private:
 	UPROPERTY()
 	int32 AttackIndex = 0;
 
+	UPROPERTY(VisibleAnywhere)
+	class UAttributeComponent* Stat;
+
 public:
 	UPROPERTY()
 	float UpDownValue;
@@ -100,4 +103,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	AAIController* EnemyController;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* HitMontage;
 };

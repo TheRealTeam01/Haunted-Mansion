@@ -14,4 +14,11 @@ class HAUNTEDMENSION_API ASevarogWeapon : public AWeapon
 {
 	GENERATED_BODY()
 	
+
+public:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+	void Swing();
+
+private:
 };

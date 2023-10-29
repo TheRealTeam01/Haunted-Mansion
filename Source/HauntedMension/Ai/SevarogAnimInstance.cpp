@@ -11,8 +11,16 @@ USevarogAnimInstance::USevarogAnimInstance()
 {
 	// �ִϸ��̼� ��Ÿ�ָ� �����´�.
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM(TEXT("/Script/Engine.AnimMontage'/Game/HauntedMansion/Animation/Sevarog_SkeletonMontage.Sevarog_SkeletonMontage'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HM(TEXT("/Script/Engine.AnimMontage'/Game/HauntedMansion/Animation/SevarogAnimation/AM_SevarogDeath.AM_SevarogDeath'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DM(TEXT("/Script/Engine.AnimMontage'/Game/HauntedMansion/Animation/Sevarog_SkeletonMontage.Sevarog_SkeletonMontage'"));
 	if (AM.Succeeded()) {
 		AttackMontage = AM.Object;
+	}
+	if (HM.Succeeded()) {
+		HitMontage = HM.Object;
+	}
+	if (DM.Succeeded()) {
+		DeathMontage = DM.Object;
 	}
 }
 
