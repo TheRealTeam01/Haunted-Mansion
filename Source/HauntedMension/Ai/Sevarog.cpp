@@ -38,7 +38,7 @@ void ASevarog::BeginPlay()
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	
 	EnemyController = Cast<AAIController>(GetController());
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	/*GetCharacterMovement()->MaxWalkSpeed = 300.f;*/
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
 
@@ -112,7 +112,7 @@ void ASevarog::Attack()
 		return;
 
 	AnimInstance->PlayAttackMontage();
-	GetCharacterMovement()->MaxWalkSpeed = 1.0f;
+	/*GetCharacterMovement()->MaxWalkSpeed = 1.0f;*/
 
 	//State = ESevarogState::E_Idle;
 	IsAttacking = true;
@@ -148,20 +148,6 @@ void ASevarog::AttackCheck()
 
 	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // 공격할 떄
 
-	//UKismetSystemLibrary::BoxTraceSingle(
-	//	GetWorld(),
-	//	Start,
-	//	End,
-	//	BoxSize,
-	//	GetActorRotation(),
-	//	ECC_EngineTraceChannel1,
-	//	false,
-	//	IgnoreToActors,
-	//	EDrawDebugTrace::ForDuration,
-	//	BoxResult,
-	//	true
-	//);
-
 	//
 	//if (BoxResult.GetActor())
 	//{
@@ -174,20 +160,20 @@ void ASevarog::AttackCheck()
 	//	}
 	//}
 
-	FColor DrawColor;
-	FVector Vec = GetActorForwardVector() * AttackDist;
-	FVector Center = GetActorLocation() + Vec * 0.5f;
-	FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
-	float HalfHeight = AttackDist * 0.5f + AttackRadius;
+	//FColor DrawColor;
+	//FVector Vec = GetActorForwardVector() * AttackDist;
+	//FVector Center = GetActorLocation() + Vec * 0.5f;
+	//FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
+	//float HalfHeight = AttackDist * 0.5f + AttackRadius;
 
-	// 공격 이벤트가 실행되는 지점을 알기 위한 DrawShape
-	if (bResult)
-		DrawColor = FColor::Green;
-	else
-		DrawColor = FColor::Red;
+	//// 공격 이벤트가 실행되는 지점을 알기 위한 DrawShape
+	//if (bResult)
+	//	DrawColor = FColor::Green;
+	//else
+	//	DrawColor = FColor::Red;
 
-	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius,
-		Rotation, DrawColor, false, 2.0f);
+	//DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius,
+	//	Rotation, DrawColor, false, 2.0f);
 
 	// 맞은게 확실하다면
 	if (bResult && HitResult.GetActor()) 
@@ -322,12 +308,12 @@ void ASevarog::Chase_Attack()
 void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 {
 	IsAttacking = false;
-	State = ESevarogState::E_Idle;
+	State = ESevarogState::E_Undefine;
 	OnAttackEnd.Broadcast();
 }
 
 void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 {
-
+	
 }
 

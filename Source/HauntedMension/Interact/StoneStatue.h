@@ -7,6 +7,8 @@
 
 class UCurveFloat;
 class USoundBase;
+class UParticleSystem;
+class UParticleSystemComponent;
 
 /**
  * 
@@ -18,6 +20,8 @@ class HAUNTEDMENSION_API AStoneStatue : public AInteract
 	
 public:
 	
+	AStoneStatue();
+
 	virtual void Interact() override;
 
 	UFUNCTION()
@@ -25,11 +29,17 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void StatueCameraShake();
+	void PlayCameraShake();
+
+	void SpawnMoveEffect();
+
+	UFUNCTION()
+	void DestroyMoveEffect();
 
 protected:
 
 	virtual void BeginPlay() override;
+
 
 private:
 
@@ -37,11 +47,15 @@ private:
 
 	FOnTimelineFloat TimelineUpdate;
 
+	FOnTimelineEvent TimelineFinish;
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCurveFloat> CurveFloat;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USoundBase> MoveSound;
+
+	FTimerHandle MoveEffectHandle;
 
 	UPROPERTY(EditAnywhere)
 	float MoveValue = 5.f;
@@ -50,5 +64,17 @@ private:
 		bool IsMove = false;
 
 	UPROPERTY(EditAnywhere)
+		float EffectTime = 1.f;
+
+	UPROPERTY(EditAnywhere)
+		float ZLocation = 0.f;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UCameraShakeBase> CameraShake;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystem> MoveEffect;
+
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<UParticleSystemComponent> MoveEffectComponent;
 };

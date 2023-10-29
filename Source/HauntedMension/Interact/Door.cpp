@@ -111,6 +111,7 @@ void ADoor::Interact()
 		{
 			IsOpening = true;
 
+
 			Timeline.PlayFromStart();
 
 			SetOpen = true;

@@ -6,6 +6,9 @@
 #include "GameFramework/HUD.h"
 #include "HMHUD.generated.h"
 
+class UHMOverlay;
+class UHMDeath;
+
 /**
  * 
  */
@@ -15,15 +18,25 @@ class HAUNTEDMENSION_API AHMHUD : public AHUD
 	GENERATED_BODY()
 	
 public:
+
 	virtual void PreInitializeComponents() override;
 
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<class UHMOverlay> HMOverlayClass;
+		TSubclassOf<UHMOverlay> HMOverlayClass;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UHMDeath> HMDeathClass;
 
 	UHMOverlay* HMOverlay;
 
-	APlayerController* PlayerController;
+	UHMDeath* HMDeath;
 
 	FORCEINLINE UHMOverlay* GetHMOverlay() { return HMOverlay; }
+
+protected:
+
+	APlayerController* PlayerController;
+
+
 
 };

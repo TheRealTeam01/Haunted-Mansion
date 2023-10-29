@@ -3,6 +3,8 @@
 #include "HauntedMension/Interact/StoneStatue.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
+#include "Components/SphereComponent.h"
 
 ABook::ABook()
 {
@@ -82,6 +84,10 @@ void ABook::Interact()
 {
 	if (!IsRotate) 
 	{
+		ShowInteractWidget(false);
+
+		Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+
 		Timeline.PlayFromStart();
 
 		PlayPullOutAnimation();
@@ -89,6 +95,8 @@ void ABook::Interact()
 		GetWorld()->GetTimerManager().SetTimer(BookTimer, [this] {StoneStatueInteract();}, WaitTime, false);
 
 		IsRotate = true;
+
+		InteractSphere->DestroyComponent();
 	}
 
 	

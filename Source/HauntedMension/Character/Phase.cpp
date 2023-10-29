@@ -326,6 +326,28 @@ void APhase::PlayReloadMontage()
 	AnimInstance->Montage_SetEndDelegate(MontageEnd, ReloadMontage);
 }
 
+void APhase::PlayHitMontage(const FVector& ImpactPoint)
+{
+	FVector Forward = GetActorForwardVector();
+	FVector ToTarget = (ImpactPoint - GetActorLocation()).GetSafeNormal();
+	double CosTheta = FVector::DotProduct(Forward, ToTarget);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitMontage)
+	{
+		if (CosTheta >= 0)
+		{
+			AnimInstance->Montage_Play(HitMontage);
+			AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
+		}
+		else
+		{
+			AnimInstance->Montage_Play(HitMontage);
+			AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
+		}
+	}
+}
+
 void APhase::ReloadPressed()
 {
 	if (DefaultWeapon == nullptr && ActionState != EActionState::EAS_Unoccupied) return;
@@ -442,39 +464,17 @@ void APhase::TraceCrossHair(FHitResult& TraceHitResult)
 
 void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	FVector Forward = GetActorForwardVector();
-	FVector ToTarget = (ImpactPoint - GetActorLocation()).GetSafeNormal();
-	double CosTheta = FVector::DotProduct(Forward, ToTarget);
-	
 	if (StatComponent)
 	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		
 		if (StatComponent->IsDead() && DeathMontage)
 		{
-			AnimInstance->Montage_Play(DeathMontage);
-			DeathState = EDeathState::EDS_Death;
-			GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
-			GetCharacterMovement()->bOrientRotationToMovement = false;
+			Die();
 		}
 		else
 		{
-			if (AnimInstance && HitMontage)
-			{
-				if (CosTheta >= 0)
-				{
-					AnimInstance->Montage_Play(HitMontage);
-					AnimInstance->Montage_JumpToSection(FName("Front"), HitMontage);
-				}
-				else
-				{
-					AnimInstance->Montage_Play(HitMontage);
-					AnimInstance->Montage_JumpToSection(FName("Back"), HitMontage);
-				}
-			}
+			PlayHitMontage(ImpactPoint);
 		}
 	}
-
 	
 	/*HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
 	if (HMController)
@@ -636,7 +636,30 @@ float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 			HitSound,
 			GetActorLocation());
 	}
+	if (StatComponent->IsDead() && DeathMontage)
+	{
+		Die();
+	}
 	return DamageAmount;
+}
+
+void APhase::Die()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	
+	HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
+
+	if (AnimInstance && HMController)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+		DeathState = EDeathState::EDS_Death;
+		
+		GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		ActorHasTag(FName("Dead"));
+
+		HMController->SetHUDDie();
+	}
 }
 
 void APhase::TurningInPlace(float DeltaTime)
@@ -669,7 +692,7 @@ void APhase::Tick(float DeltaTime)
 
 	SetActionState();
 
-	HideMeshifCameraClose();
+	/*HideMeshifCameraClose();*/
 
 	AimOffset(DeltaTime);
 

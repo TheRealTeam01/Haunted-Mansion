@@ -17,7 +17,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void ShowInteractWidget(bool bShowWidget);
+	virtual void ShowInteractWidget(bool bShowWidget);
 
 	void EnableCustomDepth(bool Enable);
 

@@ -1,18 +1,28 @@
 #include "StoneStatue.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+
+AStoneStatue::AStoneStatue()
+{
+	MoveEffectComponent = CreateDefaultSubobject<UParticleSystemComponent>("Move Effect");
+	MoveEffectComponent->SetupAttachment(Mesh);
+}
 
 void AStoneStatue::Interact()
 {
 	if (!IsMove)
 	{
-		Timeline.PlayFromStart();
-		StatueCameraShake();
-
 		if (MoveSound)
 		{
 			UGameplayStatics::SpawnSoundAtLocation(this, MoveSound, GetActorLocation(), GetActorRotation());
 		}
 
+		SpawnMoveEffect();
+
+		PlayCameraShake();
+		
+		Timeline.PlayFromStart();
+		
 		IsMove = true;
 		
 		UE_LOG(LogTemp, Warning, TEXT("StoneStatue"));
@@ -34,7 +44,7 @@ void AStoneStatue::Tick(float DeltaTime)
 	Timeline.TickTimeline(DeltaTime);
 }
 
-void AStoneStatue::StatueCameraShake()
+void AStoneStatue::PlayCameraShake()
 {
 	if (CameraShake)
 	{
@@ -42,13 +52,33 @@ void AStoneStatue::StatueCameraShake()
 	}
 }
 
+void AStoneStatue::SpawnMoveEffect()
+{
+	if (MoveEffectComponent) MoveEffectComponent->ActivateSystem();
+}
+
+void AStoneStatue::DestroyMoveEffect()
+{
+	if(MoveEffectComponent) MoveEffectComponent->DestroyComponent();
+}
+
 void AStoneStatue::BeginPlay()
 {
 	Super::BeginPlay();
 
+	MoveEffectComponent->DeactivateSystem();
+	
 	if (CurveFloat)
 	{
 		TimelineUpdate.BindDynamic(this, &AStoneStatue::StatueMove);
 		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate);
+		TimelineFinish.BindDynamic(this, &AStoneStatue::DestroyMoveEffect);
+		Timeline.SetTimelineFinishedFunc(TimelineFinish);
 	}
+
+	
+	//FVector StatueLocation(GetActorLocation().X, GetActorLocation().Y, ZLocation);
+
+	//MoveEffectComponent = UGameplayStatics::SpawnEmitterAttached(MoveEffect, Mesh, FName(), StatueLocation, GetActorRotation(), EAttachLocation::SnapToTarget);
+
 }

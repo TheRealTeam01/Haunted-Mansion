@@ -58,6 +58,8 @@ protected:
 
 	void PlayReloadMontage();
 
+	void PlayHitMontage(const FVector& ImpactPoint);
+
 	void ReloadPressed();
 
 	void FinishReload();
@@ -84,6 +86,8 @@ protected:
 	void EndPickUp();
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	void Die();
 
 	UPROPERTY(VisibleAnywhere)
 	FVector HitTarget;
