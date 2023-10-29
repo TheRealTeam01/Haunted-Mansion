@@ -119,7 +119,6 @@ void ASevarog::Attack()
 
 	//State = ESevarogState::E_Idle;
 	IsAttacking = true;
-	State = ESevarogState::E_Undefine;
 }
 
 // 공격이 플레이어에게 닿았는지 직접 판단하는 부분
@@ -207,8 +206,6 @@ void ASevarog::Patrol()
 	FNavLocation RandomLocation;
 	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) 
 	{
-		if (DistSize < SearchRange)
-			UAIBlueprintHelperLibrary::Moving
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
 	}
 	SearchInterval = 5.0f;
@@ -269,6 +266,8 @@ void ASevarog::Patrol_Chase()
 // Ÿ�ٰ��� �Ÿ��� �������� �Ÿ����� ������ ����
 void ASevarog::Chase_Attack()
 {
+	if (IsAttacking)
+		return;
 	State = ESevarogState::E_Attack;
 	//UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
 }
@@ -296,6 +295,12 @@ void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 		AnimInstance->Montage_Play(HitMontage);
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	}
+	AActor* Target = Player;
+
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(Target);
+	MoveRequest.SetAcceptanceRadius(10.0f);
+	EnemyController->MoveTo(MoveRequest);
 }
 
 float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
