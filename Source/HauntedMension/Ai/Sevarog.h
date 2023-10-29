@@ -60,8 +60,9 @@ public:
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	
 private:
 	// ���� ���¸� �˱� ���� �÷���
 	UPROPERTY()
@@ -105,7 +106,7 @@ public:
 	AAIController* EnemyController;
 
 	UPROPERTY(EditAnywhere)
-	UAnimMontage* DeathMontage;
+	 class UAnimMontage* DeathMontage;
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* HitMontage;

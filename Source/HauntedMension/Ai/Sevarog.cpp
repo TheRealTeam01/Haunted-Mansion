@@ -8,11 +8,12 @@
 #include "AIController.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HauntedMension/Interfaces/HitInterface.h"
 #include "Kismet/GamePlayStatics.h"
 #include "Math/Vector.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "HauntedMension/Attribute/AttributeComponent.h"
 
 // Sets default values
 ASevarog::ASevarog()
@@ -20,6 +21,8 @@ ASevarog::ASevarog()
 	// 하위에 직접넣는 컴포넌트, Mesh같은거는 여기서
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	Stat = CreateDefaultSubobject<UAttributeComponent>("Stat");
 
 	// ĳ���� �޽� �ʱ�ȭ
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonSevarog/Characters/Heroes/Sevarog/Meshes/Sevarog.Sevarog'"));
@@ -314,6 +317,17 @@ void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 
 void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	
+	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
+	if (Instance && HitMontage)
+	{
+		AnimInstance->Montage_Play(HitMontage);
+	}
+}
+
+float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Stat->CalculateDamage(DamageAmount);
+
+	return 0.0f;
 }
 
