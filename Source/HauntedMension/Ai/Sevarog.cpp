@@ -141,43 +141,6 @@ void ASevarog::AttackCheck()
 		Params
 	);
 
-	//무기 클래스라 가정
-	//TArray<AActor*> IgnoreToActors;
-	//IgnoreToActors.AddUnique(GetOwner());
-
-	//FHitResult BoxResult;
-
-	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision); //평소에, 공격 끝났을 때
-
-	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // 공격할 떄
-
-	//
-	//if (BoxResult.GetActor())
-	//{
-	//	if(BoxResult.BoneName.ToString() == FString("head"))
-	//	UGameplayStatics::ApplyDamage(BoxResult.GetActor(), 50.f, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
-	//	IHitInterface* Interface = Cast<IHitInterface>(BoxResult.GetActor());
-	//	if (Interface)
-	//	{
-	//		Interface->Execute_GetHit(BoxResult.GetActor(), BoxResult.BoneName);
-	//	}
-	//}
-
-	//FColor DrawColor;
-	//FVector Vec = GetActorForwardVector() * AttackDist;
-	//FVector Center = GetActorLocation() + Vec * 0.5f;
-	//FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
-	//float HalfHeight = AttackDist * 0.5f + AttackRadius;
-
-	//// 공격 이벤트가 실행되는 지점을 알기 위한 DrawShape
-	//if (bResult)
-	//	DrawColor = FColor::Green;
-	//else
-	//	DrawColor = FColor::Red;
-
-	//DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius,
-	//	Rotation, DrawColor, false, 2.0f);
-
 	// 맞은게 확실하다면
 	if (bResult && HitResult.GetActor()) 
 	{
@@ -234,7 +197,7 @@ void ASevarog::Patrol()
 
 	float DistSize = DistVector.Size();
 	if (DistSize < SearchRange)
-		ESevarogState::E_Undefine;
+		StateRefresh();
 
 	FVector GoalLocation;
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
@@ -242,7 +205,10 @@ void ASevarog::Patrol()
 		return;
 
 	FNavLocation RandomLocation;
-	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) {
+	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) 
+	{
+		if (DistSize < SearchRange)
+			UAIBlueprintHelperLibrary::Moving
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
 	}
 	SearchInterval = 5.0f;
@@ -257,7 +223,7 @@ void ASevarog::Chase(AActor* Target)
 	double VectorSize = FVector::Dist(TargetVector, myLocation);
 
 	if (VectorSize > SearchRange)
-		ESevarogState::E_Idle;
+		State = ESevarogState::E_Idle;
 
 	if (VectorSize < AttackDist)
 	{
@@ -315,12 +281,20 @@ void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 	OnAttackEnd.Broadcast();
 }
 
+void ASevarog::OnHitMontageEnded(UAnimMontage* Montage, bool bInterruppted)
+{
+	IsHit = false;
+	State = ESevarogState::E_Undefine;
+	OnHitEnd.Broadcast();
+}
+
 void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
 	if (Instance && HitMontage)
 	{
 		AnimInstance->Montage_Play(HitMontage);
+		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	}
 }
 

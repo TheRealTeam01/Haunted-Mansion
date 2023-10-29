@@ -11,6 +11,7 @@
 #include "Sevarog.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
+DECLARE_MULTICAST_DELEGATE(FOnHitEnd);
 
 UCLASS()
 class HAUNTEDMENSION_API ASevarog : public ACharacter, public IHitInterface
@@ -38,6 +39,7 @@ public:
 	void Yaw(float Value);
 
 	FOnAttackEnd OnAttackEnd;
+	FOnHitEnd OnHitEnd;
 
 	void Attack();
 	void AttackCheck();
@@ -58,6 +60,7 @@ public:
 	// ���ݻ��°� ����Ǹ� ��������Ʈ�� ���� �˸���.
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted);
+	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterruppted);
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
@@ -67,6 +70,9 @@ private:
 	// ���� ���¸� �˱� ���� �÷���
 	UPROPERTY()
 	bool IsAttacking = false;
+
+	UPROPERTY()
+	bool IsHit = false;
 
 	UPROPERTY()
 	float AttackDist = 150.0f;
