@@ -13,6 +13,8 @@
 DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
 DECLARE_MULTICAST_DELEGATE(FOnHitEnd);
 
+class UBoxComponent;
+
 UCLASS()
 class HAUNTEDMENSION_API ASevarog : public ACharacter, public IHitInterface
 {
@@ -116,4 +118,16 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* HitMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UBoxComponent* WeaponBox;
+
+	UPROPERTY(EditAnywhere)
+	FVector TraceBoxExent = FVector(30.f, 30.f, 30.f);
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 40.f;
+
+	UPROPERTY(EditAnywhere)
+	bool ShowDebugBox = true;
 };
