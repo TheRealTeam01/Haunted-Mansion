@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Components/TimeLineComponent.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "Sevarog.generated.h"
@@ -48,6 +49,8 @@ public:
 	void Idle();
 	void Patrol();
 	void Chase(AActor* Target);
+	
+	UFUNCTION()
 	void Die();
 	void StateRefresh();
 
@@ -65,7 +68,31 @@ public:
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	
+
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeline;
+
+	FOnTimelineFloat DissolveTimelineUpdate;
+
+	FOnTimelineEvent DissolveTimelineFinished;
+
+	UFUNCTION()
+	void StartDissolve();
+
+	UFUNCTION()
+	void StopDissolve();
+
+	UFUNCTION()
+	void UpdateDissolve(float DeltaTime);
+
+	UPROPERTY(EditAnywhere)
+		UCurveFloat* DissolveCurve;
+
+	UPROPERTY(VisibleAnywhere)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* DissolveMateialInstance;
 private:
 	// ���� ���¸� �˱� ���� �÷���
 	UPROPERTY()

@@ -23,6 +23,8 @@ ASevarog::ASevarog()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>("DissolveTimeline");
+
 	Stat = CreateDefaultSubobject<UAttributeComponent>("Stat");
 
 	// ĳ���� �޽� �ʱ�ȭ
@@ -44,6 +46,17 @@ void ASevarog::BeginPlay()
 	EnemyController = Cast<AAIController>(GetController());
 	/*GetCharacterMovement()->MaxWalkSpeed = 300.f;*/
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
+	
+	DissolveTimelineUpdate.BindUFunction(this, FName("UpdateDissolve"));
+
+	if (DissolveMateialInstance)
+	{
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMateialInstance, this);
+
+		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(FName("Dissolve"), -0.55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(FName("Glow"), 17000.f);
+	}
 }
 
 void ASevarog::PostInitializeComponents()
@@ -62,6 +75,7 @@ void ASevarog::PostInitializeComponents()
 void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	float Count = FApp::GetDeltaTime();
 	SearchInterval -= Count;
 
@@ -114,7 +128,7 @@ void ASevarog::Attack()
 {
 	if (IsAttacking) return;
 
-	AnimInstance->PlayAttackMontage();
+	/*AnimInstance->PlayAttackMontage();*/
 	/*GetCharacterMovement()->MaxWalkSpeed = 1.0f;*/
 
 	//State = ESevarogState::E_Idle;
@@ -237,6 +251,10 @@ void ASevarog::Die()
 {
 	State = ESevarogState::E_Die;
 	UE_LOG(LogTemp, Warning, TEXT("State Die"));
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(0, 5.f, FColor::Red, FString::Printf(TEXT("Sevarog Die")));
+	}
 }
 
 void ASevarog::StateRefresh()
@@ -289,6 +307,8 @@ void ASevarog::OnHitMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 
 void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 {
+	IsAttacking = false;
+
 	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
 	if (Instance && HitMontage)
 	{
@@ -308,5 +328,36 @@ float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	Stat->CalculateDamage(DamageAmount);
 
 	return 0.0f;
+}
+
+void ASevarog::StartDissolve()
+{
+	DissolveTimelineUpdate.BindDynamic(this, &ASevarog::UpdateDissolve);
+
+	if (DissolveCurve)
+	{
+		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTimelineUpdate);
+		DissolveTimeline->PlayFromStart();
+		DissolveTimelineFinished.BindDynamic(this, &ASevarog::Die);
+		DissolveTimeline->SetTimelineFinishedFunc(DissolveTimelineFinished);
+
+		DissolveTimeline->SetPlayRate(0.5f);
+	}
+}
+
+void ASevarog::StopDissolve()
+{
+	if (DissolveTimeline->IsPlaying())
+	{
+		DissolveTimeline->Reverse();
+	}
+}
+
+void ASevarog::UpdateDissolve(float DeltaTime)
+{
+	if (DynamicDissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(FName("Dissolve"), DeltaTime);
+	}
 }
 

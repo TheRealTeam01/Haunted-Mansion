@@ -46,7 +46,10 @@ void USevarogAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void USevarogAnimInstance::PlayAttackMontage()
 {
-	Montage_Play(AttackMontage, 1.0f);
+	if (AttackMontage)
+	{
+		Montage_Play(AttackMontage, 1.0f);
+	}
 }
 
 // ���Ӱ����� ���ؼ� ���� ��Ÿ�ָ� �����´�

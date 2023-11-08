@@ -131,19 +131,11 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	ETurnInPlace TurnInPlace;
 
-	//UPROPERTY(BlueprintReadOnly)
-	//AFlashLight* FlashLight;
-
-	//UPROPERTY(VisibleAnywhere)
-	//	class ADoorKey* Key;
-
-	//UPROPERTY(VisibleAnywhere)
-	//	class ADoor* Door;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool bAiming;
 
 	class UHMOverlay* HMOverlay;
+
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -219,7 +211,6 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 		float MaxHP = 100.f;
-
 
 	float AO_Yaw;
 	float AO_Pitch;
