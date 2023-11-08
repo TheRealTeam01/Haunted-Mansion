@@ -14,6 +14,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Attribute/AttributeComponent.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -23,6 +24,12 @@ ASevarog::ASevarog()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
+	WeaponBox->SetupAttachment(GetMesh(), FName("HammerCenter"));
+	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
+	WeaponBox->SetGenerateOverlapEvents(true);
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>("DissolveTimeline");
 
 	Stat = CreateDefaultSubobject<UAttributeComponent>("Stat");
@@ -47,6 +54,9 @@ void ASevarog::BeginPlay()
 	/*GetCharacterMovement()->MaxWalkSpeed = 300.f;*/
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 	
+	//FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
+	//WeaponBox->AttachToComponent(GetMesh(), Rules, FName("HammerCenter"));
+
 	DissolveTimelineUpdate.BindUFunction(this, FName("UpdateDissolve"));
 
 	if (DissolveMateialInstance)
@@ -139,33 +149,69 @@ void ASevarog::Attack()
 void ASevarog::AttackCheck()
 {
 	// 거리는 State체크에서 이미 체크했으니 콜라이더 충돌 여부만 판단한다
-	FHitResult HitResult;
+	/*FHitResult HitResult;*/
 	FCollisionQueryParams Params(NAME_None, false, this);
 
 	float AttackRadius = 50.0f;
 
-	bool bResult = GetWorld()->SweepSingleByChannel(
-		OUT HitResult,
-		GetActorLocation(),
-		GetActorLocation() + GetActorForwardVector() * AttackDist,
-		FQuat::Identity,
-		ECollisionChannel::ECC_Visibility,
-		FCollisionShape::MakeSphere(AttackRadius),
-		Params
-	);
+	//bool bResult = GetWorld()->SweepSingleByChannel(
+	//	OUT HitResult,
+	//	GetActorLocation(),
+	//	GetActorLocation() + GetActorForwardVector() * AttackDist,
+	//	FQuat::Identity,
+	//	ECollisionChannel::ECC_Visibility,
+	//	FCollisionShape::MakeSphere(AttackRadius),
+	//	Params
+	//);
 
-	// 맞은게 확실하다면
-	if (bResult && HitResult.GetActor()) 
+	//// 맞은게 확실하다면
+	//if (bResult && HitResult.GetActor()) 
+	//{
+	//	UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.GetActor()->GetName());
+	//	UGameplayStatics::ApplyDamage(HitResult.GetActor(), 30.f, GetInstigatorController(), this, UDamageType::StaticClass());
+	//	TScriptInterface Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
+	//	if (Interface)
+	//	{
+	//		Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
+	//	}
+	//	//FDamageEvent DamageEvent;
+	//}
+
+	TArray<AActor*> IgnoreActors;
+
+	FHitResult HitResult;
+
+	UKismetSystemLibrary::BoxTraceSingle(
+		WeaponBox,
+		WeaponBox->GetComponentLocation(),
+		WeaponBox->GetComponentLocation() + 100.f,
+		TraceBoxExent,
+		WeaponBox->GetComponentRotation(),
+		ETraceTypeQuery::TraceTypeQuery1,
+		false,
+		IgnoreActors,
+		ShowDebugBox == true ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+		HitResult,
+		true);
+
+	IgnoreActors.AddUnique(HitResult.GetActor());
+
+	if (HitResult.GetActor())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.GetActor()->GetName());
-		UGameplayStatics::ApplyDamage(HitResult.GetActor(), 30.f, GetInstigatorController(), this, UDamageType::StaticClass());
 		TScriptInterface Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
 		if (Interface)
 		{
 			Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
+			UGameplayStatics::ApplyDamage(
+				HitResult.GetActor(),
+				Damage,
+				Controller,
+				this,
+				UDamageType::StaticClass());
 		}
-		//FDamageEvent DamageEvent;
 	}
+		
+	
 }
 
 

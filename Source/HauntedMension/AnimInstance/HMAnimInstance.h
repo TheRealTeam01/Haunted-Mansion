@@ -59,6 +59,4 @@ protected:
 	UPROPERTY()
 	FRotator DeltaRotation;
 
-
-
 };
