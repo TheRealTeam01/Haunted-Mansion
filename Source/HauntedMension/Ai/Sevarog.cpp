@@ -297,9 +297,12 @@ void ASevarog::Die()
 {
 	State = ESevarogState::E_Die;
 	UE_LOG(LogTemp, Warning, TEXT("State Die"));
-	if (GEngine)
+
+	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
+	if (Instance && ScreamMontage)
 	{
-		GEngine->AddOnScreenDebugMessage(0, 5.f, FColor::Red, FString::Printf(TEXT("Sevarog Die")));
+		GetCharacterMovement()->DisableMovement();
+		Instance->Montage_Play(ScreamMontage);
 	}
 }
 
@@ -384,10 +387,10 @@ void ASevarog::StartDissolve()
 	{
 		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTimelineUpdate);
 		DissolveTimeline->PlayFromStart();
-		DissolveTimelineFinished.BindDynamic(this, &ASevarog::Die);
-		DissolveTimeline->SetTimelineFinishedFunc(DissolveTimelineFinished);
+		/*DissolveTimelineFinished.BindDynamic(this, &ASevarog::Die);
+		DissolveTimeline->SetTimelineFinishedFunc(DissolveTimelineFinished);*/
 
-		DissolveTimeline->SetPlayRate(0.5f);
+		GetWorld()->GetTimerManager().SetTimer(ScreamHandle, [this] {Die(); }, 2.f, false);
 	}
 }
 

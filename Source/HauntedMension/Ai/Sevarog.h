@@ -88,13 +88,19 @@ public:
 	void UpdateDissolve(float DeltaTime);
 
 	UPROPERTY(EditAnywhere)
-		UCurveFloat* DissolveCurve;
+	float DissolveTime = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
 
 	UPROPERTY(VisibleAnywhere)
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInstance* DissolveMateialInstance;
+
+	FTimerHandle ScreamHandle;
+
 private:
 	// ���� ���¸� �˱� ���� �÷���
 	UPROPERTY()
@@ -128,7 +134,7 @@ public:
 	UPROPERTY()
 	float LeftRightValue;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ESevarogState State;
 
 	UPROPERTY(VisibleAnywhere)
@@ -145,6 +151,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* HitMontage;
+	
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* ScreamMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UBoxComponent* WeaponBox;
