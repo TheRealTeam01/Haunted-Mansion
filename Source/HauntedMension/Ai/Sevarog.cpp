@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Sevarog.h"
 #include "SevarogAnimInstance.h"
 #include "NavigationSystem.h"
@@ -17,7 +14,6 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
 ASevarog::ASevarog()
 {
 	// 하위에 직접넣는 컴포넌트, Mesh같은거는 여기서
@@ -30,7 +26,6 @@ ASevarog::ASevarog()
 	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 	WeaponBox->SetGenerateOverlapEvents(true);
-	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>("DissolveTimeline");
 
 	Stat = CreateDefaultSubobject<UAttributeComponent>("Stat");
 
@@ -44,7 +39,6 @@ ASevarog::ASevarog()
 	
 }
 
-// Called when the game starts or when spawned
 void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,16 +51,7 @@ void ASevarog::BeginPlay()
 	//FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
 	//WeaponBox->AttachToComponent(GetMesh(), Rules, FName("HammerCenter"));
 
-	DissolveTimelineUpdate.BindUFunction(this, FName("UpdateDissolve"));
 
-	if (DissolveMateialInstance)
-	{
-		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMateialInstance, this);
-
-		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(FName("Dissolve"), -0.55f);
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(FName("Glow"), 17000.f);
-	}
 }
 
 void ASevarog::PostInitializeComponents()
@@ -81,7 +66,6 @@ void ASevarog::PostInitializeComponents()
 	
 }
 
-// Called every frame
 void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -110,7 +94,6 @@ void ASevarog::Tick(float DeltaTime)
 	}
 }
 
-// Called to bind functionality to input
 void ASevarog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -299,11 +282,7 @@ void ASevarog::Die()
 	UE_LOG(LogTemp, Warning, TEXT("State Die"));
 
 	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
-	if (Instance && ScreamMontage)
-	{
-		GetCharacterMovement()->DisableMovement();
-		Instance->Montage_Play(ScreamMontage);
-	}
+
 }
 
 void ASevarog::StateRefresh()
@@ -377,36 +356,5 @@ float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	Stat->CalculateDamage(DamageAmount);
 
 	return 0.0f;
-}
-
-void ASevarog::StartDissolve()
-{
-	DissolveTimelineUpdate.BindDynamic(this, &ASevarog::UpdateDissolve);
-
-	if (DissolveCurve)
-	{
-		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTimelineUpdate);
-		DissolveTimeline->PlayFromStart();
-		/*DissolveTimelineFinished.BindDynamic(this, &ASevarog::Die);
-		DissolveTimeline->SetTimelineFinishedFunc(DissolveTimelineFinished);*/
-
-		GetWorld()->GetTimerManager().SetTimer(ScreamHandle, [this] {Die(); }, 2.f, false);
-	}
-}
-
-void ASevarog::StopDissolve()
-{
-	if (DissolveTimeline->IsPlaying())
-	{
-		DissolveTimeline->Reverse();
-	}
-}
-
-void ASevarog::UpdateDissolve(float DeltaTime)
-{
-	if (DynamicDissolveMaterialInstance)
-	{
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(FName("Dissolve"), DeltaTime);
-	}
 }
 

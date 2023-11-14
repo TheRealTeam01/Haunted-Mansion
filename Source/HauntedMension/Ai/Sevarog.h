@@ -71,36 +71,6 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
-	UPROPERTY(VisibleAnywhere)
-	UTimelineComponent* DissolveTimeline;
-
-	FOnTimelineFloat DissolveTimelineUpdate;
-
-	FOnTimelineEvent DissolveTimelineFinished;
-
-	UFUNCTION()
-	void StartDissolve();
-
-	UFUNCTION()
-	void StopDissolve();
-
-	UFUNCTION()
-	void UpdateDissolve(float DeltaTime);
-
-	UPROPERTY(EditAnywhere)
-	float DissolveTime = 0.f;
-
-	UPROPERTY(EditAnywhere)
-	UCurveFloat* DissolveCurve;
-
-	UPROPERTY(VisibleAnywhere)
-	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
-
-	UPROPERTY(EditAnywhere)
-	UMaterialInstance* DissolveMateialInstance;
-
-	FTimerHandle ScreamHandle;
-
 private:
 	// ���� ���¸� �˱� ���� �÷���
 	UPROPERTY()
@@ -151,9 +121,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* HitMontage;
-	
-	UPROPERTY(EditAnywhere)
-	UAnimMontage* ScreamMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UBoxComponent* WeaponBox;

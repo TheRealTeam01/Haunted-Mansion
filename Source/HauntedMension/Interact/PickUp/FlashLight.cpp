@@ -4,7 +4,7 @@
 #include "HauntedMension/Character/Phase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
-#include "HauntedMension/Ai/Sevarog.h"
+#include "HauntedMension/Ai/SkeletonWarrior/SkeletonWarrior.h"
 
 // Sets default values
 AFlashLight::AFlashLight()
@@ -74,19 +74,19 @@ void AFlashLight::OnEndSphereOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void AFlashLight::TriggerBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ASevarog* Sevarog = Cast<ASevarog>(OtherActor);
-	if (Sevarog && bLightOn)
+	ASkeletonWarrior* SkeletonWarrior = Cast<ASkeletonWarrior>(OtherActor);
+	if (SkeletonWarrior && bLightOn)
 	{
-		Sevarog->StartDissolve();
+		SkeletonWarrior->StartDissolve();
 	}
 }
 
 void AFlashLight::TriggerBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	ASevarog* Sevarog = Cast<ASevarog>(OtherActor);
-	if (Sevarog && bLightOn)
+	ASkeletonWarrior* SkeletonWarrior = Cast<ASkeletonWarrior>(OtherActor);
+	if (SkeletonWarrior && bLightOn)
 	{
-		Sevarog->StopDissolve();
+		SkeletonWarrior->StopDissolve();
 	}
 }
 
