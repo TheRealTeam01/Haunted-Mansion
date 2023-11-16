@@ -6,25 +6,17 @@
 
 ASkeletonWarriorAIController::ASkeletonWarriorAIController()
 {
-	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>("Blackboard");
+	Blackboard = CreateDefaultSubobject<UBlackboardComponent>("Blackboard");
+	check(Blackboard);
 
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>("BehaviorTree");
+	check(BehaviorTreeComponent);
 }
 
 void ASkeletonWarriorAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	ASkeletonWarrior* Skeleton = Cast<ASkeletonWarrior>(InPawn);
-	if (Skeleton && Skeleton->BehaviorTree->BlackboardAsset)
-	{
-		BlackboardComponent->InitializeBlackboard(*Skeleton->BehaviorTree->BlackboardAsset);
-
-		BehaviorTreeComponent->StartTree(*Skeleton->BehaviorTree);
-	}
+	GetBlackboardComponent()->SetValueAsBool(FName("IsStanding"), false);
 }
 
-void ASkeletonWarriorAIController::SetSensedTarget(APawn* Target)
-{
-	if (BlackboardComponent) BlackboardComponent->SetValueAsObject(TargetKey, Target);
-}

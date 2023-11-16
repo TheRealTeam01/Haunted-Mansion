@@ -6,9 +6,12 @@
 #include "Components/TimelineComponent.h"
 #include "SkeletonWarrior.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnAttackEnded);
+
 class UAttributeComponent;
 class UPawnSensingComponent;
 class UBehaviorTree;
+class USphereComponent;
 
 UCLASS()
 class HAUNTEDMENSION_API ASkeletonWarrior : public ACharacter, public IHitInterface
@@ -31,23 +34,53 @@ public:
 		void UpdateDissolve(float DeltaTime);
 
 	UPROPERTY(EditAnywhere)
-		UBehaviorTree* BehaviorTree;
+		bool IsStanding = false;
+
+	void Attack();
+
+	FOnAttackEnded OnAttackEnded;
+
 protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;;
+	
+	void InitializeAIComponents();
 
 	UFUNCTION()
-	void Chase(APawn* PawnInstigator, const FVector& Location, float Volume);
+		void UpdateDie(float DeltaTime);
 
 	void Die();
+
+	void StandUp();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackTrace(USphereComponent* HitBox);
+
+	UPROPERTY(EditAnywhere)
+		float TraceDistance = 100.f;
+
+	UPROPERTY(EditAnywhere)
+		float TraceRadius = 50.f;
+
+	UPROPERTY(EditAnywhere)
+		float Damage = 30.f;
+
+	UPROPERTY(EditAnywhere)
+		bool ShowDebugBox = false;
 
 	UPROPERTY(EditAnywhere)
 		UAnimMontage* ScreamMontage;
 	
 	UPROPERTY(EditAnywhere)
 		UAnimMontage* DieMontage;
+	
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* StandUpMontage;
+	
+	UPROPERTY(EditAnywhere)
+		UAnimMontage* AttackMontage;
 
 	/* Dissolve Effect */
 
@@ -94,17 +127,26 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UAttributeComponent* Attribute;
-		
-	UPROPERTY(VisibleAnywhere)
-		UPawnSensingComponent* PawnSensingComponent;
 
-	UPROPERTY(VisibleAnywhere)
-		bool IsStanding = false;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	USphereComponent* RightHandSphere;
 	
-	UPROPERTY(VisibleAnywhere)
-		AActor* PlayerCharacter = nullptr;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	USphereComponent* LeftHandSphere;
 
+	UPROPERTY(VisibleAnywhere)
+		bool IsAttacking = false;
+
+	/* AI */
+
+	UPROPERTY(EditAnywhere)
+		UBehaviorTree* BehaviorTree;
+
+	UPROPERTY()
+		class ASkeletonWarriorAIController* AIController;
 
 public:	
 	
+	FORCEINLINE bool SetIsStanding(bool bStanding) { return IsStanding = bStanding; }
+	FORCEINLINE bool GetIsStanding() { return IsStanding; }
 };

@@ -7,6 +7,8 @@
 
 class UBehaviorTreeComponent;
 class UBlackboardComponent;
+class UBehaviorTree;
+class UAISensing;
 
 /**
  * 
@@ -22,18 +24,10 @@ public:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
-	void SetSensedTarget(APawn* Target);
-
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	UBehaviorTreeComponent* BehaviorTreeComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	UBlackboardComponent* BlackboardComponent;
-
-	UPROPERTY(EditDefaultsOnly)
-	FName TargetKey = "SensedPawn";
 
 private:
 
