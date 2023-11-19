@@ -12,6 +12,7 @@ class UAttributeComponent;
 class UPawnSensingComponent;
 class UBehaviorTree;
 class USphereComponent;
+class UMotionWarpingComponent;
 
 UCLASS()
 class HAUNTEDMENSION_API ASkeletonWarrior : public ACharacter, public IHitInterface
@@ -49,11 +50,20 @@ protected:
 	void InitializeAIComponents();
 
 	UFUNCTION()
-		void UpdateDie(float DeltaTime);
+	void UpdateDie(float DeltaTime);
 
 	void Die();
 
+	UFUNCTION()
+	void DissolveDie();
+
 	void StandUp();
+
+	UPROPERTY(VisibleAnywhere)
+	bool IsDissolving = false;
+
+	UPROPERTY(VisibleAnywhere)
+	bool IsDying = false;
 
 	UFUNCTION(BlueprintCallable)
 	void AttackTrace(USphereComponent* HitBox);
@@ -118,7 +128,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UMaterialInstance* DieMateialInstance;
 
-	FTimerHandle ScreamHandle;
+	FTimerHandle ScreamTimerHandle;
+
+	FTimerHandle DieTimerHandle;
 
 	/* Basic Properites */
 

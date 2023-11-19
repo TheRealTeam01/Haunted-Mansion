@@ -1,6 +1,7 @@
 #include "HauntedMension/Ai/SkeletonWarrior/UBTTask_Attack.h"
 #include "HauntedMension/Ai/SkeletonWarrior/SkeletonWarrior.h"
 #include "AIController.h"
+#include "Gameframework/CharacterMovementComponent.h"
 
 UUBTTask_Attack::UUBTTask_Attack()
 {
@@ -19,7 +20,12 @@ EBTNodeResult::Type UUBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	
 	IsAttacking = true;
 
-	SkeletonWarrior->OnAttackEnded.AddLambda([this]() {IsAttacking = false; });
+	SkeletonWarrior->OnAttackEnded.AddLambda([this,SkeletonWarrior]() 
+		{
+			IsAttacking = false;
+		}
+	);
+
 
 	return EBTNodeResult::Succeeded;
 }

@@ -9,6 +9,8 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "MotionWarpingComponent.h"
 
 ASkeletonWarrior::ASkeletonWarrior()
 {
@@ -40,6 +42,7 @@ ASkeletonWarrior::ASkeletonWarrior()
 
 	Attribute = CreateDefaultSubobject<UAttributeComponent>("Attributes");
 
+	MotionWarpComponent = CreateDefaultSubobject<UMotionWarpingComponent>("Motion Warping Component");
 }
 
 void ASkeletonWarrior::Attack()
@@ -67,7 +70,7 @@ void ASkeletonWarrior::Attack()
 
 		AnimInstance->Montage_Play(AttackMontage);
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
-
+		
 		FOnMontageEnded MontageEnded;
 
 		MontageEnded.BindLambda([this](UAnimMontage* AnimMontage, bool bInterrupted)
@@ -94,16 +97,15 @@ void ASkeletonWarrior::BeginPlay()
 
 	InitializeAIComponents();
 
-	if (DieCurve)
-	{
-		DieTimelineUpdate.BindDynamic(this, &ASkeletonWarrior::UpdateDie);
-		DieTimeline->AddInterpFloat(DieCurve, DieTimelineUpdate);
-	}
+
 }
 
 void ASkeletonWarrior::GetHit_Implementation(const FVector& ImpactPoint)
 {
+	DissolveTimeline->Deactivate();
+	IsDying = true;
 	Die();
+
 }
 
 void ASkeletonWarrior::InitializeAIComponents()
@@ -124,6 +126,7 @@ void ASkeletonWarrior::UpdateDie(float DeltaTime)
 
 void ASkeletonWarrior::Die()
 {
+
 	if (DieMateialInstance)
 	{
 		DynamicDieMaterialInstance = UMaterialInstanceDynamic::Create(DieMateialInstance, this);
@@ -133,6 +136,16 @@ void ASkeletonWarrior::Die()
 		DynamicDieMaterialInstance->SetScalarParameterValue(FName("Glow"), 20000.f);
 	}
 
+	if (DieCurve)
+	{
+		DieTimelineUpdate.BindDynamic(this, &ASkeletonWarrior::UpdateDie);
+		DieTimeline->AddInterpFloat(DieCurve, DieTimelineUpdate);
+	}
+
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->DisableMovement();
+
 	DieTimeline->PlayFromStart();
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -141,14 +154,12 @@ void ASkeletonWarrior::Die()
 		AnimInstance->Montage_Play(DieMontage);
 	}
 
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 	FOnMontageEnded MontageEnded;
 	MontageEnded.BindLambda([this] (UAnimMontage* AnimMontage, bool bInterrupted)
 		{
 			if (bInterrupted)
 			{
-
+				Destroy();
 			}
 			else Destroy();
 		}
@@ -188,6 +199,7 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 	const FVector End = Start + (HitBox->GetForwardVector() * TraceDistance);
 
 	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
 
 	UKismetSystemLibrary::SphereTraceSingle(
 		this,
@@ -218,11 +230,12 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 void ASkeletonWarrior::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ASkeletonWarrior::StartDissolve()
 {
+	if (IsDissolving || IsDying) return;
+
 	if (DissolveMateialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMateialInstance, this);
@@ -238,18 +251,34 @@ void ASkeletonWarrior::StartDissolve()
 	{
 		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTimelineUpdate);
 		DissolveTimeline->PlayFromStart();
-		DissolveTimelineFinished.BindUFunction(this, FName("Die"));
-
-		GetWorld()->GetTimerManager().SetTimer(ScreamHandle, [this] 
-			{
-				UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-				if (AnimInstance && ScreamMontage)
-				{
-					AnimInstance->Montage_Play(ScreamMontage);
-				}
-			},
-		2.f, false);
+		IsDissolving = true;
+		DissolveTimelineFinished.BindDynamic(this, &ASkeletonWarrior::DissolveDie);
+		DissolveTimeline->SetTimelineFinishedFunc(DissolveTimelineFinished);
 	}
+}
+
+void ASkeletonWarrior::DissolveDie()
+{
+	if (DissolveTimeline->IsPlaying() || !IsDissolving || IsDying) return;
+	
+	Destroy();
+
+	//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	//if (AnimInstance && ScreamMontage)
+	//{
+	//	AnimInstance->Montage_Play(ScreamMontage);
+	//}
+
+	//FOnMontageEnded MontageEnded;
+	//MontageEnded.BindLambda([this](UAnimMontage* AnimMontage, bool bInterrupted)
+	//	{
+	//		if (bInterrupted)
+	//		{
+	//		}
+	//		else Destroy();
+	//	}
+	//);
+	//AnimInstance->Montage_SetEndDelegate(MontageEnded, ScreamMontage);
 }
 
 void ASkeletonWarrior::StopDissolve()
@@ -257,11 +286,14 @@ void ASkeletonWarrior::StopDissolve()
 	if (DissolveTimeline->IsPlaying())
 	{
 		DissolveTimeline->Reverse();
+		IsDissolving = false;
 	}
 }
 
 void ASkeletonWarrior::UpdateDissolve(float DeltaTime)
 {
+	if (IsDying) return;
+
 	if (DynamicDissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(FName("Dissolve"), DeltaTime);

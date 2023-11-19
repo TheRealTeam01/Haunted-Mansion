@@ -13,5 +13,5 @@ bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeCompo
 	APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	check(Target);
 
-	return OwnerPawn->GetDistanceTo(Target) <= 100.f ? true : false;
+	return OwnerPawn->GetDistanceTo(Target) <= 150.f ? true : false;
 }
