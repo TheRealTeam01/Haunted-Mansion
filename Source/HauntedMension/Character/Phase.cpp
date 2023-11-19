@@ -319,6 +319,7 @@ void APhase::PlayReloadMontage()
 			if (bInterrupted) // �����ϴ� �߰��� �ǰ��� ���.
 			{
 				ActionState = EActionState::EAS_Unoccupied;
+				GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 			}
 			else
 			{

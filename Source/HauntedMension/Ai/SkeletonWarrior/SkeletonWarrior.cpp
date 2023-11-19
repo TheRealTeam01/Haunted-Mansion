@@ -10,6 +10,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HauntedMension/Character/Phase.h"
 
 ASkeletonWarrior::ASkeletonWarrior()
 {
@@ -94,8 +95,8 @@ void ASkeletonWarrior::BeginPlay()
 	DissolveTimelineUpdate.BindUFunction(this, FName("UpdateDissolve"));
 
 	InitializeAIComponents();
-
-
+	
+	Tags.Add(FName("Skeleton"));
 }
 
 void ASkeletonWarrior::GetHit_Implementation(const FVector& ImpactPoint)
@@ -197,7 +198,6 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 	const FVector End = Start + (HitBox->GetForwardVector() * TraceDistance);
 
 	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
 
 	UKismetSystemLibrary::SphereTraceSingle(
 		this,
@@ -214,6 +214,8 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 
 	if (HitResult.bBlockingHit && HitResult.GetActor())
 	{
+		if (HitResult.GetActor()->ActorHasTag(FName("Skeleton"))) return;
+	
 		TScriptInterface<IHitInterface> Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
 		if (Interface)
 		{
@@ -223,6 +225,27 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 	}
 
 
+}
+
+FVector ASkeletonWarrior::GetTargetRotation()
+{
+	APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	check(Target);
+
+	return Target->GetActorLocation();
+}
+
+FVector ASkeletonWarrior::GetTargetLocation()
+{
+	APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	check(Target);
+
+	const FVector CombatTargetLocation = Target->GetActorLocation();
+	const FVector Location = GetActorLocation();
+
+	FVector TargetToMe = (Location - CombatTargetLocation).GetSafeNormal();
+	TargetToMe *= WarpDistance;
+	return CombatTargetLocation + TargetToMe;
 }
 
 void ASkeletonWarrior::Tick(float DeltaTime)

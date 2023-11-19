@@ -156,6 +156,17 @@ protected:
 
 	UPROPERTY()
 		class ASkeletonWarriorAIController* AIController;
+	
+	/* Motion Warping */
+
+	UFUNCTION(BlueprintCallable)
+		FVector GetTargetRotation();
+	
+	UFUNCTION(BlueprintCallable)
+		FVector GetTargetLocation();
+
+	UPROPERTY(EditAnywhere)
+		float WarpDistance = 80.f;
 
 public:	
 	
