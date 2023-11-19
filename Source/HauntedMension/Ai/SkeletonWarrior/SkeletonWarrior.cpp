@@ -10,7 +10,6 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "MotionWarpingComponent.h"
 
 ASkeletonWarrior::ASkeletonWarrior()
 {
@@ -42,7 +41,6 @@ ASkeletonWarrior::ASkeletonWarrior()
 
 	Attribute = CreateDefaultSubobject<UAttributeComponent>("Attributes");
 
-	MotionWarpComponent = CreateDefaultSubobject<UMotionWarpingComponent>("Motion Warping Component");
 }
 
 void ASkeletonWarrior::Attack()
