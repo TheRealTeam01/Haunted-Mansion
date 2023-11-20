@@ -31,7 +31,9 @@ ASevarog::ASevarog()
 		GetMesh()->SetSkeletalMesh(SM.Object);
 	}
 
-	
+	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
+	PawnSensor->SightRadius = 45.0f;
+	PawnSensor->SetPeripheralVisionAngle(45.f);
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +43,13 @@ void ASevarog::BeginPlay()
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	
 	EnemyController = Cast<AAIController>(GetController());
+
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, TEXT("EnemyCharacter"));
+	}
+	FScriptDelegate fScriptDelegate;
+	fScriptDelegate.BindUFunction(this, "OnSeePawn");
+
 	/*GetCharacterMovement()->MaxWalkSpeed = 300.f;*/
 	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
@@ -206,7 +215,11 @@ void ASevarog::Patrol()
 	FNavLocation RandomLocation;
 	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) 
 	{
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
+		//UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
+		FAIMoveRequest MoveRequest;
+		MoveRequest.SetGoalLocation(RandomLocation);
+		MoveRequest.SetAcceptanceRadius(10.0f);
+		EnemyController->MoveTo(MoveRequest);
 	}
 	SearchInterval = 5.0f;
 	State = ESevarogState::E_Undefine;
@@ -241,6 +254,7 @@ void ASevarog::Die()
 
 void ASevarog::StateRefresh()
 {
+	AnimInstance->StopAllMontages(1.0f);
 	UE_LOG(LogTemp, Warning, TEXT("State Refresh"));
 	State = ESevarogState::E_Idle;
 }
@@ -268,6 +282,8 @@ void ASevarog::Chase_Attack()
 {
 	if (IsAttacking)
 		return;
+	AnimInstance->StopAllMontages(1.0f);
+
 	State = ESevarogState::E_Attack;
 	//UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
 }

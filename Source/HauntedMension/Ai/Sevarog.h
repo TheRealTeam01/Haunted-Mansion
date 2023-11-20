@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Runtime/AIModule/Classes/Perception/PawnSensingComponent.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "Sevarog.generated.h"
@@ -93,6 +94,9 @@ private:
 	class UAttributeComponent* Stat;
 
 public:
+	UPROPERTY(VisibleAnywhere, Category=Awareness)
+	UPawnSensingComponent* PawnSensor;
+
 	UPROPERTY()
 	float UpDownValue;
 
