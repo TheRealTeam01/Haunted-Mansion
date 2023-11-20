@@ -476,6 +476,9 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 		else
 		{
 			PlayHitMontage(ImpactPoint);
+
+			GetCharacterMovement()->DisableMovement();
+			GetWorld()->GetTimerManager().SetTimer(HitHandle, [this]() {GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); }, HitDelay, false);
 		}
 	}
 	
@@ -644,15 +647,17 @@ float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	}
 	if (HitSound)
 	{
+		PlayHitMontage(GetActorLocation());
+
+		GetCharacterMovement()->DisableMovement();
+		GetWorld()->GetTimerManager().SetTimer(HitHandle, [this]() {GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); }, HitDelay, false);
+
 		UGameplayStatics::PlaySoundAtLocation(
 			GetWorld(),
 			HitSound,
 			GetActorLocation());
 	}
-	if (StatComponent->IsDead() && DeathMontage)
-	{
-		Die();
-	}
+
 	return DamageAmount;
 }
 

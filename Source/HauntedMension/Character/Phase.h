@@ -102,7 +102,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 		float Speed;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TScriptInterface<IInteractInterface> InteractItem;
 
 	UPROPERTY(VisibleAnywhere)
@@ -143,6 +143,10 @@ protected:
 
 	class UHMOverlay* HMOverlay;
 
+	FTimerHandle HitHandle;
+
+	UPROPERTY(EditAnywhere)
+		float HitDelay = 0.2f;
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)

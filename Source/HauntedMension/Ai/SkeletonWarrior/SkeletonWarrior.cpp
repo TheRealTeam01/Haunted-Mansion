@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HauntedMension/Character/Phase.h"
+#include "Kismet/GameplayStatics.h"
 
 ASkeletonWarrior::ASkeletonWarrior()
 {
@@ -215,16 +216,13 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 	if (HitResult.bBlockingHit && HitResult.GetActor())
 	{
 		if (HitResult.GetActor()->ActorHasTag(FName("Skeleton"))) return;
-	
+
 		TScriptInterface<IHitInterface> Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
 		if (Interface)
 		{
-			Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), Damage, Controller, this, UDamageType::StaticClass());
 		}
 	}
-
-
 }
 
 FVector ASkeletonWarrior::GetTargetRotation()

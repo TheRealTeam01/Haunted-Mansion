@@ -146,7 +146,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	USphereComponent* LeftHandSphere;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		bool IsAttacking = false;
 
 	/* AI */
@@ -160,13 +160,16 @@ protected:
 	/* Motion Warping */
 
 	UFUNCTION(BlueprintCallable)
-		FVector GetTargetRotation();
+	FVector GetTargetRotation();
 	
 	UFUNCTION(BlueprintCallable)
-		FVector GetTargetLocation();
+	FVector GetTargetLocation();
 
 	UPROPERTY(EditAnywhere)
 		float WarpDistance = 80.f;
+	
+	UPROPERTY(EditAnywhere)
+		float DistanceToTarget = 150.f;
 
 public:	
 	
