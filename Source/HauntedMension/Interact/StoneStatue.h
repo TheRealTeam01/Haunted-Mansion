@@ -9,6 +9,7 @@ class UCurveFloat;
 class USoundBase;
 class UParticleSystem;
 class UParticleSystemComponent;
+class USplineComponent;
 
 /**
  * 

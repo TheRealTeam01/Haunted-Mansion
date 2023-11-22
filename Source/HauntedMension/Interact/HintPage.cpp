@@ -24,24 +24,21 @@ void AHintPage::Interact()
 				APhase* Player = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 				if (Player)
 				{
-					Player->GetCharacterMovement()->DisableMovement();
-					HintPage->AddToViewport();
-					IsReading = true;
+					if (!IsReading)
+					{
+						Player->GetCharacterMovement()->DisableMovement();
+						HintPage->AddToViewport();
+						IsReading = true;
+					}
+					else
+					{
+						Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+						HintPage->RemoveFromParent();
+						IsReading = false;
+					}
 				}
 			}
 		}
 	}
-	else
-	{
-		AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		if (Controller)
-		{
-			UUserWidget* HintPage = CreateWidget<UUserWidget>(Controller, HintPageWidget);
-			if (HintPage)
-			{
-				HintPage->RemoveFromParent();
-				IsReading = false;
-			}
-		}
-	}
+
 }
