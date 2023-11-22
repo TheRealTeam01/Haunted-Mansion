@@ -5,20 +5,31 @@
 #include "NavigationSystem.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 ASevarogAIController::ASevarogAIController() 
 {
-	// Blackboard�� �����´�
-	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BT(TEXT("/Script/AIModule.BehaviorTree'/Game/HauntedMansion/Ai/BT_Sevarog.BT_Sevarog"));
-	if (BT.Succeeded()) {
-		UE_LOG(LogTemp, Warning, TEXT("BB Binding"));
-		BehaviorTree = BT.Object;
+	static ConstructorHelpers::FObjectFinder<UBlackboardData> BD(TEXT("/Script/AIModule.BlackboardData'/Game/HauntedMansion/Ai/BB_Sevarog.BB_Sevarog'"));
+	if (BD.Succeeded())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BB Success"));
+		BlackboardData = BD.Object;
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("BB Failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UBlackboardData> BD(TEXT("/Script/AIModule.BlackboardData'/Game/HauntedMansion/Ai/BB_Sevarog.BB_Sevarog"));
-	if (BD.Succeeded()) {
-		BlackboardData = BD.Object;
+	// Blackboard�� �����´�
+	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BT(TEXT("/Script/AIModule.BehaviorTree'/Game/HauntedMansion/Ai/BT_Sevarog.BT_Sevarog'"));
+	if (BT.Succeeded()) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BT Success"));
+		BehaviorTree = BT.Object;
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BT Failed"));
 	}
 }
 

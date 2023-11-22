@@ -3,6 +3,7 @@
 
 #include "Sevarog.h"
 #include "SevarogAnimInstance.h"
+#include "SevarogAIController.h"
 #include "NavigationSystem.h"
 #include "Components/CapsuleComponent.h"
 #include "AIController.h"
@@ -34,6 +35,9 @@ ASevarog::ASevarog()
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
 	PawnSensor->SightRadius = 45.0f;
 	PawnSensor->SetPeripheralVisionAngle(45.f);
+
+	AIControllerClass = ASevarogAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 // Called when the game starts or when spawned
