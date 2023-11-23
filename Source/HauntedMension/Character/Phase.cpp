@@ -323,6 +323,7 @@ void APhase::PlayReloadMontage()
 			}
 			else
 			{
+				UE_LOG(LogTemp, Error, TEXT("FinishReload"));
 				FinishReload();
 			}
 		});
@@ -510,7 +511,6 @@ void APhase::SetActionState()
 		break;
 	}
 
-
 }
 
 void APhase::UpdateHUDAmmo()
@@ -675,7 +675,7 @@ void APhase::Die()
 		GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		ActorHasTag(FName("Dead"));
-
+		
 		HMController->SetHUDDie();
 	}
 }

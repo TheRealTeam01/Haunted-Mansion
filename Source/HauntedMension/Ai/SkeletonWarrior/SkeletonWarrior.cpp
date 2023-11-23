@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HauntedMension/Character/Phase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/CapsuleComponent.h"
 
 ASkeletonWarrior::ASkeletonWarrior()
 {
@@ -102,8 +103,10 @@ void ASkeletonWarrior::BeginPlay()
 
 void ASkeletonWarrior::GetHit_Implementation(const FVector& ImpactPoint)
 {
+	if (IsDying) return;
+
 	DissolveTimeline->Deactivate();
-	IsDying = true;
+	
 	Die();
 
 }
@@ -143,8 +146,10 @@ void ASkeletonWarrior::Die()
 	}
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->DisableMovement();
+	IsDying = true;
 
 	DieTimeline->PlayFromStart();
 
@@ -154,21 +159,26 @@ void ASkeletonWarrior::Die()
 		AnimInstance->Montage_Play(DieMontage);
 	}
 
-	FOnMontageEnded MontageEnded;
-	MontageEnded.BindLambda([this] (UAnimMontage* AnimMontage, bool bInterrupted)
+	FOnMontageEnded MontageEnd;
+	MontageEnd.BindWeakLambda(this, [this](UAnimMontage* Animmontage, bool bInterrupted)
 		{
-			if (bInterrupted)
+			if (bInterrupted) 
 			{
+
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Destroy"));
 				Destroy();
 			}
-			else Destroy();
-		}
-	);
-	AnimInstance->Montage_SetEndDelegate(MontageEnded, DieMontage);
+		});
+	AnimInstance->Montage_SetEndDelegate(MontageEnd, DieMontage);
 }
 
 void ASkeletonWarrior::StandUp()
 {
+	if (IsStanding) return;
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && StandUpMontage)
 	{
