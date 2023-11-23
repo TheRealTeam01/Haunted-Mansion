@@ -2,6 +2,9 @@
 
 
 #include "Sevarog.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
+#include "HauntedMension/Character/Phase.h"
 #include "SevarogAnimInstance.h"
 #include "SevarogAIController.h"
 #include "NavigationSystem.h"
@@ -32,10 +35,6 @@ ASevarog::ASevarog()
 		GetMesh()->SetSkeletalMesh(SM.Object);
 	}
 
-	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
-	PawnSensor->SightRadius = 45.0f;
-	PawnSensor->SetPeripheralVisionAngle(45.f);
-
 	AIControllerClass = ASevarogAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
@@ -45,17 +44,6 @@ void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	
-	EnemyController = Cast<AAIController>(GetController());
-
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, TEXT("EnemyCharacter"));
-	}
-	FScriptDelegate fScriptDelegate;
-	fScriptDelegate.BindUFunction(this, "OnSeePawn");
-
-	/*GetCharacterMovement()->MaxWalkSpeed = 300.f;*/
-	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
 }
 
 void ASevarog::PostInitializeComponents()
@@ -74,28 +62,6 @@ void ASevarog::PostInitializeComponents()
 void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	float Count = FApp::GetDeltaTime();
-	SearchInterval -= Count;
-
-	switch (State) 
-	{
-	case ESevarogState::E_Idle:
-		Idle();
-		break;
-	case ESevarogState::E_Patrol:
-		if (SearchInterval <= 0.0f)
-			Patrol();
-		break;
-	case ESevarogState::E_Chase:
-		Chase(Player);
-		break;
-	case ESevarogState::E_Attack:
-		Attack();
-		break;
-	default:
-		StateRefresh();
-		break;
-	}
 }
 
 // Called to bind functionality to input
@@ -127,10 +93,11 @@ void ASevarog::Attack()
 	if (IsAttacking)
 		return;
 
-	AnimInstance->PlayAttackMontage();
-	/*GetCharacterMovement()->MaxWalkSpeed = 1.0f;*/
+	APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	//State = ESevarogState::E_Idle;
+	AnimInstance->PlayAttackMontage();
+	FVector TargetLocation = Target->GetActorLocation();
+	SetActorRotation(TargetLocation.Rotation());
 	IsAttacking = true;
 }
 
@@ -163,7 +130,6 @@ void ASevarog::AttackCheck()
 		{
 			Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
 		}
-		//FDamageEvent DamageEvent;
 	}
 }
 
@@ -188,13 +154,13 @@ void ASevarog::Idle()
 	if (VectorSize > SearchRange) 
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
-		Idle_Patrol();
+		//Idle_Patrol();
 	}
 
 	if (VectorSize < SearchRange) 
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
-		Idle_Chase();
+		//Idle_Chase();
 	}
 }
 
@@ -241,7 +207,7 @@ void ASevarog::Chase(AActor* Target)
 
 	if (VectorSize < AttackDist)
 	{
-		Chase_Attack();
+		//Chase_Attack();
 	}
 
 	FAIMoveRequest MoveRequest;
@@ -263,34 +229,6 @@ void ASevarog::StateRefresh()
 	State = ESevarogState::E_Idle;
 }
 
-void ASevarog::Idle_Chase()
-{	
-	State = ESevarogState::E_Chase;
-}
-
-// 여기서 가장 가까운 지점을 정찰하도록 위치를 지정해준다
-void ASevarog::Idle_Patrol()
-{
-	State = ESevarogState::E_Patrol;
-	//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
-}
-
-void ASevarog::Patrol_Chase()
-{
-	State = ESevarogState::E_Chase;
-	//UE_LOG(LogTemp, Warning, TEXT("State Patrol to Chase"));
-}
-
-// Ÿ�ٰ��� �Ÿ��� �������� �Ÿ����� ������ ����
-void ASevarog::Chase_Attack()
-{
-	if (IsAttacking)
-		return;
-	AnimInstance->StopAllMontages(1.0f);
-
-	State = ESevarogState::E_Attack;
-	//UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
-}
 
 
 void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)
@@ -315,12 +253,6 @@ void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 		AnimInstance->Montage_Play(HitMontage);
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	}
-	AActor* Target = Player;
-
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(10.0f);
-	EnemyController->MoveTo(MoveRequest);
 }
 
 float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

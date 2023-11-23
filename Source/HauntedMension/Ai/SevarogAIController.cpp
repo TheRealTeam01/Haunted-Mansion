@@ -8,6 +8,8 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
+const FName ASevarogAIController::TargetKey(TEXT("Target"));
+
 ASevarogAIController::ASevarogAIController() 
 {
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> BD(TEXT("/Script/AIModule.BlackboardData'/Game/HauntedMansion/Ai/BB_Sevarog.BB_Sevarog'"));

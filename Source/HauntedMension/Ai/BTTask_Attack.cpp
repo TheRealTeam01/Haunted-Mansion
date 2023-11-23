@@ -16,7 +16,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	auto SevarogCharacter = Cast<ASevarog>(OwnerComp.GetAIOwner()->GetPawn());
 	if (SevarogCharacter == nullptr)
 		return EBTNodeResult::Failed;
-
+	
 	SevarogCharacter->Attack();
 	bIsAttacking = true;
 

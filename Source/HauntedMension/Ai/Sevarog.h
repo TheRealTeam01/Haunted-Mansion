@@ -52,11 +52,6 @@ public:
 	void Die();
 	void StateRefresh();
 
-	// ���� ���� �Լ�
-	void Idle_Chase();
-	void Idle_Patrol();
-	void Patrol_Chase();
-	void Chase_Attack();
 	// ���¸ӽ��� AIController���� ó���Ѵ�.
 	// ���ݻ��°� ����Ǹ� ��������Ʈ�� ���� �˸���.
 	UFUNCTION()
