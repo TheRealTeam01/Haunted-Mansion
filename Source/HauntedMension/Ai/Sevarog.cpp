@@ -15,6 +15,7 @@
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "Kismet/GamePlayStatics.h"
 #include "Math/Vector.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Attribute/AttributeComponent.h"
@@ -37,6 +38,7 @@ ASevarog::ASevarog()
 
 	AIControllerClass = ASevarogAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 }
 
 // Called when the game starts or when spawned
@@ -55,13 +57,18 @@ void ASevarog::PostInitializeComponents()
 		AnimInstance->OnMontageEnded.AddDynamic(this, &ASevarog::OnAttackMontageEnded);
 		AnimInstance->OnAttackHit.AddUObject(this, &ASevarog::AttackCheck);
 	}
-	
 }
 
 // Called every frame
 void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	SearchInterval -= DeltaTime;
+	if (SearchInterval < 0.0f) {
+		SearchInterval = 5.0f;
+		if (GetCharacterMovement()->MaxWalkSpeed == 0.0f)
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
 }
 
 // Called to bind functionality to input
@@ -99,6 +106,7 @@ void ASevarog::Attack()
 	FVector TargetLocation = Target->GetActorLocation();
 	SetActorRotation(TargetLocation.Rotation());
 	IsAttacking = true;
+	
 }
 
 // 공격이 플레이어에게 닿았는지 직접 판단하는 부분
@@ -134,36 +142,6 @@ void ASevarog::AttackCheck()
 }
 
 
-void ASevarog::Idle()
-{
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
-
-	// �켱 �Ÿ��� üũ�Ѵ�
-	FVector myLocation = GetActorLocation();
-	// �÷����̸� ã�ƿͼ� 
-	FVector TargetVector = Player->GetActorLocation();
-	FVector Distance = TargetVector - myLocation;
-	float VectorSize = Distance.Size();
-
-	if (Player == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player is nullptr"));
-		return;
-	}
-
-	if (VectorSize > SearchRange) 
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
-		//Idle_Patrol();
-	}
-
-	if (VectorSize < SearchRange) 
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
-		//Idle_Chase();
-	}
-}
-
 // ������ Ư�� ������ ���������� �׳� �ܼ� �̵��Ѵ�
 void ASevarog::Patrol()
 {
@@ -186,10 +164,10 @@ void ASevarog::Patrol()
 	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) 
 	{
 		//UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
-		FAIMoveRequest MoveRequest;
-		MoveRequest.SetGoalLocation(RandomLocation);
-		MoveRequest.SetAcceptanceRadius(10.0f);
-		EnemyController->MoveTo(MoveRequest);
+		//FAIMoveRequest MoveRequest;
+		//MoveRequest.SetGoalLocation(RandomLocation);
+		//MoveRequest.SetAcceptanceRadius(10.0f);
+		//EnemyController->MoveTo(MoveRequest);
 	}
 	SearchInterval = 5.0f;
 	State = ESevarogState::E_Undefine;
@@ -210,10 +188,10 @@ void ASevarog::Chase(AActor* Target)
 		//Chase_Attack();
 	}
 
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(10.0f);
-	EnemyController->MoveTo(MoveRequest);
+	//FAIMoveRequest MoveRequest;
+	//MoveRequest.SetGoalActor(Target);
+	//MoveRequest.SetAcceptanceRadius(10.0f);
+	//EnemyController->MoveTo(MoveRequest);
 }
 
 void ASevarog::Die()

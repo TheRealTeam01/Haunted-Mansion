@@ -46,7 +46,7 @@ public:
 	void AttackCheck();
 	
 	// ���� ���� üũ�� ���� �ൿ ����
-	void Idle();
+	//void Idle();
 	void Patrol();
 	void Chase(AActor* Target);
 	void Die();
@@ -77,7 +77,7 @@ private:
 	float SearchRange = 500.0f;
 
 	UPROPERTY()
-	float SearchInterval;
+	float SearchInterval = 3.0f;
 
 	UPROPERTY()
 	class USevarogAnimInstance* AnimInstance;
