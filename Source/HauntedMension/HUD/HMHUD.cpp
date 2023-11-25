@@ -5,22 +5,27 @@
 #include "Blueprint/UserWidget.h"
 #include "HMOverlay.h"
 #include "HMDeath.h"
+#include "HauntedMension/Controller/HMController.h"
 
 void AHMHUD::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 
-	PlayerController = PlayerController == nullptr ? GetWorld()->GetFirstPlayerController() : PlayerController;
-	if (PlayerController && HMOverlayClass)
+	AHMController* HMController = Cast<AHMController>(GetWorld()->GetFirstPlayerController());
+	if (HMController)
 	{
-		HMOverlay = CreateWidget<UHMOverlay>(PlayerController, HMOverlayClass);
-		HMOverlay->AddToViewport();
+		if (HMOverlayClass)
+		{
+			HMOverlay = CreateWidget<UHMOverlay>(HMController, HMOverlayClass);
+			HMOverlay->AddToViewport();
+		}
+
+		if (HMDeathClass)
+		{
+			HMDeath = CreateWidget<UHMDeath>(HMController, HMDeathClass);
+			HMDeath->AddToViewport();
+			HMDeath->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 
-	if (PlayerController && HMDeathClass)
-	{
-		HMDeath = CreateWidget<UHMDeath>(PlayerController, HMDeathClass);
-		HMDeath->AddToViewport();
-		HMDeath->SetVisibility(ESlateVisibility::Hidden);
-	}
 }

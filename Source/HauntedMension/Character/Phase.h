@@ -10,6 +10,8 @@
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "Phase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
+
 class IInteractInterface;
 class UPawnNoiseEmitterComponent;
 
@@ -31,6 +33,12 @@ public:
 	TSubclassOf<class AWeapon> Weapon;
 
 	void PlayPickUpMontage();
+
+	UPROPERTY(BlueprintAssignable, BlueprintReadOnly)
+	FOnHealthChanged OnHealthChanged;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		EKeyState KeyState = EKeyState::EKS_UnEquippedKey;
 
 protected:
 	virtual void BeginPlay() override;
@@ -120,9 +128,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		EActionState ActionState = EActionState::EAS_Unoccupied;
 
-	UPROPERTY(VisibleAnywhere)
-		EKeyState KeyState = EKeyState::EKS_UnEquippedKey;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		EDeathState DeathState = EDeathState::EDS_Alive;
 
@@ -146,7 +151,11 @@ protected:
 	FTimerHandle HitHandle;
 
 	UPROPERTY(EditAnywhere)
-		float HitDelay = 0.2f;
+	float HitDelay = 0.2f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UAttributeComponent* StatComponent;
+
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -192,9 +201,6 @@ private:
 		class UCameraComponent* Camera;
 
 	UCharacterMovementComponent* CharacterMovement;
-
-	UPROPERTY(VisibleAnywhere)
-	class UAttributeComponent* StatComponent;
 
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* PickupMontage;

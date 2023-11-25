@@ -478,7 +478,18 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 		{
 			PlayHitMontage(ImpactPoint);
 
+			OnHealthChanged.Broadcast();
+
+			if (HitSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(
+					GetWorld(),
+					HitSound,
+					GetActorLocation());
+			}
+
 			GetCharacterMovement()->DisableMovement();
+
 			GetWorld()->GetTimerManager().SetTimer(HitHandle, [this]() {GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); }, HitDelay, false);
 		}
 	}
@@ -640,23 +651,6 @@ void APhase::ReportNoise(USoundBase* Sound, float Volume)
 float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	StatComponent->CalculateDamage(DamageAmount);
-	HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
-	if (HMController)
-	{
-		HMController->SetHUDHealth(StatComponent->GetHealthPercent());
-	}
-	if (HitSound)
-	{
-		PlayHitMontage(GetActorLocation());
-
-		GetCharacterMovement()->DisableMovement();
-		GetWorld()->GetTimerManager().SetTimer(HitHandle, [this]() {GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); }, HitDelay, false);
-
-		UGameplayStatics::PlaySoundAtLocation(
-			GetWorld(),
-			HitSound,
-			GetActorLocation());
-	}
 
 	return DamageAmount;
 }
@@ -738,6 +732,7 @@ void APhase::Tick(float DeltaTime)
 		if (HMController && StatComponent)
 		{
 			StatComponent->RegenStamina(DeltaTime);
+			StatComponent->RegenHealth(DeltaTime);
 			HMController->SetHUDStamina(StatComponent->GetStaminaPercent());
 		}
 	}

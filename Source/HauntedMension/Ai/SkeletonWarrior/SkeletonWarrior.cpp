@@ -191,7 +191,7 @@ void ASkeletonWarrior::StandUp()
 			if (bInterrupted)
 			{
 
-			}
+			} 
 			else
 			{
 				IsStanding = true;
@@ -230,6 +230,7 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 		TScriptInterface<IHitInterface> Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
 		if (Interface)
 		{
+			Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), Damage, Controller, this, UDamageType::StaticClass());
 		}
 	}

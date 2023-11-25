@@ -19,12 +19,10 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
-
-private:
-
-	UPROPERTY(EditAnywhere)
-		float Health = 100.f;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float Health = 100.f;
+
 	UPROPERTY(EditAnywhere)
 		float MaxHealth = 100.f;
 
@@ -36,6 +34,13 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		float RegenStaminaCost = 5.f;
+	
+	UPROPERTY(EditAnywhere)
+		float RegenHealthCost = 10.f;
+
+private:
+
+
 
 public:
 
@@ -48,6 +53,8 @@ public:
 	void CalculateDamage(float Damage);
 
 	void RegenStamina(float DeltaTime);
+
+	void RegenHealth(float DeltaTime);
 
 	void SpendStamina(float DeltaTime);
 

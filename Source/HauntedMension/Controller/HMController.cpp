@@ -41,16 +41,6 @@ void AHMController::SetHUDHealth(float HealthPercent)
 	bool bValidHUD = HMHUD &&
 		HMHUD->HMOverlay &&
 		HMHUD->HMOverlay->HPBar;
-
-	if (bValidHUD)
-	{
-		if (HealthPercent < 1.f)
-		{
-			HMHUD->HMOverlay->ShowBloodSplatter(HealthPercent);
-		}
-
-		HMHUD->HMOverlay->HPBar->SetPercent(HealthPercent);
-	}
 }
 
 void AHMController::SetHUDStamina(float StaminaPercent)
