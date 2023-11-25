@@ -144,7 +144,7 @@ void ASevarog::AttackCheck()
 
 void ASevarog::PlayerDieCheck()
 {
-	if (Player->ActorHasTag("Die"))
+	if (Player->ActorHasTag("Dead"))
 		Player = nullptr;
 }
 

@@ -4,8 +4,8 @@
 #include "HauntedMension/Ai/BTDecorator_CanAttack.h"
 #include "SevarogAIController.h"
 #include "Kismet/GamePlayStatics.h"
-#include "Sevarog.h"
 #include "HauntedMension/Character/Phase.h"
+#include "Sevarog.h"
 #include "BehaviorTree/BTDecorator.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -17,13 +17,16 @@ UBTDecorator_CanAttack::UBTDecorator_CanAttack()
 bool UBTDecorator_CanAttack::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
 	bool bResult = Super::CalculateRawConditionValue(OwnerComp, NodeMemory);
-
+	
 	auto CurrentPawn = OwnerComp.GetAIOwner()->GetPawn();
 	if (CurrentPawn == nullptr)
 		return false;
 
 	auto Target = Cast<APhase>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(FName(TEXT("Target"))));
-	if (Target == nullptr || Target->ActorHasTag(FName("Dead")))
+	if (Target == nullptr)
+		return false;
+
+	if (Target->ActorHasTag(FName("Dead")))
 		return false;
 
 	return bResult = CurrentPawn->GetDistanceTo(Target) <= 200.f;

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
+#include "HauntedMension/Character/Phase.h"
 #include "BTService_SearchTarget.generated.h"
 
 /**

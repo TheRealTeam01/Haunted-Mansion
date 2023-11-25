@@ -4,6 +4,7 @@
 #include "HauntedMension/Ai/BTService_SearchTarget.h"
 #include "SevarogAIController.h"
 #include "Sevarog.h"
+#include "Kismet/GamePlayStatics.h"
 #include "HauntedMension/Character/Phase.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "DrawDebugHelpers.h"
@@ -46,6 +47,7 @@ void UBTService_SearchTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 		for (auto& OverlapResult : OverlapResults) 
 		{
 			APhase* PlayerCharacter = Cast<APhase>(OverlapResult.GetActor());
+
 			if (PlayerCharacter && PlayerCharacter->GetController()->IsPlayerController()) 
 			{
 				OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), PlayerCharacter);

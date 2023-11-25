@@ -674,7 +674,8 @@ void APhase::Die()
 		
 		GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
-		ActorHasTag(FName("Dead"));
+		//ActorHasTag(FName("Dead"));
+		Tags.Add(FName(TEXT("Dead")));
 		
 		HMController->SetHUDDie();
 	}

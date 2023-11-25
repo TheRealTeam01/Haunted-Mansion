@@ -19,7 +19,4 @@ private:
 	UBTDecorator_CanAttack();
 
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const;
-
-private:
-	ACharacter* Player;
 };
