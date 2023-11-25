@@ -29,10 +29,11 @@ ADoor::ADoor()
 void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	TimelineUpdate.BindDynamic(this, &ADoor::InteractDoor); //DoorTimelineUpdate에 BindFunction
 
 	if (CurveFloat)
 	{
-		TimelineUpdate.BindDynamic(this, &ADoor::InteractDoor); //DoorTimelineUpdate에 BindFunction
 		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate); // DoorCurveFloat동안 DoorTimelineUpdate에 Bind된 Function을 실행.
 		TimelineFinish.BindUFunction(this, FName("ChangeState")); //Timeline이 끝나면 호출되는 함수 바인드
 		Timeline.SetTimelineFinishedFunc(TimelineFinish);

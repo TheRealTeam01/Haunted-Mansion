@@ -24,6 +24,7 @@
 #include "HauntedMension/Interact/PickUp/DoorKey.h"
 #include "HauntedMension/Interfaces/InteractInterface.h"
 #include "Components/TextBlock.h"
+#include "Components/PawnNoiseEmitterComponent.h"
 
 APhase::APhase()
 {
@@ -33,7 +34,6 @@ APhase::APhase()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetGenerateOverlapEvents(true);
-	
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetMesh());
@@ -48,6 +48,8 @@ APhase::APhase()
 	CharacterMovement->MaxWalkSpeed = 150.f;
 
 	StatComponent = CreateDefaultSubobject<UAttributeComponent>("Attributes");
+
+	NoiseEmitterComponent = CreateDefaultSubobject<UPawnNoiseEmitterComponent>("Pawn Noise Emitter Component");
 
 	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 
@@ -317,9 +319,11 @@ void APhase::PlayReloadMontage()
 			if (bInterrupted) // �����ϴ� �߰��� �ǰ��� ���.
 			{
 				ActionState = EActionState::EAS_Unoccupied;
+				GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 			}
 			else
 			{
+				UE_LOG(LogTemp, Error, TEXT("FinishReload"));
 				FinishReload();
 			}
 		});
@@ -473,6 +477,9 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 		else
 		{
 			PlayHitMontage(ImpactPoint);
+
+			GetCharacterMovement()->DisableMovement();
+			GetWorld()->GetTimerManager().SetTimer(HitHandle, [this]() {GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); }, HitDelay, false);
 		}
 	}
 	
@@ -503,7 +510,6 @@ void APhase::SetActionState()
 		bUseControllerRotationYaw = true;
 		break;
 	}
-
 
 }
 
@@ -621,6 +627,16 @@ void APhase::EndPickUp()
 	}
 }
 
+void APhase::ReportNoise(USoundBase* Sound, float Volume)
+{
+	if (Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, GetActorLocation(), Volume);
+	}
+
+	NoiseEmitterComponent->MakeNoise(this, Volume, GetActorLocation());
+}
+
 float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	StatComponent->CalculateDamage(DamageAmount);
@@ -631,15 +647,17 @@ float APhase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	}
 	if (HitSound)
 	{
+		PlayHitMontage(GetActorLocation());
+
+		GetCharacterMovement()->DisableMovement();
+		GetWorld()->GetTimerManager().SetTimer(HitHandle, [this]() {GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); }, HitDelay, false);
+
 		UGameplayStatics::PlaySoundAtLocation(
 			GetWorld(),
 			HitSound,
 			GetActorLocation());
 	}
-	if (StatComponent->IsDead() && DeathMontage)
-	{
-		Die();
-	}
+
 	return DamageAmount;
 }
 
@@ -657,7 +675,7 @@ void APhase::Die()
 		GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		ActorHasTag(FName("Dead"));
-
+		
 		HMController->SetHUDDie();
 	}
 }

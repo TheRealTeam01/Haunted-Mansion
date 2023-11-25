@@ -11,6 +11,7 @@
 #include "Phase.generated.h"
 
 class IInteractInterface;
+class UPawnNoiseEmitterComponent;
 
 UCLASS()
 class HAUNTEDMENSION_API APhase : public ACharacter, public IHitInterface
@@ -85,6 +86,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void EndPickUp();
 
+	UFUNCTION(BlueprintCallable)
+	void ReportNoise(USoundBase* Sound, float Volume);
+
+	UPROPERTY(VisibleAnywhere)
+		UPawnNoiseEmitterComponent* NoiseEmitterComponent;
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void Die();
@@ -95,7 +102,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 		float Speed;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TScriptInterface<IInteractInterface> InteractItem;
 
 	UPROPERTY(VisibleAnywhere)
@@ -131,19 +138,15 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	ETurnInPlace TurnInPlace;
 
-	//UPROPERTY(BlueprintReadOnly)
-	//AFlashLight* FlashLight;
-
-	//UPROPERTY(VisibleAnywhere)
-	//	class ADoorKey* Key;
-
-	//UPROPERTY(VisibleAnywhere)
-	//	class ADoor* Door;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool bAiming;
 
 	class UHMOverlay* HMOverlay;
+
+	FTimerHandle HitHandle;
+
+	UPROPERTY(EditAnywhere)
+		float HitDelay = 0.2f;
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -219,7 +222,6 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 		float MaxHP = 100.f;
-
 
 	float AO_Yaw;
 	float AO_Pitch;

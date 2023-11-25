@@ -1,6 +1,7 @@
 #include "StoneStatue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/SplineComponent.h"
 
 AStoneStatue::AStoneStatue()
 {
@@ -24,8 +25,7 @@ void AStoneStatue::Interact()
 		Timeline.PlayFromStart();
 		
 		IsMove = true;
-		
-		UE_LOG(LogTemp, Warning, TEXT("StoneStatue"));
+
 	}
 }
 
@@ -42,6 +42,7 @@ void AStoneStatue::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Timeline.TickTimeline(DeltaTime);
+
 }
 
 void AStoneStatue::PlayCameraShake()
