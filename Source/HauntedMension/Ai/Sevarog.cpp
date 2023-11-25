@@ -38,13 +38,13 @@ ASevarog::ASevarog()
 
 	AIControllerClass = ASevarogAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 }
 
 // Called when the game starts or when spawned
 void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 }
 
@@ -64,6 +64,7 @@ void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	SearchInterval -= DeltaTime;
+
 	if (SearchInterval < 0.0f) {
 		SearchInterval = 5.0f;
 		if (GetCharacterMovement()->MaxWalkSpeed == 0.0f)
@@ -141,36 +142,10 @@ void ASevarog::AttackCheck()
 	}
 }
 
-
-// ������ Ư�� ������ ���������� �׳� �ܼ� �̵��Ѵ�
-void ASevarog::Patrol()
+void ASevarog::PlayerDieCheck()
 {
-	FVector PlayerVector = Player->GetActorLocation();
-	FVector MyVector = GetActorLocation();
-	FVector DistVector = PlayerVector - MyVector;
-
-	FQuat Dir = DistVector.ToOrientationQuat();
-
-	float DistSize = DistVector.Size();
-	if (DistSize < SearchRange)
-		StateRefresh();
-
-	FVector GoalLocation;
-	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-	if (NavSystem == nullptr)
-		return;
-
-	FNavLocation RandomLocation;
-	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) 
-	{
-		//UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
-		//FAIMoveRequest MoveRequest;
-		//MoveRequest.SetGoalLocation(RandomLocation);
-		//MoveRequest.SetAcceptanceRadius(10.0f);
-		//EnemyController->MoveTo(MoveRequest);
-	}
-	SearchInterval = 5.0f;
-	State = ESevarogState::E_Undefine;
+	if (Player->ActorHasTag("Die"))
+		Player = nullptr;
 }
 
 // �߰� ���¿��� ���� ����
@@ -206,7 +181,6 @@ void ASevarog::StateRefresh()
 	UE_LOG(LogTemp, Warning, TEXT("State Refresh"));
 	State = ESevarogState::E_Idle;
 }
-
 
 
 void ASevarog::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterruppted)

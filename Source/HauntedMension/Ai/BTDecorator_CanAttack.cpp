@@ -3,8 +3,10 @@
 
 #include "HauntedMension/Ai/BTDecorator_CanAttack.h"
 #include "SevarogAIController.h"
+#include "Kismet/GamePlayStatics.h"
 #include "Sevarog.h"
 #include "HauntedMension/Character/Phase.h"
+#include "BehaviorTree/BTDecorator.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTDecorator_CanAttack::UBTDecorator_CanAttack()

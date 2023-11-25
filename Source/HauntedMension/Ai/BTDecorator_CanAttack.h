@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTDecorator.h"
+#include "HauntedMension/Character/Phase.h"
 #include "BTDecorator_CanAttack.generated.h"
 
 /**
@@ -18,4 +19,7 @@ private:
 	UBTDecorator_CanAttack();
 
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const;
+
+private:
+	ACharacter* Player;
 };

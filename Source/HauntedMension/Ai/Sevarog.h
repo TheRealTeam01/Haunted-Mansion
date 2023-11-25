@@ -44,10 +44,9 @@ public:
 
 	void Attack();
 	void AttackCheck();
-	
+	void PlayerDieCheck();
+
 	// ���� ���� üũ�� ���� �ൿ ����
-	//void Idle();
-	void Patrol();
 	void Chase(AActor* Target);
 	void Die();
 	void StateRefresh();
