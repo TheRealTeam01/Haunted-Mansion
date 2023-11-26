@@ -100,7 +100,8 @@ void AFlashLight::Equip(USceneComponent* Inparent, AActor* NewOwner, APawn* NewI
 
 	Mesh->AttachToComponent(Inparent, AttachmentRules, FName("LeftHandSocket"));
 
-	InteractSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//InteractSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	//EnableCustomDepth(false);
 }
