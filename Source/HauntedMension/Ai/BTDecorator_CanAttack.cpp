@@ -23,11 +23,8 @@ bool UBTDecorator_CanAttack::CalculateRawConditionValue(UBehaviorTreeComponent& 
 		return false;
 
 	auto Target = Cast<APhase>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(FName(TEXT("Target"))));
-	if (Target == nullptr)
+	if (Target == nullptr || Target->ActorHasTag(FName("Dead")))
 		return false;
 
-	if (Target->ActorHasTag(FName("Dead")))
-		return false;
-
-	return bResult = CurrentPawn->GetDistanceTo(Target) <= 200.f;
+	return bResult && Target->GetDistanceTo(CurrentPawn) <= 200.0f;
 }

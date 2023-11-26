@@ -15,7 +15,7 @@ class HAUNTEDMENSION_API UBTDecorator_CanAttack : public UBTDecorator
 {
 	GENERATED_BODY()
 	
-private:
+public:
 	UBTDecorator_CanAttack();
 
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const;
