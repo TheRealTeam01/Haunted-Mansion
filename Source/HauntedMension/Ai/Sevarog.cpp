@@ -101,11 +101,9 @@ void ASevarog::Attack()
 	if (IsAttacking)
 		return;
 
-	APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
 	AnimInstance->PlayAttackMontage();
-	FVector TargetLocation = Target->GetActorLocation();
-	SetActorRotation(TargetLocation.Rotation());
 	IsAttacking = true;
 	
 }
@@ -117,7 +115,7 @@ void ASevarog::AttackCheck()
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	float AttackRadius = 50.0f;
+	float AttackRadius = 60.0f;
 
 	bool bResult = GetWorld()->SweepSingleByChannel(
 		OUT HitResult,
