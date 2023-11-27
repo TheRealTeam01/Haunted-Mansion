@@ -14,6 +14,8 @@ ABook::ABook()
 	SetRootComponent(Root);
 
 	Mesh->SetupAttachment(Root);
+
+
 }
 
 void ABook::BeginPlay()

@@ -10,6 +10,7 @@
 class UAnimMontage;
 class UCurveFloat;
 class USoundBase;
+class UCameraComponent;
 
 /**
  * 

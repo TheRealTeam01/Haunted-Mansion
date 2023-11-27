@@ -5,10 +5,12 @@
 #include "HauntedMension/Controller/HMController.h"
 #include "HauntedMension/HUD/HMHUD.h"
 #include "Gameframework/CharacterMovementComponent.h"
+#include "Camera/CameraComponent.h"
 
 AHintPage::AHintPage()
 {
-
+	InteractCamera = CreateDefaultSubobject<UCameraComponent>("Interact Camera");
+	InteractCamera->SetupAttachment(Mesh);
 }
 
 void AHintPage::Interact()
@@ -26,15 +28,23 @@ void AHintPage::Interact()
 				{
 					if (!IsReading)
 					{
-						Player->GetCharacterMovement()->DisableMovement();
-						HintPage->AddToViewport();
-						IsReading = true;
-					}
-					else
-					{
-						Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-						HintPage->RemoveFromParent();
-						IsReading = false;
+						if (InteractCamera)
+						{
+							Controller->SetViewTargetWithBlend(InteractCamera->GetOwner(), CameraBlendTime);
+						}
+
+						GetWorld()->GetTimerManager().SetTimer(CameraHandle, [this, Controller, HintPage] () 
+							{
+								FInputModeUIOnly InputMode;
+								InputMode.SetWidgetToFocus(HintPage->TakeWidget());
+								Controller->SetInputMode(InputMode);
+								HintPage->AddToViewport();
+								IsReading = true;
+							}
+							,CameraBlendTime,
+								false
+						);
+						
 					}
 				}
 			}
