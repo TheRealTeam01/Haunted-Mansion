@@ -17,6 +17,7 @@ public:
 	UBTService_IsHit();
 
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
+	void SetHitInfo();
 
 private:
 	bool bIsHit = false;

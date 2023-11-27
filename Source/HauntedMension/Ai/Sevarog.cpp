@@ -101,11 +101,9 @@ void ASevarog::Attack()
 	if (IsAttacking)
 		return;
 
-	//APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
 	AnimInstance->PlayAttackMontage();
 	IsAttacking = true;
-	
+	OnHitInfo.Broadcast();
 }
 
 // 공격이 플레이어에게 닿았는지 직접 판단하는 부분
@@ -202,6 +200,7 @@ void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 	{
 		AnimInstance->Montage_Play(HitMontage);
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
+		OnHitInfo.Broadcast();
 	}
 }
 

@@ -13,6 +13,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
 DECLARE_MULTICAST_DELEGATE(FOnHitEnd);
+DECLARE_MULTICAST_DELEGATE(FOnHitInfo);
 
 UCLASS()
 class HAUNTEDMENSION_API ASevarog : public ACharacter, public IHitInterface
@@ -41,6 +42,7 @@ public:
 
 	FOnAttackEnd OnAttackEnd;
 	FOnHitEnd OnHitEnd;
+	FOnHitInfo OnHitInfo;
 
 	void Attack();
 	void AttackCheck();
