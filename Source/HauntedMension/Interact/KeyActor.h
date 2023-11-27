@@ -5,6 +5,7 @@
 #include "KeyActor.generated.h"
 
 class UTextRenderComponent;
+class AKeyPad;
 
 UCLASS()
 class HAUNTEDMENSION_API AKeyActor : public AActor
@@ -19,7 +20,20 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	UFUNCTION()
 	void ButtonClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
+	
+	UFUNCTION()
+	void OnCursor(UPrimitiveComponent* TouchedComponent);
+
+	UFUNCTION()
+	void EndCursor(UPrimitiveComponent* TouchedComponent);
+
+	void ResetButton();
+
+	TObjectPtr<AKeyPad> KeyPad;
+
+	FORCEINLINE void SetKeyPad(AKeyPad* KeyPadActor) { KeyPad = KeyPadActor; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,4 +46,18 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		FText Number;
+
+	UPROPERTY(EditAnywhere)
+		bool bConfirmed = false;
+	
+	UPROPERTY(EditAnywhere)
+		bool IsBackSpace = false;
+
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<UMaterial> BeginHoverMaterial;
+	
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<UMaterial> EndHoverMaterial;
+
+
 };

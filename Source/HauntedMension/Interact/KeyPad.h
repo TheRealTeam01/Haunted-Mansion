@@ -8,6 +8,8 @@
 
 class UCameraComponent;
 class UTextRenderComponent;
+class AKeyActor;
+class USoundBase;
 
 /**
  * 
@@ -27,8 +29,15 @@ public:
 
 	void Initiate();
 
+	void ButtonEnter(AKeyPad* KeyPad, FText Value, bool bConfirmed, bool IsBackSpace);
+
+	void PressBackspace();
+
+	void OnConfirmed();
 
 protected:
+
+	FTimerHandle CameraHandle;
 
 	UPROPERTY(EditAnywhere, Category = "Password")
 		FText Password;
@@ -45,8 +54,23 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Password")
 		float CameraBlendTime = 0.5f;
 
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<USoundBase> ButtonClickSound;
+	
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<USoundBase> CorrectSound;
+	
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<USoundBase> WrongSound;
+
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<UMaterial> CorrectMaterial;
+	
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<UMaterial> WrongMaterial;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		TObjectPtr<UTextRenderComponent> EnterCodeText;
+		TObjectPtr<UTextRenderComponent> EnterPassword;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<USceneComponent> Buttons;

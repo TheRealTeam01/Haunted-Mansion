@@ -5,13 +5,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Controller/HMController.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "HauntedMension/Character/Phase.h"
 
 AKeyPad::AKeyPad()
 {	
 	InteractCamera = CreateDefaultSubobject<UCameraComponent>("InteractCamera");
 	InteractCamera->SetupAttachment(Mesh);
-	EnterCodeText = CreateDefaultSubobject<UTextRenderComponent>("EnterCodeText");
-	EnterCodeText->SetupAttachment(Mesh);
+	EnterPassword = CreateDefaultSubobject<UTextRenderComponent>("EnterCodeText");
+	EnterPassword->SetupAttachment(Mesh);
 	Buttons = CreateDefaultSubobject<USceneComponent>("Buttons");
 	Buttons->SetupAttachment(Mesh);
 	KeyActor1 = CreateDefaultSubobject<UChildActorComponent>("Key1");
@@ -48,14 +49,13 @@ void AKeyPad::BeginPlay()
 
 void AKeyPad::Interact()
 {
-	if (!bCanEnter)
-	{
-		AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		check(Controller);
 
-		Controller->SetViewTargetWithBlend(InteractCamera->GetOwner(), CameraBlendTime);
-		Initiate();
-	}
+	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	check(Controller);
+
+	Controller->SetViewTargetWithBlend(InteractCamera->GetOwner(), CameraBlendTime);
+	Initiate();
+
 }
 
 void AKeyPad::Initiate()
@@ -69,7 +69,7 @@ void AKeyPad::Initiate()
 
 	FString InitialCodeString = FString("");
 	FText InitialCode = FText::FromString(InitialCodeString);
-	EnterCodeText->SetText(InitialCode);
+	EnterPassword->SetText(InitialCode);
 
 	ButtonArray.Add(KeyActor1);
 	ButtonArray.Add(KeyActor2);
@@ -84,5 +84,87 @@ void AKeyPad::Initiate()
 	ButtonArray.Add(BackspaceKey);
 	ButtonArray.Add(EnterKey);
 
+	for (auto Button : ButtonArray)
+	{
+		AKeyActor* KeyActor = Cast<AKeyActor>(Button->GetChildActor());
+		KeyActor->SetKeyPad(this);
+	}
+}
 
+void AKeyPad::ButtonEnter(AKeyPad* KeyPad, FText Value, bool bConfirmed, bool IsBackSpace)
+{
+
+	if (bConfirmed)
+	{
+		OnConfirmed();
+	}
+	else
+	{
+		if (IsBackSpace)
+		{
+			PressBackspace();
+		}
+		else
+		{
+			if (ButtonClickSound) UGameplayStatics::PlaySound2D(this, ButtonClickSound);
+			FString EnterPasswordString = EnterPassword->Text.ToString();
+			if (EnterPasswordString.Len() < Password.ToString().Len() || EnterPasswordString.IsEmpty()) EnterPasswordString.Append(Value.ToString());
+			EnterPassword->SetText(FText::FromString(EnterPasswordString));
+		}
+	}
+
+}
+
+void AKeyPad::PressBackspace()
+{
+	FString EnterPasswordString = EnterPassword->Text.ToString();
+	FString ErasedPassword = UKismetStringLibrary::GetSubstring(EnterPasswordString, 0, EnterPasswordString.Len() - 1);
+	EnterPassword->SetText(FText::FromString(ErasedPassword));
+}
+
+void AKeyPad::OnConfirmed()
+{
+	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	if (EnterPassword->Text.ToString() == Password.ToString() && Controller)
+	{
+		if (CorrectSound) UGameplayStatics::PlaySound2D(this, CorrectSound);
+		Mesh->SetMaterial(1, CorrectMaterial);
+		Controller->SetShowMouseCursor(false);
+		Controller->bEnableMouseOverEvents = false;
+		Controller->bEnableClickEvents = false;
+
+		for (auto Button : ButtonArray)
+		{
+			AKeyActor* KeyActor = Cast<AKeyActor>(Button->GetChildActor());
+			KeyActor->Reset();
+		}
+
+		APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		check(Phase);
+		
+		GetWorld()->GetTimerManager().SetTimer(CameraHandle, [this,Controller,Phase]
+			{
+				Controller->SetViewTargetWithBlend(Phase->Camera->GetOwner(), CameraBlendTime);
+			},
+			1.f,
+			false
+		);
+
+		EnterPassword->SetText(FText::FromString(FString("")));
+
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		if (CorrectSound) UGameplayStatics::PlaySound2D(this, WrongSound);
+
+		for (auto Button : ButtonArray)
+		{
+			AKeyActor* KeyActor = Cast<AKeyActor>(Button->GetChildActor());
+			KeyActor->Reset();
+		}
+
+		EnterPassword->SetText(FText::FromString(FString("")));
+	}
 }
