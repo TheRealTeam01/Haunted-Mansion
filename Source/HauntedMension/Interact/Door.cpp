@@ -91,10 +91,18 @@ void ADoor::Interact()
 				if (IsOpened)
 				{
 					Timeline.Reverse();
+					if (DoorSound)
+					{
+						UGameplayStatics::SpawnSoundAtLocation(this, DoorSound, GetActorLocation(), GetActorRotation());
+					}
 				}
 				else
 				{
 					Timeline.PlayFromStart();
+					if (DoorSound)
+					{
+						UGameplayStatics::SpawnSoundAtLocation(this, DoorSound, GetActorLocation(), GetActorRotation());
+					}
 				}
 
 				IsOpened = !IsOpened;
@@ -102,7 +110,8 @@ void ADoor::Interact()
 			
 
 		}
-		
+
+
 	}
 	else
 	{

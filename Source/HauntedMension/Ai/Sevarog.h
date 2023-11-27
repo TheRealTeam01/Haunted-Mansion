@@ -6,15 +6,13 @@
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "Navigation/PathFollowingComponent.h"
-#include "Components/TimeLineComponent.h"
+#include "Runtime/AIModule/Classes/Perception/PawnSensingComponent.h"
 #include "HauntedMension/HMTypes/HMTypes.h"
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "Sevarog.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
 DECLARE_MULTICAST_DELEGATE(FOnHitEnd);
-
-class UBoxComponent;
 
 UCLASS()
 class HAUNTEDMENSION_API ASevarog : public ACharacter, public IHitInterface
@@ -46,21 +44,13 @@ public:
 
 	void Attack();
 	void AttackCheck();
-	
+	void PlayerDieCheck();
+
 	// ���� ���� üũ�� ���� �ൿ ����
-	void Idle();
-	void Patrol();
 	void Chase(AActor* Target);
-	
-	UFUNCTION()
 	void Die();
 	void StateRefresh();
 
-	// ���� ���� �Լ�
-	void Idle_Chase();
-	void Idle_Patrol();
-	void Patrol_Chase();
-	void Chase_Attack();
 	// ���¸ӽ��� AIController���� ó���Ѵ�.
 	// ���ݻ��°� ����Ǹ� ��������Ʈ�� ���� �˸���.
 	UFUNCTION()
@@ -70,7 +60,7 @@ public:
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-
+	
 private:
 	// ���� ���¸� �˱� ���� �÷���
 	UPROPERTY()
@@ -86,7 +76,7 @@ private:
 	float SearchRange = 500.0f;
 
 	UPROPERTY()
-	float SearchInterval;
+	float SearchInterval = 3.0f;
 
 	UPROPERTY()
 	class USevarogAnimInstance* AnimInstance;
@@ -98,13 +88,16 @@ private:
 	class UAttributeComponent* Stat;
 
 public:
+	UPROPERTY(VisibleAnywhere, Category=Awareness)
+	UPawnSensingComponent* PawnSensor;
+
 	UPROPERTY()
 	float UpDownValue;
 
 	UPROPERTY()
 	float LeftRightValue;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	ESevarogState State;
 
 	UPROPERTY(VisibleAnywhere)
@@ -121,16 +114,4 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* HitMontage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UBoxComponent* WeaponBox;
-
-	UPROPERTY(EditAnywhere)
-	FVector TraceBoxExent = FVector(30.f, 30.f, 30.f);
-
-	UPROPERTY(EditAnywhere)
-	float Damage = 40.f;
-
-	UPROPERTY(EditAnywhere)
-	bool ShowDebugBox = true;
 };

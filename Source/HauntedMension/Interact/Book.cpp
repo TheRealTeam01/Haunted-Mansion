@@ -96,7 +96,8 @@ void ABook::Interact()
 
 		IsRotate = true;
 
-		InteractSphere->DestroyComponent();
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//InteractSphere->DestroyComponent();
 	}
 
 	

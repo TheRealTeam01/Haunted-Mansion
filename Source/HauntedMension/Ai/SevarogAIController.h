@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS()
 class HAUNTEDMENSION_API ASevarogAIController : public AAIController
 {
@@ -31,4 +32,7 @@ private:
 
 	UPROPERTY()
 	class UBlackboardData* BlackboardData;
+
+public:
+	static const FName TargetKey;
 };

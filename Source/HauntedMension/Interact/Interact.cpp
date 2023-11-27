@@ -13,28 +13,27 @@ AInteract::AInteract()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(GetRootComponent());
-	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	Mesh->SetRenderCustomDepth(false);
 
 	InteractSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Interact Sphere"));
 	InteractSphere->SetupAttachment(Mesh);
+	InteractSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 
 	InteractWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
-	InteractWidget->SetupAttachment(Mesh);
-	
+	InteractWidget->SetupAttachment(Mesh);	
 }
 
 void AInteract::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (InteractSphere)
-	{
-		InteractSphere->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnSphereOverlap);
+	//if (InteractSphere)
+	//{
+	//	InteractSphere->OnComponentBeginOverlap.AddDynamic(this, &AInteract::OnSphereOverlap);
 
-		InteractSphere->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnEndSphereOverlap);
-	}
+	//	InteractSphere->OnComponentEndOverlap.AddDynamic(this, &AInteract::OnEndSphereOverlap);
+	//}
 
 	if(InteractWidget) InteractWidget->SetVisibility(false);
 }

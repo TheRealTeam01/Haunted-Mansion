@@ -14,7 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
 
 class IInteractInterface;
 class UPawnNoiseEmitterComponent;
-
+class UTraceComponent;
 UCLASS()
 class HAUNTEDMENSION_API APhase : public ACharacter, public IHitInterface
 {
@@ -99,6 +99,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 		UPawnNoiseEmitterComponent* NoiseEmitterComponent;
+
+	UPROPERTY(EditAnywhere)
+		UTraceComponent* TraceComponent;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 

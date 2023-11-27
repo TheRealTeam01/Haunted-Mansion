@@ -25,6 +25,7 @@
 #include "HauntedMension/Interfaces/InteractInterface.h"
 #include "Components/TextBlock.h"
 #include "Components/PawnNoiseEmitterComponent.h"
+#include "HauntedMension/Character/TraceComponent.h"
 
 APhase::APhase()
 {
@@ -51,7 +52,10 @@ APhase::APhase()
 
 	NoiseEmitterComponent = CreateDefaultSubobject<UPawnNoiseEmitterComponent>("Pawn Noise Emitter Component");
 
+	TraceComponent = CreateDefaultSubobject<UTraceComponent>("TraceComponent");
+
 	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+
 
 	bUseControllerRotationYaw = false;
 }
@@ -68,6 +72,8 @@ void APhase::BeginPlay()
 			Subsystem->AddMappingContext(CharacterMappingContext, 0);
 		}
 	}
+
+	if (IsLocallyControlled()) TraceComponent->SetComponentTickEnabled(true);
 
 	FlashLightState = EFlashLightState::EFS_UnEquippedFlashLight;
 
@@ -668,7 +674,8 @@ void APhase::Die()
 		
 		GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
-		ActorHasTag(FName("Dead"));
+		//ActorHasTag(FName("Dead"));
+		Tags.Add(FName(TEXT("Dead")));
 		
 		HMController->SetHUDDie();
 	}
@@ -717,25 +724,8 @@ void APhase::Tick(float DeltaTime)
 
 	if (DefaultWeapon && DefaultWeapon->GetAmmo() == 0) ReloadPressed();
 
-	if (CalculateSpeed() > 150.f)
-	{
-		HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
-		if(HMController && StatComponent)
-		{
-			StatComponent->SpendStamina(DeltaTime);
-			HMController->SetHUDStamina(StatComponent->GetStaminaPercent());
-		}
-	}
-	else 
-	{
-		HMController = HMController == nullptr ? Cast<AHMController>(Controller) : HMController;
-		if (HMController && StatComponent)
-		{
-			StatComponent->RegenStamina(DeltaTime);
-			StatComponent->RegenHealth(DeltaTime);
-			HMController->SetHUDStamina(StatComponent->GetStaminaPercent());
-		}
-	}
+	StatComponent->RegenHealth(DeltaTime);
+
 }
 
 void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

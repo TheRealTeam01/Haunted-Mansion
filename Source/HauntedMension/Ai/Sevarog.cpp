@@ -1,5 +1,12 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
 #include "Sevarog.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
+#include "HauntedMension/Character/Phase.h"
 #include "SevarogAnimInstance.h"
+#include "SevarogAIController.h"
 #include "NavigationSystem.h"
 #include "Components/CapsuleComponent.h"
 #include "AIController.h"
@@ -8,24 +15,17 @@
 #include "HauntedMension/Interfaces/HitInterface.h"
 #include "Kismet/GamePlayStatics.h"
 #include "Math/Vector.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Attribute/AttributeComponent.h"
-#include "Components/BoxComponent.h"
-#include "Kismet/GameplayStatics.h"
 
+// Sets default values
 ASevarog::ASevarog()
 {
 	// 하위에 직접넣는 컴포넌트, Mesh같은거는 여기서
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
-	WeaponBox->SetupAttachment(GetMesh(), FName("HammerCenter"));
-	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
-	WeaponBox->SetGenerateOverlapEvents(true);
 
 	Stat = CreateDefaultSubobject<UAttributeComponent>("Stat");
 
@@ -36,22 +36,16 @@ ASevarog::ASevarog()
 		GetMesh()->SetSkeletalMesh(SM.Object);
 	}
 
-	
+	AIControllerClass = ASevarogAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
+// Called when the game starts or when spawned
 void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	
-	EnemyController = Cast<AAIController>(GetController());
-	/*GetCharacterMovement()->MaxWalkSpeed = 300.f;*/
-	//UE_LOG(LogTemp, Warning, TEXT("Player Actor Name : %s"), Player->GetFName());
-	
-	//FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
-	//WeaponBox->AttachToComponent(GetMesh(), Rules, FName("HammerCenter"));
-
-
 }
 
 void ASevarog::PostInitializeComponents()
@@ -63,37 +57,22 @@ void ASevarog::PostInitializeComponents()
 		AnimInstance->OnMontageEnded.AddDynamic(this, &ASevarog::OnAttackMontageEnded);
 		AnimInstance->OnAttackHit.AddUObject(this, &ASevarog::AttackCheck);
 	}
-	
 }
 
+// Called every frame
 void ASevarog::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	SearchInterval -= DeltaTime;
 
-	float Count = FApp::GetDeltaTime();
-	SearchInterval -= Count;
-
-	switch (State) 
-	{
-	case ESevarogState::E_Idle:
-		Idle();
-		break;
-	case ESevarogState::E_Patrol:
-		if (SearchInterval <= 0.0f)
-			Patrol();
-		break;
-	case ESevarogState::E_Chase:
-		Chase(Player);
-		break;
-	case ESevarogState::E_Attack:
-		Attack();
-		break;
-	default:
-		StateRefresh();
-		break;
+	if (SearchInterval < 0.0f) {
+		SearchInterval = 5.0f;
+		if (GetCharacterMovement()->MaxWalkSpeed == 0.0f)
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 }
 
+// Called to bind functionality to input
 void ASevarog::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -119,140 +98,52 @@ void ASevarog::Yaw(float Value)
 
 void ASevarog::Attack()
 {
-	if (IsAttacking) return;
+	if (IsAttacking)
+		return;
 
-	/*AnimInstance->PlayAttackMontage();*/
-	/*GetCharacterMovement()->MaxWalkSpeed = 1.0f;*/
+	//APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	//State = ESevarogState::E_Idle;
+	AnimInstance->PlayAttackMontage();
 	IsAttacking = true;
+	
 }
 
 // 공격이 플레이어에게 닿았는지 직접 판단하는 부분
 void ASevarog::AttackCheck()
 {
 	// 거리는 State체크에서 이미 체크했으니 콜라이더 충돌 여부만 판단한다
-	/*FHitResult HitResult;*/
+	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	float AttackRadius = 50.0f;
+	float AttackRadius = 60.0f;
 
-	//bool bResult = GetWorld()->SweepSingleByChannel(
-	//	OUT HitResult,
-	//	GetActorLocation(),
-	//	GetActorLocation() + GetActorForwardVector() * AttackDist,
-	//	FQuat::Identity,
-	//	ECollisionChannel::ECC_Visibility,
-	//	FCollisionShape::MakeSphere(AttackRadius),
-	//	Params
-	//);
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		OUT HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AttackDist,
+		FQuat::Identity,
+		ECollisionChannel::ECC_Visibility,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
 
-	//// 맞은게 확실하다면
-	//if (bResult && HitResult.GetActor()) 
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.GetActor()->GetName());
-	//	UGameplayStatics::ApplyDamage(HitResult.GetActor(), 30.f, GetInstigatorController(), this, UDamageType::StaticClass());
-	//	TScriptInterface Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
-	//	if (Interface)
-	//	{
-	//		Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
-	//	}
-	//	//FDamageEvent DamageEvent;
-	//}
-
-	TArray<AActor*> IgnoreActors;
-
-	FHitResult HitResult;
-
-	UKismetSystemLibrary::BoxTraceSingle(
-		WeaponBox,
-		WeaponBox->GetComponentLocation(),
-		WeaponBox->GetComponentLocation() + 100.f,
-		TraceBoxExent,
-		WeaponBox->GetComponentRotation(),
-		ETraceTypeQuery::TraceTypeQuery1,
-		false,
-		IgnoreActors,
-		ShowDebugBox == true ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
-		HitResult,
-		true);
-
-	IgnoreActors.AddUnique(HitResult.GetActor());
-
-	if (HitResult.GetActor())
+	// 맞은게 확실하다면
+	if (bResult && HitResult.GetActor()) 
 	{
+		UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.GetActor()->GetName());
+		UGameplayStatics::ApplyDamage(HitResult.GetActor(), 30.f, GetInstigatorController(), this, UDamageType::StaticClass());
 		TScriptInterface Interface = TScriptInterface<IHitInterface>(HitResult.GetActor());
 		if (Interface)
 		{
 			Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
-			UGameplayStatics::ApplyDamage(
-				HitResult.GetActor(),
-				Damage,
-				Controller,
-				this,
-				UDamageType::StaticClass());
 		}
 	}
-		
-	
 }
 
-
-void ASevarog::Idle()
+void ASevarog::PlayerDieCheck()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
-
-	// �켱 �Ÿ��� üũ�Ѵ�
-	FVector myLocation = GetActorLocation();
-	// �÷����̸� ã�ƿͼ� 
-	FVector TargetVector = Player->GetActorLocation();
-	FVector Distance = TargetVector - myLocation;
-	float VectorSize = Distance.Size();
-
-	if (Player == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player is nullptr"));
-		return;
-	}
-
-	if (VectorSize > SearchRange) 
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
-		Idle_Patrol();
-	}
-
-	if (VectorSize < SearchRange) 
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("State Idle to Chase"));
-		Idle_Chase();
-	}
-}
-
-// ������ Ư�� ������ ���������� �׳� �ܼ� �̵��Ѵ�
-void ASevarog::Patrol()
-{
-	FVector PlayerVector = Player->GetActorLocation();
-	FVector MyVector = GetActorLocation();
-	FVector DistVector = PlayerVector - MyVector;
-
-	FQuat Dir = DistVector.ToOrientationQuat();
-
-	float DistSize = DistVector.Size();
-	if (DistSize < SearchRange)
-		StateRefresh();
-
-	FVector GoalLocation;
-	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-	if (NavSystem == nullptr)
-		return;
-
-	FNavLocation RandomLocation;
-	if (NavSystem->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.f, RandomLocation)) 
-	{
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(EnemyController, RandomLocation);
-	}
-	SearchInterval = 5.0f;
-	State = ESevarogState::E_Undefine;
+	if (Player->ActorHasTag("Dead"))
+		Player = nullptr;
 }
 
 // �߰� ���¿��� ���� ����
@@ -267,55 +158,26 @@ void ASevarog::Chase(AActor* Target)
 
 	if (VectorSize < AttackDist)
 	{
-		Chase_Attack();
+		//Chase_Attack();
 	}
 
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(10.0f);
-	EnemyController->MoveTo(MoveRequest);
+	//FAIMoveRequest MoveRequest;
+	//MoveRequest.SetGoalActor(Target);
+	//MoveRequest.SetAcceptanceRadius(10.0f);
+	//EnemyController->MoveTo(MoveRequest);
 }
 
 void ASevarog::Die()
 {
 	State = ESevarogState::E_Die;
 	UE_LOG(LogTemp, Warning, TEXT("State Die"));
-
-	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
-
 }
 
 void ASevarog::StateRefresh()
 {
+	AnimInstance->StopAllMontages(1.0f);
 	UE_LOG(LogTemp, Warning, TEXT("State Refresh"));
 	State = ESevarogState::E_Idle;
-}
-
-void ASevarog::Idle_Chase()
-{	
-	State = ESevarogState::E_Chase;
-}
-
-// 여기서 가장 가까운 지점을 정찰하도록 위치를 지정해준다
-void ASevarog::Idle_Patrol()
-{
-	State = ESevarogState::E_Patrol;
-	//UE_LOG(LogTemp, Warning, TEXT("State Idle to Patrol"));
-}
-
-void ASevarog::Patrol_Chase()
-{
-	State = ESevarogState::E_Chase;
-	//UE_LOG(LogTemp, Warning, TEXT("State Patrol to Chase"));
-}
-
-// Ÿ�ٰ��� �Ÿ��� �������� �Ÿ����� ������ ����
-void ASevarog::Chase_Attack()
-{
-	if (IsAttacking)
-		return;
-	State = ESevarogState::E_Attack;
-	//UE_LOG(LogTemp, Warning, TEXT("State Chase to Attack"));
 }
 
 
@@ -335,20 +197,12 @@ void ASevarog::OnHitMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 
 void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	IsAttacking = false;
-
 	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
 	if (Instance && HitMontage)
 	{
 		AnimInstance->Montage_Play(HitMontage);
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	}
-	AActor* Target = Player;
-
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(10.0f);
-	EnemyController->MoveTo(MoveRequest);
 }
 
 float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
