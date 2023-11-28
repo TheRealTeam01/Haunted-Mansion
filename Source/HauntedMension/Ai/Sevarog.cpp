@@ -96,14 +96,26 @@ void ASevarog::Yaw(float Value)
 	AddControllerYawInput(Value);
 }
 
+void ASevarog::PlayAttackMontage()
+{
+	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
+
+	if (AttackMontage && Instance)
+	{
+		Instance->Montage_Play(AttackMontage, 1.0f);
+	}
+}
+
 void ASevarog::Attack()
 {
 	if (IsAttacking)
 		return;
 
-	AnimInstance->PlayAttackMontage();
+	//APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	PlayAttackMontage();
 	IsAttacking = true;
-	OnHitInfo.Broadcast();
+	
 }
 
 // 공격이 플레이어에게 닿았는지 직접 판단하는 부분
@@ -200,7 +212,6 @@ void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 	{
 		AnimInstance->Montage_Play(HitMontage);
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
-		OnHitInfo.Broadcast();
 	}
 }
 
@@ -209,5 +220,26 @@ float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	Stat->CalculateDamage(DamageAmount);
 
 	return 0.0f;
+}
+
+FVector ASevarog::GetPlayerRotation()
+{
+	APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	check(Phase);
+
+	return Phase->GetActorLocation();
+}
+
+FVector ASevarog::GetPlayerLocation()
+{
+	APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	check(Phase);
+
+	const FVector CombatTargetLocation = Phase->GetActorLocation();
+	const FVector Location = GetActorLocation();
+
+	FVector TargetToMe = (Location - CombatTargetLocation).GetSafeNormal();
+	TargetToMe *= WarpDistance;
+	return CombatTargetLocation + TargetToMe;
 }
 

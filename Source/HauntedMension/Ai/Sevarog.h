@@ -63,6 +63,20 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 	
+	UFUNCTION(BlueprintCallable)
+	FVector GetPlayerRotation();
+
+	UFUNCTION(BlueprintCallable)
+	FVector GetPlayerLocation();
+
+	UPROPERTY(EditAnywhere)
+	float WarpDistance = 100.f;
+
+	void PlayAttackMontage();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn)
+	UAnimMontage* AttackMontage;
+
 private:
 	// ���� ���¸� �˱� ���� �÷���
 	UPROPERTY()
