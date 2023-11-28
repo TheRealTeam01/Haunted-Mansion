@@ -96,6 +96,16 @@ void ASevarog::Yaw(float Value)
 	AddControllerYawInput(Value);
 }
 
+void ASevarog::PlayAttackMontage()
+{
+	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
+
+	if (AttackMontage && Instance)
+	{
+		Instance->Montage_Play(AttackMontage, 1.0f);
+	}
+}
+
 void ASevarog::Attack()
 {
 	if (IsAttacking)
@@ -103,7 +113,7 @@ void ASevarog::Attack()
 
 	//APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	AnimInstance->PlayAttackMontage();
+	PlayAttackMontage();
 	IsAttacking = true;
 	
 }
@@ -210,5 +220,26 @@ float ASevarog::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	Stat->CalculateDamage(DamageAmount);
 
 	return 0.0f;
+}
+
+FVector ASevarog::GetPlayerRotation()
+{
+	APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	check(Phase);
+
+	return Phase->GetActorLocation();
+}
+
+FVector ASevarog::GetPlayerLocation()
+{
+	APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	check(Phase);
+
+	const FVector CombatTargetLocation = Phase->GetActorLocation();
+	const FVector Location = GetActorLocation();
+
+	FVector TargetToMe = (Location - CombatTargetLocation).GetSafeNormal();
+	TargetToMe *= WarpDistance;
+	return CombatTargetLocation + TargetToMe;
 }
 
