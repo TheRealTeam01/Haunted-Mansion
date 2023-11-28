@@ -110,12 +110,12 @@ void ASevarog::Attack()
 {
 	if (IsAttacking)
 		return;
+	OnHitInfo.Broadcast();
 
 	//APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
 	PlayAttackMontage();
 	IsAttacking = true;
-	
 }
 
 // 공격이 플레이어에게 닿았는지 직접 판단하는 부분
@@ -170,11 +170,6 @@ void ASevarog::Chase(AActor* Target)
 	{
 		//Chase_Attack();
 	}
-
-	//FAIMoveRequest MoveRequest;
-	//MoveRequest.SetGoalActor(Target);
-	//MoveRequest.SetAcceptanceRadius(10.0f);
-	//EnemyController->MoveTo(MoveRequest);
 }
 
 void ASevarog::Die()
@@ -211,6 +206,7 @@ void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 	if (Instance && HitMontage)
 	{
 		AnimInstance->Montage_Play(HitMontage);
+		OnHitInfo.Broadcast();
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	}
 }

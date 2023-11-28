@@ -22,7 +22,7 @@ void UBTService_IsHit::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 		return;
 
 	Sevarog->OnHitInfo.AddLambda([this]() -> void {
-		bIsHit = !bIsHit;
+		SetHitInfo();
 		});
 
 	if (bIsHit)
