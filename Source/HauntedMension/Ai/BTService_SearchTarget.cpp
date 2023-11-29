@@ -25,7 +25,7 @@ void UBTService_SearchTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 
 	UWorld* World = CurrentPawn->GetWorld();	// �� ��ü�� ������ �����´�
 	FVector Center = CurrentPawn->GetActorLocation();	// �� ��ġ�� �����´�.
-	float SearchRadius = 500.0f;
+	float SearchRadius = 1500.0f;
 
 	if (World == nullptr)
 		return;
