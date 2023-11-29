@@ -73,6 +73,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<AActor> StoneStatueClass;
+	
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AActor> StoneStatueCameraClass;
 
 	UPROPERTY(EditAnywhere)
 		TObjectPtr<UCurveFloat> CurveFloat;

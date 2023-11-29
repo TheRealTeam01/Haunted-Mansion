@@ -51,7 +51,7 @@ protected:
 		TArray<UChildActorComponent*> ButtonArray;
 
 	UPROPERTY(EditAnywhere, Category = "Password")
-		bool bCanEnter = false;
+		bool bCanEnter = true;
 	
 	UPROPERTY(EditAnywhere, Category = "Password")
 		AActor* KeypadTarget;

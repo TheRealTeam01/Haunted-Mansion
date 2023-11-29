@@ -9,7 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Character/Phase.h"
-
+#include "GameframeWork/CharacterMovementComponent.h"
 AKeyPad::AKeyPad()
 {	
 	EnterPassword = CreateDefaultSubobject<UTextRenderComponent>("EnterCodeText");
@@ -58,11 +58,23 @@ void AKeyPad::BeginPlay()
 
 void AKeyPad::Interact()
 {
-
+	APhase* Player = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	check(Controller);
-
-	Controller->SetViewTargetWithBlend(TargetCamera->GetOwner(), CameraBlendTime);
+	check(Player);
+	
+	if (bCanEnter)
+	{
+		Controller->SetViewTargetWithBlend(TargetCamera->GetOwner(), CameraBlendTime);
+		Player->GetCharacterMovement()->DisableMovement();
+		bCanEnter = false;
+	}
+	else
+	{
+		Controller->SetViewTargetWithBlend(Player->Camera->GetOwner(), CameraBlendTime);
+		Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		bCanEnter = true;
+	}
 	Initiate();
 
 }
@@ -149,8 +161,8 @@ void AKeyPad::OnConfirmed()
 			KeyActor->Reset();
 		}
 
-		APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-		check(Phase);
+		APhase* Player = Cast<APhase>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		check(Player);
 		
 		//GetWorld()->GetTimerManager().SetTimer(CameraHandle, [this,Controller,Phase]
 		//	{
@@ -182,6 +194,8 @@ void AKeyPad::OnConfirmed()
 
 		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+		Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+
 	}
 	else
 	{
@@ -195,6 +209,8 @@ void AKeyPad::OnConfirmed()
 
 		EnterPassword->SetText(FText::FromString(FString("")));
 	}
+
+
 }
 
 void AKeyPad::SetViewPlayerCamera()
