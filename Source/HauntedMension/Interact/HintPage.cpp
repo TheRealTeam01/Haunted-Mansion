@@ -9,46 +9,38 @@
 
 AHintPage::AHintPage()
 {
-	InteractCamera = CreateDefaultSubobject<UCameraComponent>("Interact Camera");
-	InteractCamera->SetupAttachment(Mesh);
+
 }
 
 void AHintPage::Interact()
 {
-	if (!IsReading)
-	{
-		AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		if (Controller)
-		{
-			UUserWidget* HintPage = CreateWidget<UUserWidget>(Controller, HintPageWidget);
-			if (HintPage)
-			{
-				APhase* Player = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-				if (Player)
-				{
-					if (!IsReading)
-					{
-						if (InteractCamera)
-						{
-							Controller->SetViewTargetWithBlend(InteractCamera->GetOwner(), CameraBlendTime);
-						}
 
-						GetWorld()->GetTimerManager().SetTimer(CameraHandle, [this, Controller, HintPage] () 
-							{
-								FInputModeUIOnly InputMode;
-								InputMode.SetWidgetToFocus(HintPage->TakeWidget());
-								Controller->SetInputMode(InputMode);
-								HintPage->AddToViewport();
-								IsReading = true;
-							}
-							,CameraBlendTime,
-								false
-						);
-						
-					}
+	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (Controller)
+	{
+		UUserWidget* HintPage = CreateWidget<UUserWidget>(Controller, HintPageWidget);
+		if (HintPage)
+		{
+			APhase* Player = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			if (Player)
+			{
+				if (TargetCamera)
+				{
+					Controller->SetViewTargetWithBlend(TargetCamera->GetOwner(), CameraBlendTime);
 				}
+
+				GetWorld()->GetTimerManager().SetTimer(CameraHandle, [this, Controller, HintPage]()
+					{
+						FInputModeUIOnly InputMode;
+						InputMode.SetWidgetToFocus(HintPage->TakeWidget());
+						Controller->SetInputMode(InputMode);
+						HintPage->AddToViewport();
+					}
+					, CameraBlendTime,
+						false
+						);
 			}
 		}
 	}
-
 }
+

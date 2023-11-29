@@ -6,11 +6,12 @@
 #include "HauntedMension/Controller/HMController.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "HauntedMension/Character/Phase.h"
+#include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "HauntedMension/Character/Phase.h"
 
 AKeyPad::AKeyPad()
 {	
-	InteractCamera = CreateDefaultSubobject<UCameraComponent>("InteractCamera");
-	InteractCamera->SetupAttachment(Mesh);
 	EnterPassword = CreateDefaultSubobject<UTextRenderComponent>("EnterCodeText");
 	EnterPassword->SetupAttachment(Mesh);
 	Buttons = CreateDefaultSubobject<USceneComponent>("Buttons");
@@ -45,6 +46,14 @@ AKeyPad::AKeyPad()
 void AKeyPad::BeginPlay()
 {	
 	Super::BeginPlay();
+	AInteract* InteractItem = Cast<AInteract>(UGameplayStatics::GetActorOfClass(this, InteractActor));
+	InteractItem->OnInteractEnded.AddDynamic(this, &AKeyPad::SetViewPlayerCamera);
+
+	if (AttachActorClass)
+	{
+		FAttachmentTransformRules Rules(EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, false);
+		this->AttachToActor(UGameplayStatics::GetActorOfClass(GetWorld(), AttachActorClass), Rules);
+	}
 }
 
 void AKeyPad::Interact()
@@ -53,7 +62,7 @@ void AKeyPad::Interact()
 	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	check(Controller);
 
-	Controller->SetViewTargetWithBlend(InteractCamera->GetOwner(), CameraBlendTime);
+	Controller->SetViewTargetWithBlend(TargetCamera->GetOwner(), CameraBlendTime);
 	Initiate();
 
 }
@@ -143,17 +152,36 @@ void AKeyPad::OnConfirmed()
 		APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 		check(Phase);
 		
-		GetWorld()->GetTimerManager().SetTimer(CameraHandle, [this,Controller,Phase]
-			{
-				Controller->SetViewTargetWithBlend(Phase->Camera->GetOwner(), CameraBlendTime);
-			},
-			1.f,
-			false
-		);
+		//GetWorld()->GetTimerManager().SetTimer(CameraHandle, [this,Controller,Phase]
+		//	{
+		//		Controller->SetViewTargetWithBlend(Phase->Camera->GetOwner(), CameraBlendTime);
+		//	},
+		//	1.f,
+		//	false
+		//);
+
+		if (InteractActor)
+		{
+			GetWorld()->GetTimerManager().SetTimer(InteractHandle, [this,Controller] 
+				{
+					AInteract* InteractItem = Cast<AInteract>(UGameplayStatics::GetActorOfClass(this, InteractActor));
+					TScriptInterface<IInteractInterface> Interface = TScriptInterface<IInteractInterface>(InteractItem);
+					if (InteractItem && Interface)
+					{
+						Controller->SetViewTarget(InteractItem->TargetCamera->GetOwner());
+						Interface->Interact();
+					}
+				},
+				InteractInterval
+				,false
+			);
+
+		}
 
 		EnterPassword->SetText(FText::FromString(FString("")));
 
 		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	}
 	else
 	{
@@ -167,4 +195,14 @@ void AKeyPad::OnConfirmed()
 
 		EnterPassword->SetText(FText::FromString(FString("")));
 	}
+}
+
+void AKeyPad::SetViewPlayerCamera()
+{
+	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	check(Controller);
+	check(Phase);
+
+	Controller->SetViewTarget(Phase->Camera->GetOwner());
 }

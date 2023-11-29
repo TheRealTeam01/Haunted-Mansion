@@ -35,9 +35,14 @@ public:
 
 	void OnConfirmed();
 
+	UFUNCTION()
+	void SetViewPlayerCamera();
+
 protected:
 
 	FTimerHandle CameraHandle;
+
+	FTimerHandle InteractHandle;
 
 	UPROPERTY(EditAnywhere, Category = "Password")
 		FText Password;
@@ -47,12 +52,21 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Password")
 		bool bCanEnter = false;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Password")
 		AActor* KeypadTarget;
 
 	UPROPERTY(EditAnywhere, Category = "Password")
 		float CameraBlendTime = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Password")
+		float InteractInterval = 1.f;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AInteract> InteractActor;
+	
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AActor> AttachActorClass;
 
 	UPROPERTY(EditAnywhere)
 		TObjectPtr<USoundBase> ButtonClickSound;
@@ -111,6 +125,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<UChildActorComponent> EnterKey;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		TObjectPtr<UCameraComponent> InteractCamera;
 };

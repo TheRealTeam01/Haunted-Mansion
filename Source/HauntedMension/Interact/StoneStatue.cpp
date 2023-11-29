@@ -7,31 +7,27 @@ AStoneStatue::AStoneStatue()
 {
 	MoveEffectComponent = CreateDefaultSubobject<UParticleSystemComponent>("Move Effect");
 	MoveEffectComponent->SetupAttachment(Mesh);
+
+	Timeline = CreateDefaultSubobject<UTimelineComponent>("Timeline");
 }
 
 void AStoneStatue::Interact()
 {
-	if (!IsMove)
+	if (MoveSound)
 	{
-		if (MoveSound)
-		{
-			UGameplayStatics::SpawnSoundAtLocation(this, MoveSound, GetActorLocation(), GetActorRotation());
-		}
-
-		SpawnMoveEffect();
-
-		PlayCameraShake();
-		
-		Timeline.PlayFromStart();
-		
-		IsMove = true;
-
+		UGameplayStatics::SpawnSoundAtLocation(this, MoveSound, GetActorLocation(), GetActorRotation());
 	}
+
+	SpawnMoveEffect();
+
+	PlayCameraShake();
+
+	Timeline->PlayFromStart();
 }
 
 void AStoneStatue::StatueMove(float DeltaTime)
 {
-	FVector Location(GetActorLocation().X, GetActorLocation().Y + MoveValue * DeltaTime, GetActorLocation().Z);
+	FVector Location(GetActorLocation().X + LocationX * DeltaTime, GetActorLocation().Y + LocationY * DeltaTime, GetActorLocation().Z + LocationZ * DeltaTime);
 
 	SetActorRelativeLocation(Location);
 
@@ -40,8 +36,6 @@ void AStoneStatue::StatueMove(float DeltaTime)
 void AStoneStatue::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	Timeline.TickTimeline(DeltaTime);
 
 }
 
@@ -72,9 +66,9 @@ void AStoneStatue::BeginPlay()
 	if (CurveFloat)
 	{
 		TimelineUpdate.BindDynamic(this, &AStoneStatue::StatueMove);
-		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate);
+		Timeline->AddInterpFloat(CurveFloat, TimelineUpdate);
 		TimelineFinish.BindDynamic(this, &AStoneStatue::DestroyMoveEffect);
-		Timeline.SetTimelineFinishedFunc(TimelineFinish);
+		Timeline->SetTimelineFinishedFunc(TimelineFinish);
 	}
 
 	

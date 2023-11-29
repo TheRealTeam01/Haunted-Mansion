@@ -21,12 +21,6 @@ public:
 
 	virtual void Interact() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsReading = false;
-
-	UPROPERTY(EditAnywhere)
-		TObjectPtr<UCameraComponent> InteractCamera;
-
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> HintPageWidget;
 
