@@ -19,7 +19,7 @@ void UBTService_SearchTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 	// Ÿ���� �ڵ� �󿡼� �����Ѵ�.
 	auto CurrentPawn = OwnerComp.GetAIOwner()->GetPawn();
-	auto TargetPawn = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	APhase* Phase = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	if (CurrentPawn == nullptr)
 		return;
 
@@ -29,40 +29,10 @@ void UBTService_SearchTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 
 	if (World == nullptr)
 		return;
-	// ����Ƽ�� overlap Sphere�� ����ϴ� ����, ���ڰ� ������ ���Ƽ� ������.
-	TArray<FOverlapResult> OverlapResults;
-	FCollisionQueryParams QueryParams(NAME_None, false, CurrentPawn);
-	bool bResult = World->OverlapMultiByChannel(
-		OverlapResults,
-		Center,
-		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel2,	// �츮�� �߰��� ������ 2ä���̹Ƿ� 2�� ���
-		FCollisionShape::MakeSphere(SearchRadius),
-		QueryParams
-	);
-
-	// ������ ã�� ���
-	if (bResult)
-	{
-		for (auto& OverlapResult : OverlapResults)
-		{
-			APhase* MyCharacter = Cast<APhase>(OverlapResult.GetActor());
-			// ������ ���Ͷ� �÷��̾��� ��Ʈ�ѷ��� ���� ������, �÷��̾� ���θ� �ѹ� �� üũ�Ѵ�.
-			if (MyCharacter && MyCharacter->GetController()->IsPlayerController())
-			{
-				OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), MyCharacter);
-				DrawDebugSphere(World, Center, SearchRadius, 16, FColor::Green, false, 0.2f);
-				return;
-			}
-		}
-		DrawDebugSphere(World, Center, SearchRadius, 16, FColor::Red, false, 0.2f);
-		//OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), nullptr);
-	}
-	// ������ ã�� ���Ѱ��
+	
+	FVector Distance = Phase->GetActorLocation() - CurrentPawn->GetActorLocation();
+	if(Distance.Size() < SearchRadius)
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), Phase);
 	else
-	{
-		// AI�� ���õ� ��� ������ �����ͼ� Target�� nullptr�� �о������.
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), nullptr);
-		DrawDebugSphere(World, Center, SearchRadius, 16, FColor::Red, false, 0.2f);
-	}
 }

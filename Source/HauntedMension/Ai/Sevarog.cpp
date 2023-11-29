@@ -66,7 +66,7 @@ void ASevarog::Tick(float DeltaTime)
 	SearchInterval -= DeltaTime;
 
 	if (SearchInterval < 0.0f) {
-		SearchInterval = 5.0f;
+		SearchInterval = 3.0f;
 		if (GetCharacterMovement()->MaxWalkSpeed == 0.0f)
 			GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
@@ -202,11 +202,11 @@ void ASevarog::OnHitMontageEnded(UAnimMontage* Montage, bool bInterruppted)
 
 void ASevarog::GetHit_Implementation(const FVector& ImpactPoint)
 {
+	OnHitInfo.Broadcast();
 	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
 	if (Instance && HitMontage)
 	{
 		AnimInstance->Montage_Play(HitMontage);
-		OnHitInfo.Broadcast();
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	}
 }
