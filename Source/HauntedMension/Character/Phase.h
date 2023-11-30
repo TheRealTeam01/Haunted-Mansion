@@ -40,6 +40,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		EKeyState KeyState = EKeyState::EKS_UnEquippedKey;
 
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+		class UCameraComponent* Camera;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -199,9 +202,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* SpringArm;
-
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class UCameraComponent* Camera;
 
 	UCharacterMovementComponent* CharacterMovement;
 

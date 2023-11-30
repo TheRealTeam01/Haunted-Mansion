@@ -45,14 +45,23 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCurveFloat> CurveFloat;
 
-	FTimeline Timeline;
+	TObjectPtr<UTimelineComponent> DoorTimeline;
 
 	FOnTimelineFloat TimelineUpdate;
 
 	FOnTimelineEvent TimelineFinish;
 
 	UPROPERTY(EditAnywhere)
-	float DoorRotateValue = 120.f;
+	FString DoorText;
+
+	UPROPERTY(EditAnywhere)
+		float RotationPitch = 0.f;
+	
+	UPROPERTY(EditAnywhere)
+		float RotationYaw = 0.f;
+	
+	UPROPERTY(EditAnywhere)
+		float RotationRoll = 0.f;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USoundBase> DoorSound;

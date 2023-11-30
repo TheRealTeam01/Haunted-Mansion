@@ -5,6 +5,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "LevelSequencePlayer.h"
+#include "LevelSequenceActor.h"
+#include "HauntedMension/Controller/HMController.h"
+#include "Camera/CameraComponent.h"
 
 ABook::ABook()
 {
@@ -14,6 +18,8 @@ ABook::ABook()
 	SetRootComponent(Root);
 
 	Mesh->SetupAttachment(Root);
+
+	Timeline = CreateDefaultSubobject<UTimelineComponent>("Timeline");
 }
 
 void ABook::BeginPlay()
@@ -22,10 +28,10 @@ void ABook::BeginPlay()
 
 	if (CurveFloat)
 	{
-		TimelineUpdate.BindDynamic(this, &ABook::BookRotate);
-		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate);
+		TimelineUpdate.BindDynamic(this, &ABook::BookMove);
+		Timeline->AddInterpFloat(CurveFloat, TimelineUpdate);
 		TimelineFinish.BindUFunction(this, FName("SetPhysics"));
-		Timeline.SetTimelineFinishedFunc(TimelineFinish);
+		Timeline->SetTimelineFinishedFunc(TimelineFinish);
 	}
 
 	/*Mesh->OnComponentHit.AddDynamic(this, &ABook::OnHit);*/
@@ -36,7 +42,7 @@ void ABook::StoneStatueInteract()
 {
 	TArray<AActor*> StoneStatues;
 
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStoneStatue::StaticClass(),StoneStatues); //StoneStatue클래스인 엑터들을 가져와 StoneStatues배열에 담아서 반환.
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStoneStatue::StaticClass(), StoneStatues); //StoneStatue클래스인 엑터들을 가져와 StoneStatues배열에 담아서 반환.
 	for (auto statue : StoneStatues)
 	{
 		TObjectPtr<AStoneStatue> StoneStatue = Cast<AStoneStatue>(statue);
@@ -46,11 +52,12 @@ void ABook::StoneStatueInteract()
 			if (Interface)
 			{
 				StoneStatue->Interact();
-				UE_LOG(LogTemp, Warning, TEXT("StoneStatueInBook"));
 			}
 		}
 	}
 	
+	Destroy();
+
 }
 
 void ABook::PlayPullOutAnimation()
@@ -82,42 +89,33 @@ void ABook::SetPhysics()
 
 void ABook::Interact()
 {
-	if (!IsRotate) 
-	{
-		ShowInteractWidget(false);
-
-		Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-
-		Timeline.PlayFromStart();
-
-		PlayPullOutAnimation();
-		
-		GetWorld()->GetTimerManager().SetTimer(BookTimer, [this] {StoneStatueInteract();}, WaitTime, false);
-
-		IsRotate = true;
-
-		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//InteractSphere->DestroyComponent();
-	}
-
 	
+	ShowInteractWidget(false);
 
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	FMovieSceneSequencePlaybackSettings  PlayBackSettings;
+	PlayBackSettings.bDisableLookAtInput = true;
+	PlayBackSettings.bDisableMovementInput = true;
+	PlayBackSettings.bHideHud = true;
+
+	ALevelSequenceActor* LevelSequenceActor;
+	LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), LevelSequence, PlayBackSettings, LevelSequenceActor);
+	LevelSequencePlayer->OnFinished.AddDynamic(this, &ABook::StoneStatueInteract);
+	LevelSequencePlayer->Play();	
+	
 }
 
-void ABook::BookRotate(float DeltaTime)
+void ABook::BookMove(float DeltaTime)
 {
-	/*FRotator Rotation(BookRotation * DeltaTime ,0.f, 0.f );*/
-	FVector Location(GetActorLocation().X + BookLocation * DeltaTime, GetActorLocation().Y, GetActorLocation().Z);
+	FVector Location(GetActorLocation().X + LocationX * DeltaTime, GetActorLocation().Y + LocationY * DeltaTime, GetActorLocation().Z + LocationZ * DeltaTime);
 
-	//SetActorRelativeRotation(Rotation);
 	SetActorRelativeLocation(Location);
 }
 
 void ABook::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	Timeline.TickTimeline(DeltaTime);
 }
 
 

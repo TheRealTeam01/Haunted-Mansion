@@ -6,6 +6,7 @@
 #include "DoorKey.generated.h"
 
 class USoundBase;
+class UImage;
 
 /**
  * 
@@ -27,6 +28,9 @@ protected:
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	virtual void Interact() override;
+	
+	UPROPERTY(EditAnywhere)
+		UTexture2D* DoorKeyImage;
 
 private:
 

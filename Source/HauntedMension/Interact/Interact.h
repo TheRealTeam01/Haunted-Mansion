@@ -7,6 +7,8 @@
 
 class USceneComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractEnded);
+
 UCLASS()
 class HAUNTEDMENSION_API AInteract : public AActor, public IInteractInterface
 {
@@ -24,6 +26,11 @@ public:
 	virtual void  OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	virtual void  OnEndSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		class UCameraComponent* TargetCamera;
+
+	FOnInteractEnded OnInteractEnded;
 
 protected:
 

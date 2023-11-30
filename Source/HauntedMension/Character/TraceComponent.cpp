@@ -45,6 +45,10 @@ void UTraceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	);
 
 	AActor* InteractActor = TraceHitResult.GetActor();
+	if (InteractActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s"), *InteractActor->GetName());
+	}
 
 	AInteract* InteractItem = Cast<AInteract>(TraceHitResult.GetActor());
 	

@@ -10,6 +10,9 @@
 class UAnimMontage;
 class UCurveFloat;
 class USoundBase;
+class UCameraComponent;
+class ULevelSequencePlayer;
+class ULevelSequence;
 
 /**
  * 
@@ -26,7 +29,7 @@ public:
 	virtual void Interact() override;
 	
 	UFUNCTION()
-	void BookRotate(float DeltaTime);
+	void BookMove(float DeltaTime);
 	
 	virtual void Tick(float DeltaTime) override;
 
@@ -34,6 +37,7 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
 	void StoneStatueInteract();
 
 	void PlayPullOutAnimation();
@@ -44,9 +48,13 @@ protected:
 	//UFUNCTION()
 	//	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-private:
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<ULevelSequencePlayer> LevelSequencePlayer;
 
-	FTimeline Timeline;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<ULevelSequence> LevelSequence;
+
+	TObjectPtr<UTimelineComponent> Timeline;
 
 	FOnTimelineFloat TimelineUpdate;
 
@@ -55,10 +63,16 @@ private:
 	FOnTimelineEvent TimelineFinish;
 
 	UPROPERTY(EditAnywhere)
-		float BookRotation = 120.f;
+		float LocationX = 0.f;
 
 	UPROPERTY(EditAnywhere)
-		float BookLocation = 30.f;
+		float LocationY = 0.f;
+
+	UPROPERTY(EditAnywhere)
+		float LocationZ = 0.f;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AActor> StoneStatueClass;
 
 	UPROPERTY(EditAnywhere)
 		TObjectPtr<UCurveFloat> CurveFloat;
@@ -69,9 +83,8 @@ private:
 	/*UPROPERTY(EditAnywhere)
 		TObjectPtr<USoundBase> FallSound;*/
 
-	UPROPERTY(VisibleAnywhere)
-		bool IsRotate = false;
-
 	UPROPERTY(EditAnywhere)
 		float WaitTime = 2.f;
+private:
+
 };
