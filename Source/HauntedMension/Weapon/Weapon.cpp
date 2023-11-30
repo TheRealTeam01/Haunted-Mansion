@@ -100,11 +100,11 @@ void AWeapon::Fire(FVector& HitTarget)
 void AWeapon::UpdateAmmos()
 {
 	int32 RoomInMag = MaxAmmo - Ammo; // ������ �� �� �ִ� ��.
-
+		
 	int32 Least = FMath::Min(RoomInMag, CarriedAmmo); //������ �� �� �ִ� ������ CarriedAmmo�� �۴ٸ� ��� ��.
-
+								
 	int32 AmountToReload = FMath::Clamp(RoomInMag, 0, Least);
-
+								           
 	CarriedAmmo = FMath::Clamp(CarriedAmmo - AmountToReload, 0, MaxCarriedAmmo);
 	Ammo = FMath::Clamp(Ammo + AmountToReload, 0, MaxAmmo);
 }

@@ -149,8 +149,11 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	ETurnInPlace TurnInPlace;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bAiming;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool IsSequenceUse = false;
 
 	class UHMOverlay* HMOverlay;
 
