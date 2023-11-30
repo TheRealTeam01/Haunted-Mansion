@@ -40,15 +40,21 @@ void ABook::BeginPlay()
 	
 void ABook::StoneStatueInteract()
 {
-	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	TObjectPtr<AStoneStatue> StoneStatue = Cast<AStoneStatue>(UGameplayStatics::GetActorOfClass(GetWorld(), StoneStatueClass));
-	TObjectPtr<AStoneStatue> StoneStatueCamera = Cast<AStoneStatue>(UGameplayStatics::GetActorOfClass(GetWorld(), StoneStatueCameraClass));
-	check(Controller);
-	check(StoneStatue);
-	check(StoneStatueCamera);
+	TArray<AActor*> StoneStatues;
 
-	StoneStatue->Interact();
-	StoneStatueCamera->Interact();
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStoneStatue::StaticClass(), StoneStatues); //StoneStatue클래스인 엑터들을 가져와 StoneStatues배열에 담아서 반환.
+	for (auto statue : StoneStatues)
+	{
+		TObjectPtr<AStoneStatue> StoneStatue = Cast<AStoneStatue>(statue);
+		if (StoneStatue)
+		{
+			TScriptInterface<IInteractInterface> Interface = TScriptInterface<IInteractInterface>(StoneStatue);
+			if (Interface)
+			{
+				StoneStatue->Interact();
+			}
+		}
+	}
 	
 	Destroy();
 
