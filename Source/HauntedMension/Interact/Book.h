@@ -40,8 +40,6 @@ protected:
 	UFUNCTION()
 	void StoneStatueInteract();
 
-	void PlayPullOutAnimation();
-
 	UFUNCTION()
 	void SetPhysics();
 
@@ -75,6 +73,9 @@ protected:
 		TSubclassOf<AActor> StoneStatueClass;
 
 	UPROPERTY(EditAnywhere)
+		TSubclassOf<AActor> SequencePhase;
+
+	UPROPERTY(EditAnywhere)
 		TObjectPtr<UCurveFloat> CurveFloat;
 
 	UPROPERTY(EditAnywhere)
@@ -85,6 +86,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		float WaitTime = 2.f;
+	
+	UPROPERTY(EditAnywhere)
+		bool IsSequenceUse = false;
+
+
+
 private:
 
 };

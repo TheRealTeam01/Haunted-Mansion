@@ -9,6 +9,7 @@
 #include "LevelSequenceActor.h"
 #include "HauntedMension/Controller/HMController.h"
 #include "Camera/CameraComponent.h"
+#include "HauntedMension/Weapon/Weapon.h"
 
 ABook::ABook()
 {
@@ -34,6 +35,8 @@ void ABook::BeginPlay()
 		Timeline->SetTimelineFinishedFunc(TimelineFinish);
 	}
 
+	if(IsSequenceUse) UGameplayStatics::GetActorOfClass(GetWorld(), SequencePhase)->SetActorHiddenInGame(true);
+
 	/*Mesh->OnComponentHit.AddDynamic(this, &ABook::OnHit);*/
 }
 
@@ -41,6 +44,8 @@ void ABook::BeginPlay()
 void ABook::StoneStatueInteract()
 {
 	TArray<AActor*> StoneStatues;
+
+	UGameplayStatics::GetActorOfClass(GetWorld(), SequencePhase)->Destroy();
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStoneStatue::StaticClass(), StoneStatues); //StoneStatue클래스인 엑터들을 가져와 StoneStatues배열에 담아서 반환.
 	for (auto statue : StoneStatues)
@@ -58,20 +63,6 @@ void ABook::StoneStatueInteract()
 	
 	Destroy();
 
-}
-
-void ABook::PlayPullOutAnimation()
-{
-	TObjectPtr<APhase> Character = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (Character)
-	{
-		TObjectPtr<UAnimInstance> AnimInstance = Character->GetMesh()->GetAnimInstance();
-		if (AnimInstance && CharacterAnim)
-		{
-			AnimInstance->Montage_Play(CharacterAnim);
-			UE_LOG(LogTemp, Warning, TEXT("CharacterAnim"));
-		}
-	}
 }
 
 void ABook::SetPhysics()
@@ -93,7 +84,9 @@ void ABook::Interact()
 	ShowInteractWidget(false);
 
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
+
+	UGameplayStatics::GetActorOfClass(GetWorld(), SequencePhase)->SetActorHiddenInGame(false);
+
 	FMovieSceneSequencePlaybackSettings  PlayBackSettings;
 	PlayBackSettings.bDisableLookAtInput = true;
 	PlayBackSettings.bDisableMovementInput = true;
@@ -102,7 +95,8 @@ void ABook::Interact()
 	ALevelSequenceActor* LevelSequenceActor;
 	LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), LevelSequence, PlayBackSettings, LevelSequenceActor);
 	LevelSequencePlayer->OnFinished.AddDynamic(this, &ABook::StoneStatueInteract);
-	LevelSequencePlayer->Play();	
+	LevelSequencePlayer->Play();
+
 	
 }
 
