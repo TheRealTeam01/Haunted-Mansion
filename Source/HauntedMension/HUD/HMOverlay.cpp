@@ -28,9 +28,21 @@ void UHMOverlay::PlayBlink()
 {
 	if (Blink && BlinkText)
 	{
-		
 		BlinkText->SetVisibility(ESlateVisibility::Visible);
 		PlayAnimation(Blink);
+	}
+}
+
+void UHMOverlay::PlayPickUp(FText Text, UTexture2D* Image)
+{
+	if (PickUp && PickUpText)
+	{
+
+		PickUpImage->SetBrushFromTexture(Image);
+		PickUpImage->SetVisibility(ESlateVisibility::Visible);
+		PickUpText->SetText(Text);
+		PickUpText->SetVisibility(ESlateVisibility::Visible);
+		PlayAnimation(PickUp);
 	}
 }
 

@@ -44,7 +44,7 @@ protected:
 
 private:
 
-	FTimeline Timeline;
+	TObjectPtr<UTimelineComponent> Timeline;
 
 	FOnTimelineFloat TimelineUpdate;
 
@@ -59,16 +59,13 @@ private:
 	FTimerHandle MoveEffectHandle;
 
 	UPROPERTY(EditAnywhere)
-	float MoveValue = 5.f;
-
+	float LocationX = 0.f;
+	
 	UPROPERTY(EditAnywhere)
-		bool IsMove = false;
-
+	float LocationY = 0.f;
+	
 	UPROPERTY(EditAnywhere)
-		float EffectTime = 1.f;
-
-	UPROPERTY(EditAnywhere)
-		float ZLocation = 0.f;
+	float LocationZ= 0.f;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UCameraShakeBase> CameraShake;

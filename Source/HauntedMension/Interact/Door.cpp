@@ -24,6 +24,7 @@ ADoor::ADoor()
 	Door->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Door->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
+	DoorTimeline = CreateDefaultSubobject<UTimelineComponent>("DoorTimeline");
 }
 
 void ADoor::BeginPlay()
@@ -34,9 +35,9 @@ void ADoor::BeginPlay()
 
 	if (CurveFloat)
 	{
-		Timeline.AddInterpFloat(CurveFloat, TimelineUpdate); // DoorCurveFloat동안 DoorTimelineUpdate에 Bind된 Function을 실행.
+		DoorTimeline->AddInterpFloat(CurveFloat, TimelineUpdate); // DoorCurveFloat동안 DoorTimelineUpdate에 Bind된 Function을 실행.
 		TimelineFinish.BindUFunction(this, FName("ChangeState")); //Timeline이 끝나면 호출되는 함수 바인드
-		Timeline.SetTimelineFinishedFunc(TimelineFinish);
+		DoorTimeline->SetTimelineFinishedFunc(TimelineFinish);
 	}
 }
 
@@ -44,13 +45,13 @@ void ADoor::BeginPlay()
 void ADoor::Tick(float DeltaTime)
 {	
 	Super::Tick(DeltaTime);
-	// Timeline에 Deltatime을 전달.
-	Timeline.TickTimeline(DeltaTime); //이거 안해서 거의 1시간 소비함..
+
 }
 
 void ADoor::ChangeState() // 문이 다 열리고나서 호출됨.
 {
 	IsOpening = !IsOpening;
+	OnInteractEnded.Broadcast();
 }
 
 void ADoor::InteractDoor(float DeltaTime)
@@ -58,7 +59,7 @@ void ADoor::InteractDoor(float DeltaTime)
 
 	if (TimelineUpdate.IsBound()) UE_LOG(LogTemp, Warning, TEXT("InteractDoor"));
 
-	FRotator Rotation = FRotator(0.f, DoorRotateValue * DeltaTime, 0.f);
+	FRotator Rotation = FRotator(RotationPitch * DeltaTime, RotationYaw * DeltaTime, RotationRoll * DeltaTime);
 
 	Door->SetRelativeRotation(Rotation);
 
@@ -77,7 +78,7 @@ void ADoor::Interact()
 				AHMHUD* HMHUD = Cast<AHMHUD>(Controller->GetHUD());
 				if (HMHUD)
 				{
-					HMHUD->HMOverlay->BlinkText->SetText(FText::FromString("Don't Have Key. Find The Key"));
+					HMHUD->HMOverlay->BlinkText->SetText(FText::FromString(DoorText));
 					HMHUD->HMOverlay->PlayBlink();
 				}
 			}
@@ -90,7 +91,7 @@ void ADoor::Interact()
 
 				if (IsOpened)
 				{
-					Timeline.Reverse();
+					DoorTimeline->Reverse();
 					if (DoorSound)
 					{
 						UGameplayStatics::SpawnSoundAtLocation(this, DoorSound, GetActorLocation(), GetActorRotation());
@@ -98,7 +99,7 @@ void ADoor::Interact()
 				}
 				else
 				{
-					Timeline.PlayFromStart();
+					DoorTimeline->PlayFromStart();
 					if (DoorSound)
 					{
 						UGameplayStatics::SpawnSoundAtLocation(this, DoorSound, GetActorLocation(), GetActorRotation());
@@ -122,7 +123,7 @@ void ADoor::Interact()
 			IsOpening = true;
 
 
-			Timeline.PlayFromStart();
+			DoorTimeline->PlayFromStart();
 
 			SetOpen = true;
 

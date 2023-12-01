@@ -90,12 +90,15 @@ void APhase::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Weapon"));
 
-		DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(Weapon);
-		if (DefaultWeapon)
+		if (!IsSequenceUse)
 		{
-			FAttachmentTransformRules AttachmentRule(EAttachmentRule::SnapToTarget, true);
-			DefaultWeapon->AttachToComponent(GetMesh(), AttachmentRule, FName("RightHandSocket"));
-			DefaultWeapon->SetOwner(this);
+			DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(Weapon);
+			if (DefaultWeapon)
+			{
+				FAttachmentTransformRules AttachmentRule(EAttachmentRule::SnapToTarget, true);
+				DefaultWeapon->AttachToComponent(GetMesh(), AttachmentRule, FName("RightHandSocket"));
+				DefaultWeapon->SetOwner(this);
+			}
 		}
 	}
 
@@ -674,6 +677,8 @@ void APhase::Die()
 		
 		GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->DisableMovement();
+
 		//ActorHasTag(FName("Dead"));
 		Tags.Add(FName(TEXT("Dead")));
 		

@@ -36,6 +36,7 @@ void ADrawer::Interact()
 		DrawerTimeline->PlayFromStart();
 		IsOpened = true;
 		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ShowInteractWidget(false);
 	}
 
 	UGameplayStatics::PlaySoundAtLocation(this, DrawerSound, GetActorLocation());

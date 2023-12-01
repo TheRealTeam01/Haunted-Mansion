@@ -5,6 +5,8 @@
 #include "HauntedMension/Interact/Interact.h"
 #include "AmmoPickUp.generated.h"
 
+class UImage;
+
 UCLASS()
 class HAUNTEDMENSION_API AAmmoPickUp : public AInteract
 {
@@ -19,5 +21,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* AmmoImage;
 
 };

@@ -41,9 +41,18 @@ public:
 	
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* BlinkText;
+		
+	UPROPERTY(meta = (BindWidget))
+		class UTextBlock* PickUpText;
 
 	UPROPERTY(meta = (BindWidgetAnim), transient)
 		class UWidgetAnimation* Blink;
+	
+	UPROPERTY(meta = (BindWidgetAnim), transient)
+		class UWidgetAnimation* PickUp;
+
+	UPROPERTY(meta = (BindWidget))
+		UImage* PickUpImage;
 
 	UPROPERTY(meta = (BindWidget))
 		UProgressBar* HPBar;
@@ -56,6 +65,8 @@ public:
 	void HideCrossHair();
 
 	void PlayBlink();
+
+	void PlayPickUp(FText Text, UTexture2D* Image);
 
 	void SetBlinkText(FText Text);
 

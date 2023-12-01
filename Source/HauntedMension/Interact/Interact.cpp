@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "HauntedMension/Character/Phase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
 
 AInteract::AInteract()
 {
@@ -22,6 +23,9 @@ AInteract::AInteract()
 
 	InteractWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
 	InteractWidget->SetupAttachment(Mesh);	
+
+	TargetCamera = CreateDefaultSubobject<UCameraComponent>("Target Camera");
+	TargetCamera->SetupAttachment(Mesh);
 }
 
 void AInteract::BeginPlay()

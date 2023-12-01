@@ -6,6 +6,8 @@
 #include "HauntedMension/Interfaces/InteractInterface.h"
 #include "FlashLight.generated.h"
 
+class UImage;
+
 UCLASS()
 class HAUNTEDMENSION_API AFlashLight : public AInteract
 {
@@ -43,6 +45,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UBoxComponent* TriggerBox;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* FlashLightImage;
 
 	bool bLightOn = false;
 	

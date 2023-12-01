@@ -5,6 +5,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "HauntedMension/Ai/SkeletonWarrior/SkeletonWarrior.h"
+#include "HauntedMension/HUD/HMHUD.h"
+#include "HauntedMension/HUD/HMOverlay.h"
+#include "HauntedMension/Controller/HMController.h"
 
 // Sets default values
 AFlashLight::AFlashLight()
@@ -54,8 +57,11 @@ void AFlashLight::LightOnOff(bool LightOnOff)
 void AFlashLight::Interact()
 {
 	APhase* Character = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
-	if (Character)
+	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	if (Character && Controller)
 	{
+		Controller->GetHUD<AHMHUD>()->HMOverlay->PlayPickUp(FText::FromString("+ "), FlashLightImage);
 		Character->PlayPickUpMontage();
 		Character->SetFlashLightState(EFlashLightState::EFS_EquippedFlashLight);
 		Character->SetEquippedFlashLightState(this);
