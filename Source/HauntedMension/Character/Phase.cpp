@@ -26,6 +26,7 @@
 #include "Components/TextBlock.h"
 #include "Components/PawnNoiseEmitterComponent.h"
 #include "HauntedMension/Character/TraceComponent.h"
+#include "Components/AudioComponent.h"
 
 APhase::APhase()
 {
@@ -497,6 +498,8 @@ void APhase::GetHit_Implementation(const FVector& ImpactPoint)
 					GetActorLocation());
 			}
 
+			HittedTime = 0.f;
+
 			GetCharacterMovement()->DisableMovement();
 
 			GetWorld()->GetTimerManager().SetTimer(HitHandle, [this]() {GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); }, HitDelay, false);
@@ -731,6 +734,19 @@ void APhase::Tick(float DeltaTime)
 
 	StatComponent->RegenHealth(DeltaTime);
 
+	HittedTime += DeltaTime;
+	if (HittedTime > 7.f) StatComponent->SetHealth(100.f);
+
+	if (StatComponent->GetHealth() < 70.f && !IsPlayingBreathSound)
+	{
+		BreathSoundComponent = UGameplayStatics::SpawnSoundAtLocation(GetWorld(), BreathSound, GetActorLocation(), GetActorRotation());
+		IsPlayingBreathSound = true;
+	}
+	else if (StatComponent->GetHealth() >= 70.f && IsPlayingBreathSound)
+	{
+		BreathSoundComponent->FadeOut(2.f, 0);
+		IsPlayingBreathSound = false;
+	}
 }
 
 void APhase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

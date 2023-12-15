@@ -63,6 +63,9 @@ protected:
 		float InteractInterval = 1.f;
 
 	UPROPERTY(EditAnywhere)
+		float MaterialInterval = 0.5f;
+
+	UPROPERTY(EditAnywhere)
 		TSubclassOf<AInteract> InteractActor;
 	
 	UPROPERTY(EditAnywhere)
@@ -77,6 +80,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 		TObjectPtr<USoundBase> WrongSound;
 
+	FTimerHandle TimerHandle;
+
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<UMaterial> DefaultMaterial;
+
 	UPROPERTY(EditAnywhere)
 		TObjectPtr<UMaterial> CorrectMaterial;
 	
@@ -85,6 +93,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<UTextRenderComponent> EnterPassword;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UStaticMeshComponent> Glass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<USceneComponent> Buttons;

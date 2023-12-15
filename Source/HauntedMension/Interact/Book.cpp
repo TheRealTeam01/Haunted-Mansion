@@ -91,6 +91,7 @@ void ABook::Interact()
 	PlayBackSettings.bDisableLookAtInput = true;
 	PlayBackSettings.bDisableMovementInput = true;
 	PlayBackSettings.bHideHud = true;
+	PlayBackSettings.bHidePlayer = true;
 
 	ALevelSequenceActor* LevelSequenceActor;
 	LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), LevelSequence, PlayBackSettings, LevelSequenceActor);

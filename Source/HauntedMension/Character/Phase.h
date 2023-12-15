@@ -43,6 +43,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class UCameraComponent* Camera;
 
+	UPROPERTY(VisibleAnywhere)
+		class AFlashLight* EquippedFlashLight;
+
+	void FlashOnOffPressed();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -65,8 +70,6 @@ protected:
 	void AimReleased();
 
 	void InterpFOV(float DeltaTime);
-
-	void FlashOnOffPressed();
 
 	void PlayReloadMontage();
 
@@ -120,9 +123,6 @@ protected:
 	TScriptInterface<IInteractInterface> InteractItem;
 
 	UPROPERTY(VisibleAnywhere)
-	class AFlashLight* EquippedFlashLight;
-	
-	UPROPERTY(VisibleAnywhere)
 	AWeapon* DefaultWeapon;
 
 	UPROPERTY(VisibleAnywhere)
@@ -165,6 +165,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UAttributeComponent* StatComponent;
 
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<USoundBase> BreathSound;
+	
+	UPROPERTY(EditAnywhere)
+		TObjectPtr<UAudioComponent> BreathSoundComponent;
+
+	UPROPERTY(EditAnywhere)
+		bool IsPlayingBreathSound = false;
+
+	UPROPERTY(EditAnywhere)
+		float HittedTime = 0.f;
 private:
 
 	UPROPERTY(EditAnywhere, Category = Input)

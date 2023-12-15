@@ -16,7 +16,7 @@ void UAttributeComponent::BeginPlay()
 
 void UAttributeComponent::CalculateDamage(float Damage)
 {
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	Health = FMath::Clamp(Health - Damage, -10.f, MaxHealth);
 }
 
 float UAttributeComponent::GetHealthPercent()
@@ -46,7 +46,7 @@ void UAttributeComponent::SpendStamina(float DeltaTime)
 
 bool UAttributeComponent::IsDead()
 {
-	return Health == 0.f ? true : false;
+	return Health <= 0.f ? true : false;
 }
 
 void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

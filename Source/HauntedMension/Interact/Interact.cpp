@@ -17,10 +17,6 @@ AInteract::AInteract()
 	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	InteractSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Interact Sphere"));
-	InteractSphere->SetupAttachment(Mesh);
-	InteractSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
-
 	InteractWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractWidget"));
 	InteractWidget->SetupAttachment(Mesh);	
 

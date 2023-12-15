@@ -41,13 +41,24 @@ public:
 
 	FOnAttackEnded OnAttackEnded;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		USphereComponent* RightHandSphere;
+	
+	UFUNCTION(BlueprintCallable)
+		void AttackTrace();
+
+	TArray<AActor*> ActorsToIgnore;
+
+	UPROPERTY()
+		class ASkeletonWarriorAIController* AIController;
+
+	void InitializeAIComponents();
+
 protected:
 
 	virtual void BeginPlay() override;
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;;
-	
-	void InitializeAIComponents();
 
 	UFUNCTION()
 	void UpdateDie(float DeltaTime);
@@ -65,8 +76,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	bool IsDying = false;
 
-	UFUNCTION(BlueprintCallable)
-	void AttackTrace(USphereComponent* HitBox);
 
 	UPROPERTY(EditAnywhere)
 		float TraceDistance = 100.f;
@@ -140,12 +149,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UAttributeComponent* Attribute;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USphereComponent* RightHandSphere;
-	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USphereComponent* LeftHandSphere;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		bool IsAttacking = false;
 
@@ -154,9 +157,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 		UBehaviorTree* BehaviorTree;
 
-	UPROPERTY()
-		class ASkeletonWarriorAIController* AIController;
-	
 	/* Motion Warping */
 
 	UFUNCTION(BlueprintCallable)

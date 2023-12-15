@@ -58,5 +58,7 @@ public:
 
 	void SpendStamina(float DeltaTime);
 
+	void SetHealth(float NewHealth) { Health = NewHealth; }
+
 	bool IsDead();
 };

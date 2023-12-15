@@ -43,6 +43,11 @@ private:
 		TObjectPtr<UStaticMeshComponent> DoorFrame;
 
 	UPROPERTY(EditAnywhere)
+		TSubclassOf<AActor> SafeDoor;
+
+	FTimerHandle CameraChangeTimer;
+
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCurveFloat> CurveFloat;
 
 	TObjectPtr<UTimelineComponent> DoorTimeline;
@@ -74,4 +79,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere) // 문이 열리는 동안 Interact못하도록 하는 변수
 		bool IsOpening = false;
+
+	UPROPERTY(EditAnywhere)
+		bool IsSafeHandle = false;
 };

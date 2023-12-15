@@ -10,10 +10,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "HauntedMension/Character/Phase.h"
 #include "GameframeWork/CharacterMovementComponent.h"
+#include "Components/WidgetComponent.h"
+
 AKeyPad::AKeyPad()
 {	
 	EnterPassword = CreateDefaultSubobject<UTextRenderComponent>("EnterCodeText");
 	EnterPassword->SetupAttachment(Mesh);
+	Glass = CreateDefaultSubobject<UStaticMeshComponent>("Glass");
+	Glass->SetupAttachment(Mesh);
 	Buttons = CreateDefaultSubobject<USceneComponent>("Buttons");
 	Buttons->SetupAttachment(Mesh);
 	KeyActor1 = CreateDefaultSubobject<UChildActorComponent>("Key1");
@@ -66,16 +70,21 @@ void AKeyPad::Interact()
 	if (bCanEnter)
 	{
 		Controller->SetViewTargetWithBlend(TargetCamera->GetOwner(), CameraBlendTime);
+		Controller->SetShowMouseCursor(true);
 		Player->GetCharacterMovement()->DisableMovement();
+		ShowInteractWidget(false);
 		bCanEnter = false;
+		Initiate();
 	}
 	else
 	{
 		Controller->SetViewTargetWithBlend(Player->Camera->GetOwner(), CameraBlendTime);
+		Controller->SetShowMouseCursor(false);
 		Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		ShowInteractWidget(true);
 		bCanEnter = true;
 	}
-	Initiate();
+
 
 }
 
@@ -84,7 +93,6 @@ void AKeyPad::Initiate()
 	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	check(Controller);
 
-	Controller->SetShowMouseCursor(true);
 	Controller->bEnableClickEvents = true;
 	Controller->bEnableMouseOverEvents = true;
 
@@ -127,12 +135,13 @@ void AKeyPad::ButtonEnter(AKeyPad* KeyPad, FText Value, bool bConfirmed, bool Is
 		}
 		else
 		{
-			if (ButtonClickSound) UGameplayStatics::PlaySound2D(this, ButtonClickSound);
 			FString EnterPasswordString = EnterPassword->Text.ToString();
 			if (EnterPasswordString.Len() < Password.ToString().Len() || EnterPasswordString.IsEmpty()) EnterPasswordString.Append(Value.ToString());
 			EnterPassword->SetText(FText::FromString(EnterPasswordString));
 		}
 	}
+
+	if (ButtonClickSound) UGameplayStatics::PlaySound2D(this, ButtonClickSound);
 
 }
 
@@ -150,7 +159,7 @@ void AKeyPad::OnConfirmed()
 	if (EnterPassword->Text.ToString() == Password.ToString() && Controller)
 	{
 		if (CorrectSound) UGameplayStatics::PlaySound2D(this, CorrectSound);
-		Mesh->SetMaterial(1, CorrectMaterial);
+		Glass->SetMaterial(0, CorrectMaterial);
 		Controller->SetShowMouseCursor(false);
 		Controller->bEnableMouseOverEvents = false;
 		Controller->bEnableClickEvents = false;
@@ -200,7 +209,16 @@ void AKeyPad::OnConfirmed()
 	else
 	{
 		if (CorrectSound) UGameplayStatics::PlaySound2D(this, WrongSound);
+		
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this] {
+			Glass->SetMaterial(0, DefaultMaterial);
+			}
+			, MaterialInterval
+				, false
+				);
 
+		Glass->SetMaterial(0, WrongMaterial);
+		
 		for (auto Button : ButtonArray)
 		{
 			AKeyActor* KeyActor = Cast<AKeyActor>(Button->GetChildActor());

@@ -8,7 +8,7 @@
 #include "HauntedMension/HUD/HMHUD.h"
 #include "HauntedMension/HUD/HMOverlay.h"
 #include "Components/TextBlock.h"
-
+#include "Camera/CameraComponent.h"
 
 ADoor::ADoor()
 {
@@ -52,6 +52,23 @@ void ADoor::ChangeState() // 문이 다 열리고나서 호출됨.
 {
 	IsOpening = !IsOpening;
 	OnInteractEnded.Broadcast();
+
+	AHMController* Controller = Cast<AHMController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	APhase* Player = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//금고 손잡이가 열린 후 금고 문이 열리도록.
+	if (IsSafeHandle && Controller && Player)
+	{
+		AActor* SafeDoorActor = UGameplayStatics::GetActorOfClass(GetWorld(), SafeDoor);
+		Cast<ADoor>(SafeDoorActor)->Interact();
+		Controller->SetViewTarget(SafeDoorActor);
+		GetWorld()->GetTimerManager().SetTimer(CameraChangeTimer, [this, Controller, Player]
+			{
+				Controller->SetViewTarget(Player->Camera->GetOwner());
+			},
+			3.f,
+			false
+		);
+	}
 }
 
 void ADoor::InteractDoor(float DeltaTime)
@@ -114,11 +131,11 @@ void ADoor::Interact()
 
 
 	}
-	else
+	else // 열쇠가 있을 때
 	{
 		if (TimelineUpdate.IsBound()) UE_LOG(LogTemp, Warning, TEXT("Bound"));
 
-		if (!IsOpening && (!IsOpened || SetOpen && Character->GetKeyState() == EKeyState::EKS_EquippedKey)) // 처음 열쇠로 열 때
+		if (!IsOpening && !IsOpened && !SetOpen && Character->GetKeyState() == EKeyState::EKS_EquippedKey) // 처음 열쇠로 열 때
 		{
 			IsOpening = true;
 
@@ -136,6 +153,36 @@ void ADoor::Interact()
 
 			IsOpened = !IsOpened;
 		}
+		else 
+		{
+			if (IsOpened)
+			{
+				IsOpening = true;
+
+				DoorTimeline->Reverse();
+
+				if (DoorSound)
+				{
+					UGameplayStatics::SpawnSoundAtLocation(this, DoorSound, GetActorLocation(), GetActorRotation());
+				}
+
+				IsOpened = !IsOpened;
+			}
+			else
+			{
+				IsOpening = true;
+
+				DoorTimeline->PlayFromStart();
+
+				if (DoorSound)
+				{
+					UGameplayStatics::SpawnSoundAtLocation(this, DoorSound, GetActorLocation(), GetActorRotation());
+				}
+
+				IsOpened = !IsOpened;
+			}
+		}
+		
 
 
 	}

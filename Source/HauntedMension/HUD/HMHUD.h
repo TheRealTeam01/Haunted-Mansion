@@ -27,6 +27,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UHMDeath> HMDeathClass;
 
+	UPROPERTY(BlueprintReadOnly)
 	UHMOverlay* HMOverlay;
 
 	UHMDeath* HMDeath;

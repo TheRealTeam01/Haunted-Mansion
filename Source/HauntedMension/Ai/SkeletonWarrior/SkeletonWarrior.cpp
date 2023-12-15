@@ -1,4 +1,4 @@
-#include "HauntedMension/Ai/SkeletonWarrior/SkeletonWarrior.h"
+ #include "HauntedMension/Ai/SkeletonWarrior/SkeletonWarrior.h"
 #include "Components/TimelineComponent.h"
 #include "Delegates/DelegateSignatureImpl.inl"
 #include "HauntedMension/Attribute/AttributeComponent.h"
@@ -30,13 +30,6 @@ ASkeletonWarrior::ASkeletonWarrior()
 	RightHandSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	RightHandSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 	RightHandSphere->SetGenerateOverlapEvents(true);
-
-	LeftHandSphere = CreateDefaultSubobject<USphereComponent>("LeftHand Sphere");
-	LeftHandSphere->SetupAttachment(GetMesh(), FName("LeftHandSocket"));
-	LeftHandSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	LeftHandSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	LeftHandSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
-	LeftHandSphere->SetGenerateOverlapEvents(true);
 
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>("DissolveTimeline");
 
@@ -96,8 +89,6 @@ void ASkeletonWarrior::BeginPlay()
 
 	DissolveTimelineUpdate.BindUFunction(this, FName("UpdateDissolve"));
 
-	InitializeAIComponents();
-	
 	Tags.Add(FName("Skeleton"));
 }
 
@@ -164,7 +155,7 @@ void ASkeletonWarrior::Die()
 		{
 			if (bInterrupted) 
 			{
-
+				Destroy();
 			}
 			else
 			{
@@ -201,14 +192,12 @@ void ASkeletonWarrior::StandUp()
 	AnimInstance->Montage_SetEndDelegate(MontageEnded, StandUpMontage);
 }
 
-void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
+void ASkeletonWarrior::AttackTrace()
 {
 	FHitResult HitResult;
 
-	const FVector Start = HitBox->GetComponentLocation();
-	const FVector End = Start + (HitBox->GetForwardVector() * TraceDistance);
-
-	TArray<AActor*> ActorsToIgnore;
+	const FVector Start = GetMesh()->GetSocketLocation(FName("RightHandSocket_Start"));
+	const FVector End = GetMesh()->GetSocketLocation(FName("RightHandSocket_End"));
 
 	UKismetSystemLibrary::SphereTraceSingle(
 		this,
@@ -232,6 +221,7 @@ void ASkeletonWarrior::AttackTrace(USphereComponent* HitBox)
 		{
 			Interface->Execute_GetHit(HitResult.GetActor(), HitResult.ImpactPoint);
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), Damage, Controller, this, UDamageType::StaticClass());
+			ActorsToIgnore.Add(HitResult.GetActor());
 		}
 	}
 }
@@ -247,7 +237,6 @@ FVector ASkeletonWarrior::GetTargetRotation()
 FVector ASkeletonWarrior::GetTargetLocation()
 {
 	APhase* Target = Cast<APhase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	check(Target);
 
 	const FVector CombatTargetLocation = Target->GetActorLocation();
 	const FVector Location = GetActorLocation();
@@ -291,8 +280,10 @@ void ASkeletonWarrior::DissolveDie()
 {
 	if (DissolveTimeline->IsPlaying() || !IsDissolving || IsDying) return;
 	
+	
 	Destroy();
 
+	UE_LOG(LogTemp, Warning, TEXT("Dissolve Die"));
 	//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	//if (AnimInstance && ScreamMontage)
 	//{

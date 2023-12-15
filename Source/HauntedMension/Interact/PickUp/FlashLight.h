@@ -34,6 +34,11 @@ public:
 
 	virtual void Interact() override;
 
+	UPROPERTY(VisibleAnywhere)
+		class UBoxComponent* TriggerBox;
+
+	bool bLightOn = false;
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -43,14 +48,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USpotLightComponent* Light;
 
-	UPROPERTY(VisibleAnywhere)
-	class UBoxComponent* TriggerBox;
-
 	UPROPERTY(EditAnywhere)
 		UTexture2D* FlashLightImage;
 
-	bool bLightOn = false;
-	
 	float InitialBrightness = 0.f;
 
 	float OnBrightness = 15000.f;

@@ -42,10 +42,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		UStaticMeshComponent* Mesh;
 
-	UPROPERTY(VisibleAnywhere)
-		class USphereComponent* InteractSphere;
-
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		class UWidgetComponent* InteractWidget;
 
 	virtual void Interact() override;
